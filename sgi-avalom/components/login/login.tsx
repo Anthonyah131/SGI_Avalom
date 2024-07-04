@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import cookie from "js-cookie";
 
-const Login = () => {
+const Login: React.FC = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -10,9 +11,8 @@ const Login = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Aquí puedes implementar la lógica para autenticar al usuario
     try {
-      /*const response = await fetch("/api/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -21,16 +21,17 @@ const Login = () => {
       });
 
       if (response.ok) {
-        // Redirigir a la página de inicio después del login exitoso
-        window.location.href = "/"; // Puedes usar useRouter() de next/router para navegación interna
+        const data = await response.json();
+        const { token } = data;
+
+        cookie.set("token", token, { expires: 1 });
+
+        router.push("/homePage");
       } else {
         console.error("Login failed");
-        // Manejar el error de login
-      }*/
-      router.push("/homePage");
+      }
     } catch (error) {
       console.error("Error during login:", error);
-      // Manejar errores de red u otros errores
     }
   };
 
@@ -96,7 +97,6 @@ const Login = () => {
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                {/* Heroicon name: lock-closed */}
                 <svg
                   className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
                   xmlns="http://www.w3.org/2000/svg"

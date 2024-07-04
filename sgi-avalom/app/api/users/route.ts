@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function GET() {
   try {
@@ -21,6 +22,9 @@ export async function POST(request: Request) {
       });
     }
 
+    // Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(body.usu_contrasena, 10);
+
     const user = await prisma.ava_usuario.create({
       data: {
         usu_nombre: body.usu_nombre,
@@ -28,7 +32,7 @@ export async function POST(request: Request) {
         usu_sapellido: body.usu_sapellido,
         usu_cedula: body.usu_cedula,
         usu_correo: body.usu_correo,
-        usu_contrasena: body.usu_contrasena,
+        usu_contrasena: hashedPassword,
         usu_telefono: body.usu_telefono,
         // usu_fechacreacion se establecerá automáticamente debido a la configuración en el modelo
         usu_estado: body.usu_estado,

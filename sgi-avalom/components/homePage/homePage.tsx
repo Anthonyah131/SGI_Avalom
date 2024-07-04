@@ -1,14 +1,11 @@
-import Header from "../header/header";
-import BodyHomePage from "./bodyHomePage";
+import AuthRoute from '../AuthRoute';
+import BodyHomePage from './bodyHomePage';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="">
-      <Header />
-      <section className="">
-        <BodyHomePage />
-      </section>
-    </div>
+    <AuthRoute>
+      <BodyHomePage />
+    </AuthRoute>
   );
 };
 
