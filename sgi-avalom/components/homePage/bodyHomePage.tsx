@@ -1,9 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useUser } from '@/lib/UserContext';
 import cookie from "js-cookie";
 
 const BodyHomePage: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
+  const { user } = useUser();
+
   const fetchData = async () => {
     const token = cookie.get("token"); // Obtener el token almacenado en la cookie
     if (!token) {
@@ -13,7 +16,7 @@ const BodyHomePage: React.FC = () => {
     }
 
     try {
-      const response = await fetch("/api/users/1", {
+      const response = await fetch("/api/users/2", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`, // Enviar el token en la cabecera Authorization

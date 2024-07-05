@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import cookie from "js-cookie";
+import { useUser } from "@/lib/UserContext";
 
 const Login: React.FC = () => {
   const router = useRouter();
+  const { setUser } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -22,9 +24,10 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        const { token } = data;
+        const { token, user } = data;
 
         cookie.set("token", token, { expires: 1 });
+        setUser(user);
 
         router.push("/homePage");
       } else {

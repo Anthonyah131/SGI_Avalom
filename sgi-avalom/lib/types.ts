@@ -1,4 +1,4 @@
-interface User {
+export interface User {
   usu_id: number;
   usu_nombre: string;
   usu_papellido: string;
@@ -10,4 +10,10 @@ interface User {
   usu_fechacreacion?: Date | null;
   usu_estado: string;
   usu_rol: string;
+}
+
+declare module "next/server" {
+  interface NextRequest {
+    user?: User;
+  }
 }

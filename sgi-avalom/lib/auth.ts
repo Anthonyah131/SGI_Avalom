@@ -1,8 +1,8 @@
-// lib/auth.ts
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { NextResponse, NextRequest } from "next/server";
 import cookie from "cookie";
+import { User } from "./types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
@@ -34,26 +34,6 @@ export const verifyToken = (token: string) => {
   }
 };
 
-interface User {
-  usu_id: number;
-  usu_nombre: string;
-  usu_papellido: string;
-  usu_sapellido?: string | null;
-  usu_cedula?: string | null;
-  usu_correo: string;
-  usu_contrasena: string;
-  usu_telefono?: string | null;
-  usu_fechacreacion?: Date | null;
-  usu_estado: string;
-  usu_rol: string;
-}
-
-declare module "next/server" {
-  interface NextRequest {
-    user?: User;
-  }
-}
-
 // Middleware para autenticar
 export const authenticate = (handler: any) => {
   return async (req: NextRequest, res: NextResponse) => {
@@ -68,7 +48,7 @@ export const authenticate = (handler: any) => {
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as User; // Asegúrate de castear correctamente el tipo según tu estructura
+      const decoded = jwt.verify(token, JWT_SECRET) as User;
       req.user = decoded;
       return handler(req, res);
     } catch (error) {
