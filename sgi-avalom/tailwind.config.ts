@@ -3,8 +3,8 @@ import type { Config } from "tailwindcss"
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
 	],
@@ -19,6 +19,7 @@ const config = {
     },
     extend: {
       colors: {
+        sideBar: "hsl(var(--sideBar))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
