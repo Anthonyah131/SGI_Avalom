@@ -1,16 +1,24 @@
 import * as React from "react";
+import { useState } from "react";
+import { Cliente } from "@/lib/types";
+import axios from "axios";
+import cookie from "js-cookie";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Cliente } from "@/lib/types";
-import { useState } from "react";
+import { Label } from "../ui/label";
+import useClientStore from "@/lib/clientStore";
 
 interface ClienteFormProps {
   action: "create" | "edit" | "view";
   cliente?: Cliente;
+  onSuccess?: () => void;
 }
 
-const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
+const ClienteForm: React.FC<ClienteFormProps> = ({
+  action,
+  cliente,
+  onSuccess,
+}) => {
   const initialFormData = cliente || {
     cli_nombre: "",
     cli_papellido: "",
@@ -19,23 +27,55 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
     cli_telefono: "",
     cli_correo: "",
   };
-
   const [formData, setFormData] = useState<Partial<Cliente>>(initialFormData);
+  const [error, setError] = useState<string | null>(null);
+  const { addClient, updateClient } = useClientStore((state) => ({
+    addClient: state.addClient,
+    updateClient: state.updateClient,
+  }));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí manejarías la lógica para guardar o editar el cliente
-    console.log("Form submitted:", formData);
-    // Resetear el formulario después de enviarlo
-    setFormData(initialFormData);
+    try {
+      const token = cookie.get("token");
+      if (!token) {
+        console.error("No hay token disponible");
+        setError("No hay token disponible");
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      if (action === "create") {
+        const response = await axios.post("/api/client", formData, { headers });
+        if (response.data) {
+          addClient(response.data);
+          console.log("Cliente creado:", response.data);
+          onSuccess && onSuccess();
+        }
+      } else if (action === "edit") {
+        const response = await axios.put(
+          `/api/client/${formData.cli_id}`,
+          formData,
+          { headers }
+        );
+        if (response.data) {
+          updateClient(response.data);
+          console.log("Cliente Actualizado:", response.data);
+          onSuccess && onSuccess();
+        }
+      }
+    } catch (error) {
+      setError("Error al guardar el cliente: " + error);
+    }
   };
 
   return (
@@ -50,7 +90,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             value={formData.cli_nombre}
             onChange={handleChange}
             required
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
         <div>
@@ -62,7 +102,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             value={formData.cli_papellido}
             onChange={handleChange}
             required
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
         <div>
@@ -73,7 +113,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             type="text"
             value={formData.cli_sapellido}
             onChange={handleChange}
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
         <div>
@@ -85,7 +125,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             value={formData.cli_cedula}
             onChange={handleChange}
             required
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
         <div>
@@ -96,7 +136,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             type="text"
             value={formData.cli_telefono}
             onChange={handleChange}
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
         <div>
@@ -107,7 +147,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
             type="email"
             value={formData.cli_correo}
             onChange={handleChange}
-            disabled={action === "view"} // Deshabilitar en modo ver
+            disabled={action === "view"}
           />
         </div>
       </div>
@@ -118,6 +158,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ action, cliente }) => {
           </Button>
         </div>
       )}
+      {error && <p className="text-red-500">{error}</p>}
     </form>
   );
 };

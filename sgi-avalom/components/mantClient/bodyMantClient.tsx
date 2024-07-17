@@ -2,44 +2,46 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
-import { ModeToggle } from "../modeToggle";
+import { DataTable } from "@/components/mantClient/data-table";
+import { columns } from "@/components/mantClient/columns";
+import { ModeToggle } from "@/components/modeToggle";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { Cliente } from "@/lib/types";
-import cookie from "js-cookie";
-import ManageClientActions from "./manageClientActions";
+import { useEffect } from "react";
+import useClientStore from "@/lib/clientStore";
+import ManageClientActions from "@/components/mantClient/manageClientActions";
 import { Plus } from "lucide-react";
+import cookie from "js-cookie";
 
 const BodyMantClient: React.FC = () => {
-  const [clients, setClients] = useState<Cliente[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { clients, setClients } = useClientStore((state) => ({
+    clients: state.clients,
+    setClients: state.setClients,
+    addClient: state.addClient,
+  }));
 
-  // useEffect(() => {
-  //   const fetchClients = async () => {
-  //     const token = cookie.get("token");
-  //     if (!token) {
-  //       console.error("No hay token disponible");
-  //       setError("No hay token disponible");
-  //       return;
-  //     }
+  useEffect(() => {
+    const fetchClients = async () => {
+      const token = cookie.get("token");
+      if (!token) {
+        console.error("No hay token disponible");
+        return;
+      }
 
-  //     try {
-  //       const response = await axios.get("/api/client", {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //           "Content-Type": "application/json",
-  //         },
-  //       });
-  //       setClients(response.data);
-  //     } catch (error) {
-  //       setError("Error al buscar clientes: " + error);
-  //     }
-  //   };
+      try {
+        const response = await axios.get("/api/client", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setClients(response.data);
+      } catch (error) {
+        console.error("Error al buscar clientes: " + error);
+      }
+    };
 
-  //   fetchClients();
-  // }, []);
+    fetchClients();
+  }, [setClients]);
 
   return (
     <div className="flex flex-col w-full space-y-10 md:flex-row md:space-y-0 md:space-x-10">

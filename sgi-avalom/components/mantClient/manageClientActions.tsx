@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,7 +58,11 @@ const ManageClientActions: React.FC<ManageClientActionsProps> = ({
 
   const toggleOpen = (event: React.MouseEvent) => {
     event.stopPropagation();
-    setOpen((prevOpen) => !prevOpen); // Toggle the state
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleSuccess = () => {
+    setOpen(false);
   };
 
   if (isDesktop) {
@@ -76,7 +79,11 @@ const ManageClientActions: React.FC<ManageClientActionsProps> = ({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          <ClienteForm action={action} cliente={cliente} />
+          <ClienteForm
+            action={action}
+            cliente={cliente}
+            onSuccess={handleSuccess}
+          />
         </DialogContent>
       </Dialog>
     );
@@ -95,7 +102,11 @@ const ManageClientActions: React.FC<ManageClientActionsProps> = ({
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <ClienteForm action={action} cliente={cliente} />
+        <ClienteForm
+          action={action}
+          cliente={cliente}
+          onSuccess={handleSuccess}
+        />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild onClick={toggleOpen}>
             <Button variant={variant} className={classn}>

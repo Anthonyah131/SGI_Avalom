@@ -31,7 +31,14 @@ export async function PUT(
       const body = await request.json();
       const updatedClient = await prisma.ava_cliente.update({
         where: { cli_id: parseInt(params.cliId) },
-        data: body,
+        data: {
+          cli_nombre: body.cli_nombre,
+          cli_cedula: body.cli_cedula,
+          cli_papellido: body.cli_papellido,
+          cli_sapellido: body.cli_sapellido,
+          cli_telefono: body.cli_telefono,
+          cli_correo: body.cli_correo,
+        },
       });
       return NextResponse.json(updatedClient);
     })(request, new NextResponse());

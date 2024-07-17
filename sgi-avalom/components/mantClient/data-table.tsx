@@ -1,15 +1,15 @@
 "use client";
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  getFilteredRowModel,
+  FilterFn,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -30,6 +30,13 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
+const globalFilter: FilterFn<any> = (row, columnId, filterValue) => {
+  return row.original[columnId]
+    ?.toString()
+    .toLowerCase()
+    .includes(filterValue.toLowerCase());
+};
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -40,40 +47,37 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
-      columnFilters,
+      globalFilter: globalFilterValue,
       columnVisibility,
       rowSelection,
     },
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilterValue,
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    globalFilterFn: globalFilter,
   });
 
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filtrar Correo..."
-          value={
-            (table.getColumn("cli_correo")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("cli_correo")?.setFilterValue(event.target.value)
-          }
+          placeholder="Buscar..."
+          value={globalFilterValue}
+          onChange={(event) => setGlobalFilterValue(event.target.value)}
           className="max-w-sm"
         />
 

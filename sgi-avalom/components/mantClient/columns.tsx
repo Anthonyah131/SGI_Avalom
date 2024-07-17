@@ -1,5 +1,4 @@
 "use client";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +11,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Cliente } from "@/lib/types";
+import ClientAlertDialog from "./clientAlertDialog";
 import ManageClientActions from "./manageClientActions";
-import { Edit, Eye, ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import axios from "axios";
+import cookie from "js-cookie";
+import useClientStore from "@/lib/clientStore";
 
 export const columns: ColumnDef<Cliente>[] = [
   // {
@@ -85,43 +88,36 @@ export const columns: ColumnDef<Cliente>[] = [
     },
   },
   {
-    id: "ver",
-    cell: ({ row }) => {
-      const cliente = row.original;
-      return (
-        <ManageClientActions
-          title={"Ver cliente"}
-          description={"Visualiza los datos del cliente"}
-          action={"view"}
-          classn={"p-0 m-0 h-5"}
-          variant={"ghost"}
-          icon={<Eye />}
-          cliente={cliente}
-        />
-      );
-    },
-  },
-  {
-    id: "editar",
-    cell: ({ row }) => {
-      const cliente = row.original;
-      return (
-        <ManageClientActions
-          title={"Editar Cliente"}
-          description={"Edita los datos del cliente"}
-          action={"edit"}
-          classn={"p-0 m-0 h-5"}
-          variant={"ghost"}
-          icon={<Edit />}
-          cliente={cliente}
-        />
-      );
-    },
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
       const cliente = row.original;
+      const { removeClient } = useClientStore((state) => ({
+        removeClient: state.removeClient,
+      }));
+
+      const handleAction = async () => {
+        try {
+          const token = cookie.get("token");
+          if (!token) {
+            console.error("No hay token disponible");
+            return;
+          }
+
+          const headers = {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          };
+
+          const response = await axios.delete(`/api/client/${cliente.cli_id}`, {
+            headers,
+          });
+          if (response.data) {
+            removeClient(cliente.cli_id);
+          }
+        } catch (error) {
+          console.error("Error al borrar cliente:", error);
+        }
+      };
 
       return (
         <DropdownMenu>
@@ -141,7 +137,40 @@ export const columns: ColumnDef<Cliente>[] = [
             >
               Copiar ID cliente
             </DropdownMenuItem>
-            <DropdownMenuItem>Borrar Cliente</DropdownMenuItem>
+            <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              <ManageClientActions
+                title={"Ver cliente"}
+                titleButtom="Ver Cliente"
+                description={"Visualiza los datos del cliente"}
+                action={"view"}
+                classn={"p-4 m-0 h-8 w-full"}
+                variant={"ghost"}
+                cliente={cliente}
+              />
+            </div>
+            <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              <ManageClientActions
+                title={"Editar Cliente"}
+                titleButtom="Editar Cliente"
+                description={"Edita los datos del cliente"}
+                action={"edit"}
+                classn={"p-4 m-0 h-8 w-full"}
+                variant={"ghost"}
+                cliente={cliente}
+              />
+            </div>
+            <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              <ClientAlertDialog
+                title="Está seguro?"
+                description="Esta acción no se puede deshacer. Esta seguro de que desea borrar este cliente?"
+                triggerText="Borrar Cliente"
+                cancelText="Cancelar"
+                actionText="Continuar"
+                classn={"p-4 m-0 h-8 w-full"}
+                variant={"ghost"}
+                onAction={handleAction}
+              />
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       );
