@@ -5,6 +5,8 @@ import {
   LayoutDashboard,
   BookUser,
   ChevronRight,
+  Users,
+  User,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useWindowWidth } from "@react-hook/window-size";
@@ -31,7 +33,15 @@ const SideNavbar: React.FC<Props> = () => {
   }
 
   return (
-    <div onMouseEnter={()=> {setIsCollapsed(false)}} onMouseLeave={()=> {setIsCollapsed(true)}} className="relative bg-sideBar min-w-[60px] md:min-w-[80px] border-r px-3 pb-10 pt-24 ">
+    <div
+      onMouseEnter={() => {
+        setIsCollapsed(false);
+      }}
+      onMouseLeave={() => {
+        setIsCollapsed(true);
+      }}
+      className="relative bg-sideBar min-w-[60px] md:min-w-[80px] border-r px-3 pb-10 pt-24 "
+    >
       {!mobileWidth && (
         <div className="absolute right-[-20px] top-7">
           <Button
@@ -57,7 +67,13 @@ const SideNavbar: React.FC<Props> = () => {
             href: "/mantClient",
             icon: BookUser,
             variant: "ghost",
-          }
+          },
+          {
+            title: "Usuarios",
+            href: "/mantUser",
+            icon: Users,
+            variant: "ghost",
+          },
         ]}
       />
     </div>

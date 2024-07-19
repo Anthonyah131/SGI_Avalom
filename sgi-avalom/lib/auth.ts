@@ -43,7 +43,7 @@ export const authenticate = (handler: any) => {
 
     if (!token) {
       return NextResponse.json(
-        { message: "Authentication token required" },
+        { error: "Authentication token required" },
         { status: 401 }
       );
     }
@@ -54,7 +54,7 @@ export const authenticate = (handler: any) => {
       return handler(req, res);
     } catch (error) {
       return NextResponse.json(
-        { message: "Invalid or expired token" },
+        { error: "Invalid or expired token" },
         { status: 401 }
       );
     }

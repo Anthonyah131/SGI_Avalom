@@ -1,17 +1,17 @@
-"use client";
+"use Client";
 import AuthRoute from "../AuthRoute";
 import SideNavbar from "../SideNavbar";
-import BodyMantClient from "./bodyMantClient";
+import BodyMantUser from "./bodyMantUser";
 
-const MantClient: React.FC = () => {
+const MantUser: React.FC = () => {
   return (
     <AuthRoute>
       <div className="flex w-full">
         <SideNavbar />
-        <BodyMantClient />
+        <BodyMantUser />
       </div>
     </AuthRoute>
   );
 };
 
-export default MantClient;
+export default MantUser;

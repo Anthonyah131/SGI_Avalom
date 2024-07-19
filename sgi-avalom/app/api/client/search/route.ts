@@ -3,13 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { authenticate } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  try {
-    return authenticate(async (req: NextRequest, res: NextResponse) => {
+  return authenticate(async (req: NextRequest, res: NextResponse) => {
+    try {
       const { searchParams } = new URL(request.url);
       const query = searchParams.get("query");
 
       if (!query) {
-        return NextResponse.json({ status: 400, message: "Query parameter is required" });
+        return NextResponse.json({ error: "No se ha proporcionado un query" }, { status: 400 });
       }
 
       const clients = await prisma.ava_cliente.findMany({
@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json(clients);
-    })(request, new NextResponse());
-  } catch (error) {
-    console.error("Error:", error);
-    return NextResponse.json({ status: 500, message: "Internal Server Error" });
-  }
+    } catch (error) {
+      console.error("Error:", error);
+      return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+    }
+  })(request, new NextResponse());
 }

@@ -18,7 +18,7 @@ import axios from "axios";
 import cookie from "js-cookie";
 import useClientStore from "@/lib/clientStore";
 
-export const columns: ColumnDef<Cliente>[] = [
+export const columnsClient: ColumnDef<Cliente>[] = [
   // {
   //   id: "select",
   //   header: ({ table }) => (

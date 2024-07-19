@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/mantClient/data-table";
-import { columns } from "@/components/mantClient/columns";
+import { columnsClient } from "@/components/mantClient/columnsClient";
 import { ModeToggle } from "@/components/modeToggle";
 import axios from "axios";
 import { useEffect } from "react";
@@ -66,7 +66,7 @@ const BodyMantClient: React.FC = () => {
         </Card>
         <Card>
           <CardContent>
-            <DataTable columns={columns} data={clients} />
+            <DataTable columns={columnsClient} data={clients} />
           </CardContent>
         </Card>
       </section>

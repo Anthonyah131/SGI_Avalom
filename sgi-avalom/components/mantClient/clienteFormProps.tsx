@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "../ui/label";
 import useClientStore from "@/lib/clientStore";
+import { Alert } from "@/components/ui/alert";
 
 interface ClienteFormProps {
   action: "create" | "edit" | "view";
@@ -73,8 +74,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           onSuccess && onSuccess();
         }
       }
-    } catch (error) {
-      setError("Error al guardar el cliente: " + error);
+    } catch (error: any) {
+      console.error("Error al guardar el cliente:", error);
+      const errorMessage = error.response?.data?.error || "Error desconocido";
+      setError("Error al guardar el cliente: " + errorMessage);
     }
   };
 
@@ -158,7 +161,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           </Button>
         </div>
       )}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <Alert variant="destructive">{error}</Alert>}
     </form>
   );
 };
