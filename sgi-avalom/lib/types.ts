@@ -3,7 +3,7 @@ export interface User {
   usu_nombre: string;
   usu_papellido: string;
   usu_sapellido?: string | null;
-  usu_cedula?: string | null;
+  usu_cedula: string;
   usu_correo: string;
   usu_contrasena: string;
   usu_telefono?: string | null;
