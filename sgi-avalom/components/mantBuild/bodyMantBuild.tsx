@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import cookie from "js-cookie";
 import axios from "axios";
 import { Plus } from "lucide-react";
@@ -12,9 +12,14 @@ import ManageActions from "@/components/dataTable/manageActions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BuildForm from "./buildFormProps";
+import { columnsProperty } from "./columnProperty";
+import PropertyManager from "./mantProperty/propertyManager";
 
 const BodyMantBuild: React.FC = () => {
   const { setBuildings, buildings } = useBuildingStore();
+  const [selectedBuilding, setSelectedBuilding] = useState<AvaEdificio | null>(
+    null
+  );
 
   useEffect(() => {
     const token = cookie.get("token");
@@ -59,11 +64,37 @@ const BodyMantBuild: React.FC = () => {
             <ModeToggle />
           </div>
         </Card>
-        <Card>
-          <CardContent>
-            <DataTable data={buildings} columns={columns} />
-          </CardContent>
-        </Card>
+        <div className="flex flex-col md:flex-row space-y-10 md:space-y-0 md:space-x-10">
+          <Card className="flex-1">
+            <CardContent>
+              <DataTable
+                data={buildings}
+                columns={columns}
+                onRowClick={(building: AvaEdificio) =>
+                  setSelectedBuilding(building)
+                }
+              />
+            </CardContent>
+          </Card>
+          {selectedBuilding && (
+            <div className="flex-1">
+              <Card>
+                <CardContent>
+                  <BuildForm
+                    building={selectedBuilding}
+                    action={"edit"}
+                    onSuccess={() => {}}
+                  />
+                  <DataTable
+                    columns={columnsProperty}
+                    data={selectedBuilding.ava_propiedad || []}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+        {/* <PropertyManager propertyId={1}></PropertyManager> */}
       </section>
     </div>
   );

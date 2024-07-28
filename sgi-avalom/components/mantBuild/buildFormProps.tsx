@@ -1,23 +1,23 @@
-import { useState } from "react";
-import { AvaEdificio, AvaPropiedad } from "@/lib/types";
-import axios from "axios";
-import cookie from "js-cookie";
+import { useEffect, useState } from "react";
+import { AvaEdificio } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import useBuildingStore from "@/lib/zustand/buildStore";
-import { DataTable } from "../dataTable/data-table";
-import { columns } from "./columnProperty";
 
 interface BuildFormProps {
   action: "create" | "edit" | "view";
-  entity?: AvaEdificio;
+  building?: AvaEdificio;
   onSuccess: () => void;
 }
 
-const BuildForm: React.FC<BuildFormProps> = ({ action, entity, onSuccess }) => {
-  const initialFormData = entity || {
+const BuildForm: React.FC<BuildFormProps> = ({
+  action,
+  building,
+  onSuccess,
+}) => {
+  const initialFormData = building || {
     edi_identificador: "",
     edi_descripcion: "",
   };
@@ -26,51 +26,18 @@ const BuildForm: React.FC<BuildFormProps> = ({ action, entity, onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const { addBuilding, updateBuilding } = useBuildingStore();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  useEffect(() => {
+    setFormData(building || initialFormData);
+  }, [building]);
 
-  const handleSelectChange = (name: string, value: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // const token = cookie.get("token");
-      // if (!token) {
-      //   console.error("No hay token disponible");
-      //   setError("No hay token disponible");
-      //   return;
-      // }
-
-      // const headers = {
-      //   Authorization: `Bearer ${token}`,
-      //   "Content-Type": "application/json",
-      // };
-
-      // if (action === "create") {
-      //   const response = await axios.post("/api/building", formData, { headers });
-      //   if (response.data) {
-      //     addBuilding(response.data);
-      //     console.log("Edificio creado:", response.data);
-      //     onSuccess && onSuccess();
-      //   }
-      // } else if (action === "edit") {
-      //   const response = await axios.put(
-      //     `/api/building/${formData.edi_id}`,
-      //     formData,
-      //     { headers }
-      //   );
-      //   if (response.data) {
-      //     updateBuilding(response.data);
-      //     console.log("Edificio Actualizado:", response.data);
-      //     onSuccess && onSuccess();
-      //   }
-      // }
       if (action === "create") {
         addBuilding(formData as AvaEdificio);
         console.log("Edificio creado:", formData);
@@ -90,7 +57,7 @@ const BuildForm: React.FC<BuildFormProps> = ({ action, entity, onSuccess }) => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 m-3">
           <div>
             <Label htmlFor="edi_identificador">Identificador</Label>
             <Input
@@ -117,7 +84,7 @@ const BuildForm: React.FC<BuildFormProps> = ({ action, entity, onSuccess }) => {
           </div>
         </div>
         {action !== "view" && (
-          <div className="pt-4">
+          <div className="pt-4 m-3">
             <Button type="submit">
               {action === "create" ? "Crear Edificio" : "Guardar Cambios"}
             </Button>
@@ -125,9 +92,6 @@ const BuildForm: React.FC<BuildFormProps> = ({ action, entity, onSuccess }) => {
         )}
         {error && <Alert variant="destructive">{error}</Alert>}
       </form>
-      <div className="">
-        <DataTable columns={columns} data={entity?.ava_propiedad as AvaPropiedad[]} />
-      </div>
     </div>
   );
 };

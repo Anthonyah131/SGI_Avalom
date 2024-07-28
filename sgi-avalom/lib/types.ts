@@ -2,14 +2,14 @@ export interface User {
   usu_id: number;
   usu_nombre: string;
   usu_papellido: string;
-  usu_sapellido?: string | null;
+  usu_sapellido?: string;
   usu_cedula: string;
   usu_correo: string;
   usu_contrasena: string;
-  usu_telefono?: string | null;
-  usu_fechacreacion?: string | null;
-  usu_estado: string;
-  usu_rol: string;
+  usu_telefono?: string;
+  usu_fechacreacion?: string;
+  usu_estado: "A" | "I";
+  usu_rol: "A" | "J" | "E" | "R";
 }
 
 export interface Cliente {
@@ -60,13 +60,13 @@ export interface AvaEdificio {
 export interface AvaPropiedad {
   prop_id: number;
   prop_identificador: string;
-  prop_descripcion?: string | null;
-  edi_id?: number | null;
-  tipp_id?: number | null;
+  prop_descripcion?: string;
+  edi_id?: number;
+  tipp_id?: number;
   ava_alquiler: AvaAlquiler[];
   ava_pagoservicio: AvaPagoServicio[];
-  ava_edificio?: AvaEdificio | null;
-  ava_tipopropiedad?: AvaTipoPropiedad | null;
+  ava_edificio?: AvaEdificio;
+  ava_tipopropiedad?: AvaTipoPropiedad;
   ava_reservacion: AvaReservacion[];
 }
 
@@ -80,11 +80,11 @@ export interface AvaAlquiler {
   alq_id: number;
   alq_monto: string;
   alq_fechapago: string;
-  alq_contrato?: string | null;
+  alq_contrato?: string;
   alq_estado: string;
-  alq_fechacreacion?: string | null;
-  prop_id?: number | null;
-  ava_propiedad?: AvaPropiedad | null;
+  alq_fechacreacion?: string
+  prop_id?: number;
+  ava_propiedad?: AvaPropiedad;
   ava_alquilermensual: AvaAlquilerMensual[];
   ava_deposito: AvaDeposito[];
 }

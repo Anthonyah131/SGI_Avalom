@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-export const columns: ColumnDef<AvaPropiedad>[] = [
+export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
   {
     accessorKey: "prop_id",
     header: ({ column }) => {

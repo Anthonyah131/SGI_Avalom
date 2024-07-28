@@ -83,12 +83,12 @@ const ManageActions = <T,>({
             {icon}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[825px]">
+        <DialogContent className="md:max-w-xl lg:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-72 rounded-md">
+          <ScrollArea className="md:max-h-[500px] lg:max-h-[600px] xl:max-h-[700px] rounded-md">
             <FormComponent
               action={action}
               entity={entity}

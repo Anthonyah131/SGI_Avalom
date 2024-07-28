@@ -1,19 +1,35 @@
 import { useState } from "react";
-import { User } from "@/lib/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "../ui/label";
-import useUserStore from "@/lib/zustand/userStore";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import {
-    Select,
-    SelectTrigger,
-    SelectContent,
-    SelectItem,
-    SelectValue,
-  } from "@/components/ui/select";
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import useUserStore from "@/lib/zustand/userStore";
+import { User } from "@/lib/types";
+
+// Define schema using zod
+const userFormSchema = z.object({
+  usu_nombre: z.string().min(1, "Nombre es requerido"),
+  usu_papellido: z.string().min(1, "Primer Apellido es requerido"),
+  usu_sapellido: z.string().optional(),
+  usu_cedula: z.string().min(1, "Cédula es requerida"),
+  usu_telefono: z.string().optional(),
+  usu_correo: z.string().email("Correo no válido"),
+  usu_contrasena: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
+  usu_estado: z.enum(["A", "I"]),
+  usu_rol: z.enum(["A", "J", "E", "R"]),
+});
 
 interface UserFormProps {
   action: "create" | "edit" | "view";
@@ -22,7 +38,14 @@ interface UserFormProps {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
-  const initialFormData = entity || {
+  const { addUser, updateUser } = useUserStore((state) => ({
+    addUser: state.addUser,
+    updateUser: state.updateUser,
+  }));
+
+  const [error, setError] = useState<string | null>(null);
+
+  const defaultValues = entity || {
     usu_nombre: "",
     usu_papellido: "",
     usu_sapellido: "",
@@ -33,26 +56,19 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     usu_estado: "A",
     usu_rol: "R",
   };
-  const [formData, setFormData] = useState<Partial<User>>(initialFormData);
-  const [error, setError] = useState<string | null>(null);
-  const { addUser, updateUser } = useUserStore((state) => ({
-    addUser: state.addUser,
-    updateUser: state.updateUser,
-  }));
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const form = useForm<z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues,
+  });
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
-  };
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = form;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (formData: z.infer<typeof userFormSchema>) => {
     try {
       const token = cookie.get("token");
       if (!token) {
@@ -70,19 +86,13 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
         const response = await axios.post("/api/users", formData, { headers });
         if (response.data) {
           addUser(response.data);
-          console.log("Usuario creado:", response.data);
-          onSuccess && onSuccess();
+          onSuccess();
         }
-      } else if (action === "edit") {
-        const response = await axios.put(
-          `/api/users/${formData.usu_id}`,
-          formData,
-          { headers }
-        );
+      } else if (action === "edit" && entity?.usu_id) {
+        const response = await axios.put(`/api/users/${entity.usu_id}`, formData, { headers });
         if (response.data) {
           updateUser(response.data);
-          console.log("Usuario Actualizado:", response.data);
-          onSuccess && onSuccess();
+          onSuccess();
         }
       }
     } catch (error: any) {
@@ -93,127 +103,174 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-2 gap-4 m-3">
         <div>
           <Label htmlFor="usu_nombre">Nombre</Label>
-          <Input
-            id="usu_nombre"
+          <Controller
             name="usu_nombre"
-            type="text"
-            value={formData.usu_nombre}
-            onChange={handleChange}
-            required
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_nombre"
+                type="text"
+                required
+                disabled={action === "view"}
+              />
+            )}
           />
+          {errors.usu_nombre && <Alert variant="destructive">{errors.usu_nombre.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_papellido">Primer Apellido</Label>
-          <Input
-            id="usu_papellido"
+          <Controller
             name="usu_papellido"
-            type="text"
-            value={formData.usu_papellido}
-            onChange={handleChange}
-            required
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_papellido"
+                type="text"
+                required
+                disabled={action === "view"}
+              />
+            )}
           />
+          {errors.usu_papellido && <Alert variant="destructive">{errors.usu_papellido.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_sapellido">Segundo Apellido</Label>
-          <Input
-            id="usu_sapellido"
+          <Controller
             name="usu_sapellido"
-            type="text"
-            value={formData.usu_sapellido || ""}
-            onChange={handleChange}
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_sapellido"
+                type="text"
+                disabled={action === "view"}
+              />
+            )}
           />
         </div>
         <div>
           <Label htmlFor="usu_cedula">Cédula</Label>
-          <Input
-            id="usu_cedula"
+          <Controller
             name="usu_cedula"
-            type="text"
-            value={formData.usu_cedula}
-            onChange={handleChange}
-            required
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_cedula"
+                type="text"
+                required
+                disabled={action === "view"}
+              />
+            )}
           />
+          {errors.usu_cedula && <Alert variant="destructive">{errors.usu_cedula.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_telefono">Teléfono</Label>
-          <Input
-            id="usu_telefono"
+          <Controller
             name="usu_telefono"
-            type="text"
-            value={formData.usu_telefono || ""}
-            onChange={handleChange}
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_telefono"
+                type="text"
+                disabled={action === "view"}
+              />
+            )}
           />
         </div>
         <div>
           <Label htmlFor="usu_correo">Correo</Label>
-          <Input
-            id="usu_correo"
+          <Controller
             name="usu_correo"
-            type="email"
-            value={formData.usu_correo}
-            onChange={handleChange}
-            required
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_correo"
+                type="email"
+                required
+                disabled={action === "view"}
+              />
+            )}
           />
+          {errors.usu_correo && <Alert variant="destructive">{errors.usu_correo.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_contrasena">Contraseña</Label>
-          <Input
-            id="usu_contrasena"
+          <Controller
             name="usu_contrasena"
-            type="password"
-            value={formData.usu_contrasena}
-            onChange={handleChange}
-            required
-            disabled={action === "view"}
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="usu_contrasena"
+                type="password"
+                required
+                disabled={action === "view"}
+              />
+            )}
           />
+          {errors.usu_contrasena && <Alert variant="destructive">{errors.usu_contrasena.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_estado">Estado</Label>
-          <Select
-            defaultValue={formData.usu_estado}
-            onValueChange={(value) => handleSelectChange("usu_estado", value)}
-            disabled={action === "view"}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="A">Activo</SelectItem>
-              <SelectItem value="I">Inactivo</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="usu_estado"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={action === "view"}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">Activo</SelectItem>
+                  <SelectItem value="I">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.usu_estado && <Alert variant="destructive">{errors.usu_estado.message}</Alert>}
         </div>
         <div>
           <Label htmlFor="usu_rol">Rol</Label>
-          <Select
-            defaultValue={formData.usu_rol}
-            onValueChange={(value) => handleSelectChange("usu_rol", value)}
-            disabled={action === "view"}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Rol" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="A">Admin</SelectItem>
-              <SelectItem value="J">Jefe</SelectItem>
-              <SelectItem value="E">Empleado</SelectItem>
-              <SelectItem value="R">Auditor</SelectItem>
-            </SelectContent>
-          </Select>
+          <Controller
+            name="usu_rol"
+            control={control}
+            render={({ field }) => (
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={action === "view"}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Rol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">Admin</SelectItem>
+                  <SelectItem value="J">Jefe</SelectItem>
+                  <SelectItem value="E">Empleado</SelectItem>
+                  <SelectItem value="R">Auditor</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.usu_rol && <Alert variant="destructive">{errors.usu_rol.message}</Alert>}
         </div>
       </div>
       {action !== "view" && (
-        <div className="pt-4">
+        <div className="pt-4 m-3">
           <Button type="submit">
             {action === "create" ? "Crear Usuario" : "Guardar Cambios"}
           </Button>

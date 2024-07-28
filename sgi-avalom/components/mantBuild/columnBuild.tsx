@@ -6,8 +6,6 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import useBuildingStore from "@/lib/zustand/buildStore";
 import { AvaEdificio } from "@/lib/types";
 import AlertDialog from "@/components/alertDialog";
-import BuildForm from "./buildFormProps";
-import ManageActions from "@/components/dataTable/manageActions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,30 +84,6 @@ export const columns: ColumnDef<AvaEdificio>[] = [
             >
               Copiar ID Edificio
             </DropdownMenuItem>
-            <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              <ManageActions<AvaEdificio>
-                title={"Ver Edificio"}
-                titleButton="Ver Edificio"
-                description={"Visualiza los datos del Edificio"}
-                action={"view"}
-                classn={"p-4 m-0 h-8 w-full"}
-                variant={"ghost"}
-                entity={building}
-                FormComponent={BuildForm}
-              />
-            </div>
-            <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              <ManageActions<AvaEdificio>
-                title={"Editar Edificio"}
-                titleButton="Editar Edificio"
-                description={"Edita los datos del Edificio"}
-                action={"edit"}
-                classn={"p-4 m-0 h-8 w-full"}
-                variant={"ghost"}
-                entity={building}
-                FormComponent={BuildForm}
-              />
-            </div>
             <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
               <AlertDialog
                 title="Está seguro?"
