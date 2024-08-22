@@ -127,14 +127,14 @@ const BodyMantBuild: React.FC = () => {
                   />
                   <Separator className="my-4" />
                   <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-                    <h1 className="text-lg md:text-xl font-bold">Alquileres</h1>
+                    <h1 className="text-lg md:text-xl font-bold">Propiedades</h1>
                   </div>
                   <ManageActions
                     variant={"nuevo"}
-                    titleButton={"Nuevo Alquiler"}
+                    titleButton={"Nueva propiedad"}
                     icon={<Plus />}
-                    title={"Nuevo Alquiler"}
-                    description={"Ingresa una nuevo Alquiler"}
+                    title={"Nuevo Propiedad"}
+                    description={"Ingresa una nueva propiedad"}
                     action={"create"}
                     classn={"m-2"}
                     FormComponent={PropertyForm}

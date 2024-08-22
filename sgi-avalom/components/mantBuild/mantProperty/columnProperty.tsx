@@ -103,13 +103,13 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
                 navigator.clipboard.writeText(property.prop_id.toString());
               }}
             >
-              Copiar ID Alquiler
+              Copiar ID Propiedad
             </DropdownMenuItem>
             <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
               <ManageActionsProperty<AvaPropiedad>
-                title={"Editar Alquiler"}
-                titleButton="Editar Alquiler"
-                description={"Edita los datos del Alquiler"}
+                title={"Editar Propiedad"}
+                titleButton="Editar Propiedad"
+                description={"Edita los datos de la propiedad"}
                 classn={"p-4 m-0 h-8 w-full"}
                 variant={"ghost"}
                 propId={property.prop_id}
@@ -118,8 +118,8 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
             <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
               <AlertDialog
                 title="Está seguro?"
-                description="Esta acción no se puede deshacer. Está seguro de que desea borrar este Alquiler?"
-                triggerText="Borrar Alquiler"
+                description="Esta acción no se puede deshacer. Está seguro de que desea borrar esta Propiedad?"
+                triggerText="Borrar Propiedad"
                 cancelText="Cancelar"
                 actionText="Continuar"
                 classn={"p-4 m-0 h-8 w-full"}

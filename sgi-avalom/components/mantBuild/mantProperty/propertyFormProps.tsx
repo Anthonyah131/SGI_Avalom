@@ -1,17 +1,44 @@
 "use client";
 
-import { useForm, SubmitHandler } from "react-hook-form";
-import { AvaPropiedad } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert } from "@/components/ui/alert";
-import usePropertyStore from "@/lib/zustand/propertyStore";
-import useBuildingStore from "@/lib/zustand/buildStore";
-import useTypeStore from "@/lib/zustand/typeStore"; // Importa el store de tipos de propiedad
-import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import usePropertyStore from "@/lib/zustand/propertyStore";
+import useBuildingStore from "@/lib/zustand/buildStore";
+import useTypeStore from "@/lib/zustand/typeStore";
+import { AvaPropiedad } from "@/lib/types";
+
+// Define schema using zod
+const propertyFormSchema = z.object({
+  prop_identificador: z
+    .string()
+    .min(1, "El identificador es obligatorio")
+    .max(15, "El identificador no puede tener más de 15 caracteres"),
+  prop_descripcion: z
+    .string()
+    .max(50, "La descripción no puede tener más de 50 caracteres"),
+  tipp_id: z.number().min(1, "Selecciona un tipo de propiedad"),
+});
 
 interface PropertyFormProps {
   action: "create" | "edit" | "view";
@@ -26,19 +53,27 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
   entity,
   onSuccess,
 }) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<AvaPropiedad>({
-    defaultValues: property,
-  });
-
   const { setSelectedProperty, updateSelectedProperty } = usePropertyStore();
   const { updateProperty, addProperty } = useBuildingStore();
   const { types, fetchTypes } = useTypeStore();
   const [error, setError] = useState<string | null>(null);
+
+  const defaultValues = property || {
+    prop_identificador: "",
+    prop_descripcion: "",
+    tipp_id: undefined,
+  };
+
+  const form = useForm<z.infer<typeof propertyFormSchema>>({
+    resolver: zodResolver(propertyFormSchema),
+    defaultValues,
+  });
+
+  const {
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = form;
 
   useEffect(() => {
     reset(property);
@@ -46,7 +81,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
 
   useEffect(() => {
     const fetchPropertyTypes = async () => {
-      // Verifica si ya se han cargado los tipos de propiedad
       if (types.length === 0) {
         await fetchTypes();
       }
@@ -54,7 +88,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
     fetchPropertyTypes();
   }, [fetchTypes, types]);
 
-  const onSubmit: SubmitHandler<AvaPropiedad> = async (data) => {
+  const onSubmit = async (data: z.infer<typeof propertyFormSchema>) => {
     try {
       const token = cookie.get("token");
       if (!token) {
@@ -66,12 +100,9 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
         "Content-Type": "application/json",
       };
 
-      // Convertir tipp_id a número si está presente
-      const tippId = parseInt(String(data.tipp_id), 10);
-
       const propertyData = {
         ...data,
-        tipp_id: tippId,
+        tipp_id: data.tipp_id || undefined,
         edi_id: entity,
       };
 
@@ -79,19 +110,17 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
         const response = await axios.post(`/api/property`, propertyData, {
           headers,
         });
-
         if (response.data) {
           setSelectedProperty(response.data);
           addProperty(entity || 0, response.data);
           onSuccess();
         }
-      } else if (action === "edit") {
+      } else if (action === "edit" && property?.prop_id) {
         const response = await axios.put(
-          `/api/property/${data.prop_id}`,
+          `/api/property/${property.prop_id}`,
           propertyData,
           { headers }
         );
-
         if (response.data) {
           updateSelectedProperty(response.data);
           updateProperty(property?.edi_id || 0, response.data);
@@ -105,60 +134,77 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-2 gap-4 m-3">
-        <div>
-          <Label htmlFor="prop_identificador">Identificador</Label>
-          <Input
-            id="prop_identificador"
-            {...register("prop_identificador", {
-              required: "El identificador es obligatorio",
-            })}
-            disabled={action === "view"}
-          />
-          {errors.prop_identificador && (
-            <p className="text-red-500">{errors.prop_identificador.message}</p>
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4 m-3"
+      >
+        <FormField
+          control={form.control}
+          name="prop_identificador"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Identificador</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
-        <div>
-          <Label htmlFor="prop_descripcion">Descripción</Label>
-          <Input
-            id="prop_descripcion"
-            {...register("prop_descripcion")}
-            disabled={action === "view"}
-          />
-        </div>
-        <div>
-          <Label htmlFor="tipp_id">Tipo de Propiedad</Label>
-          <select
-            id="tipp_id"
-            {...register("tipp_id", {
-              required: "Selecciona un tipo de propiedad",
-            })}
-            disabled={action === "view"}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Seleccionar Tipo</option>
-            {types.map((type) => (
-              <option key={type.tipp_id} value={type.tipp_id}>
-                {type.tipp_nombre}
-              </option>
-            ))}
-          </select>
-          {errors.tipp_id && (
-            <p className="text-red-500">{errors.tipp_id.message}</p>
+        />
+        <FormField
+          control={form.control}
+          name="prop_descripcion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-        </div>
-      </div>
-      {action !== "view" && (
-        <div className="pt-4 m-3">
-          <Button type="submit">
-            {action === "create" ? "Crear Propiedad" : "Guardar Cambios"}
-          </Button>
-        </div>
-      )}
-      {error && <Alert variant="destructive">{error}</Alert>}
-    </form>
+        />
+        <FormField
+          control={form.control}
+          name="tipp_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tipo de Propiedad</FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value?.toString() || ""}
+                  onValueChange={(value) => field.onChange(parseInt(value, 10))}
+                  disabled={action === "view"}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccionar Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {types.map((type) => (
+                      <SelectItem
+                        key={type.tipp_id}
+                        value={type.tipp_id.toString()}
+                      >
+                        {type.tipp_nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {action !== "view" && (
+          <div className="pt-4 m-3">
+            <Button type="submit">
+              {action === "create" ? "Crear Propiedad" : "Guardar Cambios"}
+            </Button>
+          </div>
+        )}
+      </form>
+    </Form>
   );
 };
 

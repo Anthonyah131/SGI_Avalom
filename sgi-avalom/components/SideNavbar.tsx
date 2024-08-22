@@ -7,7 +7,7 @@ import {
   ChevronRight,
   Users,
   Building2,
-  LogOut,
+  LucideLineChart ,
 } from "lucide-react";
 import { Nav } from "./ui/nav";
 import { Button } from "./ui/button";
@@ -115,6 +115,12 @@ const SideNavbar: React.FC = () => {
             title: "Edificios",
             href: "/mantBuild",
             icon: Building2,
+            variant: "ghost",
+          },
+          {
+            title: "Contabilidad",
+            href: "/accounting",
+            icon: LucideLineChart,
             variant: "ghost",
           },
         ]}

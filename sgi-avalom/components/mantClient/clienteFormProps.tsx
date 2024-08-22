@@ -30,17 +30,19 @@ const clienteFormSchema = z.object({
     .min(1, "El primer apellido es requerido")
     .max(30, "El primer apellido no puede tener más de 30 caracteres"),
   cli_sapellido: z
-      .string()
-      .max(30, "El segundo apellido no puede tener más de 30 caracteres"),
+    .string()
+    .max(30, "El segundo apellido no puede tener más de 30 caracteres"),
   cli_cedula: z
     .string()
     .min(1, "La cédula es requerida")
-    .max(20, "La cédula no puede tener más de 20 caracteres"),
+    .max(15, "La cédula no puede tener más de 20 caracteres"),
   cli_telefono: z
     .string()
+    .min(1, "El teléfono es requerido")
     .max(15, "El teléfono no puede tener más de 15 caracteres"),
   cli_correo: z
     .string()
+    .min(1, "El correo es requerido")
     .email("Correo inválido")
     .max(50, "El correo no puede tener más de 50 caracteres"),
 });
@@ -116,7 +118,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4"
+      >
         <FormField
           control={form.control}
           name="cli_nombre"
@@ -137,11 +142,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Primer Apellido</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  disabled={action === "view"}
-                  maxLength={30}
-                />
+                <Input {...field} disabled={action === "view"} maxLength={30} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -154,11 +155,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Segundo Apellido</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  disabled={action === "view"}
-                  maxLength={30}
-                />
+                <Input {...field} disabled={action === "view"} maxLength={30} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -171,7 +168,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Cédula</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={20} />
+                <Input {...field} disabled={action === "view"} maxLength={15} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -1,12 +1,34 @@
-import { useEffect, useState } from "react";
-import { AvaEdificio } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert } from "@/components/ui/alert";
-import useBuildingStore from "@/lib/zustand/buildStore";
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert } from "@/components/ui/alert";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import useBuildingStore from "@/lib/zustand/buildStore";
+import { AvaEdificio } from "@/lib/types";
+
+// Define schema using zod
+const buildingFormSchema = z.object({
+  edi_identificador: z
+    .string()
+    .min(1, "Identificador es requerido")
+    .max(15, "El identificador no puede tener más de 15 caracteres"),
+  edi_descripcion: z
+    .string()
+    .max(50, "La descripción no puede tener más de 50 caracteres"),
+});
 
 interface BuildFormProps {
   action: "create" | "edit" | "view";
@@ -19,37 +41,37 @@ const BuildForm: React.FC<BuildFormProps> = ({
   building,
   onSuccess,
 }) => {
-  const initialFormData = building || {
+  const { addBuilding, updateBuilding } = useBuildingStore((state) => ({
+    addBuilding: state.addBuilding,
+    updateBuilding: state.updateBuilding,
+  }));
+
+  const defaultValues = building || {
     edi_identificador: "",
     edi_descripcion: "",
   };
-  const [formData, setFormData] =
-    useState<Partial<AvaEdificio>>(initialFormData);
-  const [error, setError] = useState<string | null>(null);
-  const { addBuilding, updateBuilding } = useBuildingStore();
 
-  useEffect(() => {
-    setFormData(building || initialFormData);
-  }, [building]);
+  const form = useForm<z.infer<typeof buildingFormSchema>>({
+    resolver: zodResolver(buildingFormSchema),
+    defaultValues,
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (formData: z.infer<typeof buildingFormSchema>) => {
     try {
       const token = cookie.get("token");
       if (!token) {
         console.error("No hay token disponible");
-        setError("No hay token disponible");
         return;
       }
 
       const headers = {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       };
 
       if (action === "create") {
@@ -58,55 +80,58 @@ const BuildForm: React.FC<BuildFormProps> = ({
         });
         if (response.data) {
           addBuilding(response.data);
-          console.log("Edificio creado:", formData);
-          onSuccess && onSuccess();
+          onSuccess();
         }
-      } else if (action === "edit") {
-        const response = await axios.put(`/api/building/${building?.edi_id}`, formData, {
-          headers,
-        });
+      } else if (action === "edit" && building?.edi_id) {
+        const response = await axios.put(
+          `/api/building/${building.edi_id}`,
+          formData,
+          { headers }
+        );
         if (response.data) {
           updateBuilding(response.data);
-          console.log("Edificio Actualizado:", formData);
-          onSuccess && onSuccess();
+          onSuccess();
         }
       }
     } catch (error: any) {
       console.error("Error al guardar el Edificio:", error);
       const errorMessage = error.response?.data?.error || "Error desconocido";
-      setError("Error al guardar el Edificio: " + errorMessage);
+      console.error("Error al guardar el Edificio: " + errorMessage);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 gap-4 m-3">
-          <div>
-            <Label htmlFor="edi_identificador">Identificador</Label>
-            <Input
-              id="edi_identificador"
-              name="edi_identificador"
-              type="text"
-              value={formData.edi_identificador}
-              onChange={handleChange}
-              required
-              disabled={action === "view"}
-            />
-          </div>
-          <div>
-            <Label htmlFor="edi_descripcion">Descripcion</Label>
-            <Input
-              id="edi_descripcion"
-              name="edi_descripcion"
-              type="text"
-              value={formData.edi_descripcion || ""}
-              onChange={handleChange}
-              required
-              disabled={action === "view"}
-            />
-          </div>
-        </div>
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4 m-3"
+      >
+        <FormField
+          control={form.control}
+          name="edi_identificador"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Identificador</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="edi_descripcion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {action !== "view" && (
           <div className="pt-4 m-3">
             <Button type="submit">
@@ -114,9 +139,8 @@ const BuildForm: React.FC<BuildFormProps> = ({
             </Button>
           </div>
         )}
-        {error && <Alert variant="destructive">{error}</Alert>}
       </form>
-    </div>
+    </Form>
   );
 };
 

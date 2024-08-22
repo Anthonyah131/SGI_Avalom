@@ -1,13 +1,21 @@
-import { useState } from "react";
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert } from "@/components/ui/alert";
 import {
   Select,
   SelectTrigger,
@@ -20,13 +28,33 @@ import { User } from "@/lib/types";
 
 // Define schema using zod
 const userFormSchema = z.object({
-  usu_nombre: z.string().min(1, "Nombre es requerido"),
-  usu_papellido: z.string().min(1, "Primer Apellido es requerido"),
-  usu_sapellido: z.string().optional(),
-  usu_cedula: z.string().min(1, "Cédula es requerida"),
-  usu_telefono: z.string().optional(),
-  usu_correo: z.string().email("Correo no válido"),
-  usu_contrasena: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
+  usu_nombre: z
+    .string()
+    .min(1, "Nombre es requerido")
+    .max(30, "El nombre no puede tener más de 30 caracteres"),
+  usu_papellido: z
+    .string()
+    .min(1, "Primer Apellido es requerido")
+    .max(30, "El primer apellido no puede tener más de 30 caracteres"),
+  usu_sapellido: z
+    .string()
+    .max(30, "El segundo apellido no puede tener más de 30 caracteres"),
+  usu_cedula: z
+    .string()
+    .min(1, "Cédula es requerida")
+    .max(15, "La cédula no puede tener más de 15 caracteres"),
+  usu_telefono: z
+    .string()
+    .max(15, "El teléfono no puede tener más de 15 caracteres"),
+  usu_correo: z
+    .string()
+    .min(1, "Correo es requerido")
+    .email("Correo no válido")
+    .max(50, "El correo no puede tener más de 50 caracteres"),
+  usu_contrasena: z
+    .string()
+    .min(1, "Contraseña es requerida")
+    .max(500, "La contraseña no puede tener más de 30 caracteres"),
   usu_estado: z.enum(["A", "I"]),
   usu_rol: z.enum(["A", "J", "E", "R"]),
 });
@@ -42,8 +70,6 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     addUser: state.addUser,
     updateUser: state.updateUser,
   }));
-
-  const [error, setError] = useState<string | null>(null);
 
   const defaultValues = entity || {
     usu_nombre: "",
@@ -62,18 +88,13 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     defaultValues,
   });
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = form;
+  const { handleSubmit } = form;
 
   const onSubmit = async (formData: z.infer<typeof userFormSchema>) => {
     try {
       const token = cookie.get("token");
       if (!token) {
         console.error("No hay token disponible");
-        setError("No hay token disponible");
         return;
       }
 
@@ -89,7 +110,11 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
           onSuccess();
         }
       } else if (action === "edit" && entity?.usu_id) {
-        const response = await axios.put(`/api/users/${entity.usu_id}`, formData, { headers });
+        const response = await axios.put(
+          `/api/users/${entity.usu_id}`,
+          formData,
+          { headers }
+        );
         if (response.data) {
           updateUser(response.data);
           onSuccess();
@@ -98,186 +123,170 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     } catch (error: any) {
       console.error("Error al guardar el usuario:", error);
       const errorMessage = error.response?.data?.error || "Error desconocido";
-      setError("Error al guardar el usuario: " + errorMessage);
+      console.error("Error al guardar el usuario: " + errorMessage);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid grid-cols-2 gap-4 m-3">
-        <div>
-          <Label htmlFor="usu_nombre">Nombre</Label>
-          <Controller
-            name="usu_nombre"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_nombre"
-                type="text"
-                required
-                disabled={action === "view"}
-              />
-            )}
-          />
-          {errors.usu_nombre && <Alert variant="destructive">{errors.usu_nombre.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_papellido">Primer Apellido</Label>
-          <Controller
-            name="usu_papellido"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_papellido"
-                type="text"
-                required
-                disabled={action === "view"}
-              />
-            )}
-          />
-          {errors.usu_papellido && <Alert variant="destructive">{errors.usu_papellido.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_sapellido">Segundo Apellido</Label>
-          <Controller
-            name="usu_sapellido"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_sapellido"
-                type="text"
-                disabled={action === "view"}
-              />
-            )}
-          />
-        </div>
-        <div>
-          <Label htmlFor="usu_cedula">Cédula</Label>
-          <Controller
-            name="usu_cedula"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_cedula"
-                type="text"
-                required
-                disabled={action === "view"}
-              />
-            )}
-          />
-          {errors.usu_cedula && <Alert variant="destructive">{errors.usu_cedula.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_telefono">Teléfono</Label>
-          <Controller
-            name="usu_telefono"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_telefono"
-                type="text"
-                disabled={action === "view"}
-              />
-            )}
-          />
-        </div>
-        <div>
-          <Label htmlFor="usu_correo">Correo</Label>
-          <Controller
-            name="usu_correo"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_correo"
-                type="email"
-                required
-                disabled={action === "view"}
-              />
-            )}
-          />
-          {errors.usu_correo && <Alert variant="destructive">{errors.usu_correo.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_contrasena">Contraseña</Label>
-          <Controller
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-4 m-3"
+      >
+        <FormField
+          control={form.control}
+          name="usu_nombre"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nombre</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={30} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_papellido"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Primer Apellido</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={30} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_sapellido"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Segundo Apellido</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={30} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_cedula"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cédula</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={15} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_telefono"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Teléfono</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={15} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_correo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Correo</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={action === "view"} maxLength={50} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {(action === "create" || action === "edit") && (
+          <FormField
+            control={form.control}
             name="usu_contrasena"
-            control={control}
             render={({ field }) => (
-              <Input
-                {...field}
-                id="usu_contrasena"
-                type="password"
-                required
-                disabled={action === "view"}
-              />
+              <FormItem>
+                <FormLabel>Contraseña</FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" maxLength={30} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
           />
-          {errors.usu_contrasena && <Alert variant="destructive">{errors.usu_contrasena.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_estado">Estado</Label>
-          <Controller
-            name="usu_estado"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={action === "view"}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">Activo</SelectItem>
-                  <SelectItem value="I">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.usu_estado && <Alert variant="destructive">{errors.usu_estado.message}</Alert>}
-        </div>
-        <div>
-          <Label htmlFor="usu_rol">Rol</Label>
-          <Controller
-            name="usu_rol"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={action === "view"}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A">Admin</SelectItem>
-                  <SelectItem value="J">Jefe</SelectItem>
-                  <SelectItem value="E">Empleado</SelectItem>
-                  <SelectItem value="R">Auditor</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.usu_rol && <Alert variant="destructive">{errors.usu_rol.message}</Alert>}
-        </div>
-      </div>
-      {action !== "view" && (
-        <div className="pt-4 m-3">
-          <Button type="submit">
-            {action === "create" ? "Crear Usuario" : "Guardar Cambios"}
-          </Button>
-        </div>
-      )}
-      {error && <Alert variant="destructive">{error}</Alert>}
-    </form>
+        )}
+        <FormField
+          control={form.control}
+          name="usu_estado"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado</FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={action === "view"}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">Activo</SelectItem>
+                    <SelectItem value="I">Inactivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="usu_rol"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rol</FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={action === "view"}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Rol" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="A">Admin</SelectItem>
+                    <SelectItem value="J">Jefe</SelectItem>
+                    <SelectItem value="E">Empleado</SelectItem>
+                    <SelectItem value="R">Auditor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {action !== "view" && (
+          <div className="pt-4 m-3">
+            <Button type="submit">
+              {action === "create" ? "Crear Usuario" : "Guardar Cambios"}
+            </Button>
+          </div>
+        )}
+      </form>
+    </Form>
   );
 };
 
