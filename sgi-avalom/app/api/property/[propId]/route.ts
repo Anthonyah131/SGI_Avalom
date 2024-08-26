@@ -11,7 +11,15 @@ export async function GET(
       const property = await prisma.ava_propiedad.findFirst({
         where: { prop_id: Number(params.propId) },
         include: {
-          ava_alquiler: true,
+          ava_alquiler: {
+            include: {
+              ava_clientexalquiler: {
+                include: {
+                  ava_cliente: true,
+                },
+              },
+            },
+          },
           ava_tipopropiedad: true,
           ava_edificio: true,
         },

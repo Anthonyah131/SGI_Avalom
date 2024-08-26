@@ -71,7 +71,9 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
           <RentalForm action="edit" onSuccess={handleSuccess} />
           <Separator className="my-4" />
           <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-            <h1 className="text-lg md:text-xl font-bold">Historial de alquileres</h1>
+            <h1 className="text-lg md:text-xl font-bold">
+              Historial de alquileres
+            </h1>
           </div>
           <DataTable
             columns={columnsRent}

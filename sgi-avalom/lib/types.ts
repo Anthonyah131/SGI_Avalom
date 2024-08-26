@@ -21,8 +21,14 @@ export interface Cliente {
   cli_telefono: string;
   cli_correo: string;
   cli_fechacreacion?: string;
-  ava_deposito: AvaDeposito[];
-  ava_pago: AvaPago[];
+  ava_clientexalquiler: AvaClientexAlquiler[];
+}
+
+export interface AvaClientexAlquiler {
+  alq_id: number;
+  cli_id: number;
+  ava_alquiler: AvaAlquiler;
+  ava_cliente: Cliente;
 }
 
 export interface AvaDeposito {
@@ -82,11 +88,12 @@ export interface AvaAlquiler {
   alq_fechapago: string;
   alq_contrato?: string;
   alq_estado: "A" | "F" | "C";
-  alq_fechacreacion?: string
+  alq_fechacreacion?: string;
   prop_id?: number;
   ava_propiedad?: AvaPropiedad;
   ava_alquilermensual: AvaAlquilerMensual[];
   ava_deposito: AvaDeposito[];
+  ava_clientexalquiler: AvaClientexAlquiler[];
 }
 
 export interface AvaAlquilerMensual {

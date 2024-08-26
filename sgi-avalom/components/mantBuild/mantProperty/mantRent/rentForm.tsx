@@ -23,8 +23,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import usePropertyStore from "@/lib/zustand/propertyStore";
-import { AvaAlquiler } from "@/lib/types";
+import useClientStore from "@/lib/zustand/clientStore";
+import { AvaAlquiler, Cliente } from "@/lib/types";
 import { useEffect } from "react";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandEmpty,
+} from "@/components/ui/command";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { X } from "lucide-react";
+import { ClientComboBox } from "./ClientComboBox";
 
 // Define schema using zod
 const rentalFormSchema = z.object({
@@ -49,13 +67,46 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     selectedProperty,
     selectedRental,
     setSelectedRental,
+    addClientToRental,
+    removeClientFromRental,
   } = usePropertyStore((state) => ({
     addRental: state.addRental,
     updateRental: state.updateRental,
     selectedProperty: state.selectedProperty,
     selectedRental: state.selectedRental,
     setSelectedRental: state.setSelectedRental,
+    addClientToRental: state.addClientToRental,
+    removeClientFromRental: state.removeClientFromRental,
   }));
+
+  const { clients, setClients } = useClientStore((state) => ({
+    clients: state.clients,
+    setClients: state.setClients,
+  }));
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      const token = cookie.get("token");
+      if (!token) {
+        console.error("No hay token disponible");
+        return;
+      }
+
+      try {
+        const response = await axios.get("/api/client", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        setClients(response.data);
+      } catch (error) {
+        console.error("Error al buscar clientes: " + error);
+      }
+    };
+
+    fetchClients();
+  }, [setClients]);
 
   const defaultValues =
     action === "create"
@@ -137,6 +188,16 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     setSelectedRental(null); // Clear the selected rental if creating
   };
 
+  const handleClientSelect = (client: Cliente) => {
+    if (client && (selectedRental?.ava_clientexalquiler?.length ?? 0) < 2) {
+      addClientToRental(client);
+    }
+  };
+
+  const handleClientRemove = (clientId: number) => {
+    removeClientFromRental(clientId);
+  };
+
   return (
     <Form {...form}>
       <form
@@ -208,7 +269,37 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
             </FormItem>
           )}
         />
-        <div className="flex gap-4">
+        <div className="col-span-2">
+          <FormLabel>Agregar Clientes</FormLabel>
+          <ClientComboBox
+            clients={clients}
+            onClientSelect={handleClientSelect}
+          />
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {selectedRental?.ava_clientexalquiler.map(({ ava_cliente }) => (
+              <Card key={ava_cliente.cli_id} className="relative p-3">
+                <CardHeader className="p-0 mb-2">
+                  <CardTitle className="text-lg font-medium">
+                    {ava_cliente.cli_nombre} {ava_cliente.cli_papellido}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-gray-500">
+                    {ava_cliente.cli_cedula}
+                  </CardDescription>
+                </CardHeader>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-1 right-1 p-0 m-0"
+                  onClick={() => handleClientRemove(ava_cliente.cli_id)}
+                >
+                  <X className="w-4 h-4 text-gray-600" />
+                </Button>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-4 col-span-2">
           <Button type="submit" className="mt-4">
             Guardar
           </Button>
