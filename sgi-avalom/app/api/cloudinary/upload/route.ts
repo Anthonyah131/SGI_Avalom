@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const formData = await req.formData();
-      const file = formData.get("file") as File | null; // Cast a File
+      const file = formData.get("file") as File | null;
 
       if (!file) {
         return NextResponse.json(
@@ -15,15 +15,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Convertir el Blob a un buffer
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Subir el archivo a Cloudinary sin establecer public_id
-      // Cloudinary usará el nombre original y agregará un sufijo aleatorio automáticamente
       const result = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { resource_type: "raw", format: "pdf" }, // No public_id specified
+          { resource_type: "raw", format: "pdf" },
           (error, result) => {
             if (error) {
               reject(error);

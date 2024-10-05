@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,6 +51,8 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     setClients: state.setClients,
   }));
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const defaultValues = useMemo(() => {
     if (action === "create") {
       return {
@@ -99,6 +101,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
       alq_contrato: "",
       alq_estado: "A",
     });
+    setSelectedFile(null);
     setSelectedRental(null);
   };
 
@@ -115,6 +118,26 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         "Content-Type": "application/json",
       };
 
+      let fileUrl = selectedRental?.alq_contrato || "";
+
+      if (selectedFile) {
+        const formDataFile = new FormData();
+        formDataFile.append("file", selectedFile);
+
+        const response = await axios.post(
+          "/api/cloudinary/upload",
+          formDataFile,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        const { url } = response.data;
+        fileUrl = url;
+      }
+
       if (action === "create") {
         const newRental = {
           ...formData,
@@ -122,6 +145,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
             ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
             : null,
           prop_id: selectedProperty?.prop_id,
+          alq_contrato: fileUrl,
         };
         const response = await axios.post("/api/rent", newRental, { headers });
         if (response.data) {
@@ -139,6 +163,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
             selectedRental?.ava_clientexalquiler.map(({ ava_cliente }) => ({
               cli_id: ava_cliente.cli_id,
             })) || [],
+          alq_contrato: fileUrl,
         };
 
         const response = await axios.put(
@@ -194,6 +219,10 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     clearForm();
   };
 
+  const handleFileSelect = (file: File | null) => {
+    setSelectedFile(file);
+  };
+
   const handleClientSelect = (client: Cliente) => {
     if (
       client &&
@@ -242,6 +271,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     onSubmit,
     handleDelete,
     handleClear,
+    handleFileSelect,
     handleClientSelect,
     handleClientRemove,
     isFormDisabled,

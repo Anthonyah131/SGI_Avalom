@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     const url = cloudinary.url(publicId, { resource_type: "raw", format: "pdf" });
 
-    return NextResponse.json({ viewUrl: url });
+    return NextResponse.json({ url: url });
   } catch (error) {
     console.error("Error al obtener la URL:", error);
     return NextResponse.json(

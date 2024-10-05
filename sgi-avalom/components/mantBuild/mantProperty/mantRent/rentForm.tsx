@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -36,6 +34,8 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
+import FileUploader from "@/components/ui/fileUploader";
+import { useState } from "react";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
@@ -43,6 +43,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     handleSubmit,
     onSubmit,
     handleClear,
+    handleFileSelect,
     handleClientSelect,
     handleClientRemove,
     isFormDisabled,
@@ -50,10 +51,27 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     selectedRental,
   } = useRentalForm({ action, onSuccess });
 
+  const [resetFile, setResetFile] = useState(false);
+
+  // Llamar a setResetFile(true) después de guardar exitosamente para resetear el uploader
+  const handleFormSubmit = async (data: any) => {
+    await handleSubmit(onSubmit)(data);
+    setResetFile(true); // Resetear el archivo después de guardar
+  };
+
+  const onClear = () => {
+    setResetFile(true);
+    handleClear();
+  };
+
+  const onResetComplete = () => {
+    setResetFile(false);
+  };
+
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleFormSubmit}
         className="grid grid-cols-2 gap-4 m-3"
       >
         <FormField
@@ -122,15 +140,16 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
         <FormField
           control={form.control}
           name="alq_contrato"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Contrato</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  disabled={isFormDisabled || action === "view"}
-                />
-              </FormControl>
+              <FileUploader
+                disabled={isFormDisabled || action === "view"}
+                onFileSelect={handleFileSelect}
+                resetFile={resetFile}
+                onResetComplete={onResetComplete}
+                existingFileUrl={selectedRental?.alq_contrato}
+              />
               <FormMessage />
             </FormItem>
           )}
@@ -200,7 +219,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
           <Button type="submit" className="mt-4" disabled={isFormDisabled}>
             Guardar
           </Button>
-          <Button type="button" onClick={handleClear} className="mt-4">
+          <Button type="button" onClick={onClear} className="mt-4">
             Limpiar
           </Button>
         </div>
