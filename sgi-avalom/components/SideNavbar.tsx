@@ -1,132 +1,119 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useWindowWidth } from "@react-hook/window-size";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   BookUser,
-  ChevronRight,
   Users,
   Building2,
-  LucideLineChart ,
+  LineChart,
+  Settings,
 } from "lucide-react";
-import { Nav } from "./ui/nav";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/lib/UserContext";
-import { useRouter } from "next/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
-const SideNavbar: React.FC = () => {
+export default function SideNavbar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const onlyWidth = useWindowWidth();
-  const mobileWidth = onlyWidth < 768;
 
   const { user, logout } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  function toggleSidebar() {
-    setIsCollapsed(!isCollapsed);
-  }
-
   const handleLogout = () => {
     logout();
-    router.push("/login");
+    router.push("/");
   };
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
   const truncateName = (name: string, maxLength: number) => {
-    if (name.length > maxLength) {
-      return `${name.substring(0, maxLength)}...`;
-    }
-    return name;
+    return name.length > maxLength
+      ? `${name.substring(0, maxLength)}...`
+      : name;
   };
 
+  interface NavItemProps {
+    href: string;
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+  }
+
+  const NavItem: React.FC<NavItemProps> = ({ href, icon: Icon, title }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link
+          href={href}
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground",
+            pathname === href && "bg-accent text-accent-foreground"
+          )}
+        >
+          <Icon className="h-5 w-5" />
+          <span className="sr-only">{title}</span>
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent side="right">{title}</TooltipContent>
+    </Tooltip>
+  );
+
   return (
-    <div
-      onMouseEnter={() => {
-        setIsCollapsed(false);
-      }}
-      onMouseLeave={() => {
-        setIsCollapsed(true);
-      }}
-      className="relative bg-sideBar min-w-[60px] md:min-w-[95px] border-r px-3 pb-10 pt-24"
-    >
-      {!mobileWidth && (
-        <div className="absolute right-[-20px] top-7">
-          <Button
-            onClick={toggleSidebar}
-            variant="secondary"
-            className="rounded-full p-2"
-          >
-            <ChevronRight />
-          </Button>
-        </div>
+    <aside
+      className={cn(
+        "fixed inset-y-0 left-0 z-10 flex flex-col border-r bg-background transition-all duration-300",
+        isCollapsed ? "w-14" : "w-20"
       )}
-      <div className="flex items-center flex-col gap-2 m-1">
+      onMouseEnter={() => setIsCollapsed(false)}
+      onMouseLeave={() => setIsCollapsed(true)}
+    >
+      <nav className="flex flex-col items-center gap-4 p-4">
+        <NavItem href="/homePage" icon={LayoutDashboard} title="Inicio" />
+        <NavItem href="/mantClient" icon={BookUser} title="Clientes" />
+        <NavItem href="/mantUser" icon={Users} title="Usuarios" />
+        <NavItem href="/mantBuild" icon={Building2} title="Edificios" />
+        <NavItem href="/accounting" icon={LineChart} title="Contabilidad" />
+      </nav>
+      <div className="mt-auto flex flex-col items-center gap-4 p-4">
+        <NavItem href="/settings" icon={Settings} title="Ajustes" />
         {user && (
-          <>
-            <Avatar>
-              <AvatarImage
-                src={"https://github.com/shadcn.png"}
-                alt={`@${user.usu_nombre}`}
-              />
-              <AvatarFallback>
-                {user.usu_nombre ? user.usu_nombre[0] : "U"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="hidden md:flex text-sm md:text-sm">
-              {truncateName(user.usu_nombre, 8)}
-            </span>
-            <span className="flex md:hidden text-sm md:text-sm">
-              {user.usu_nombre ? user.usu_nombre.substring(0, 3) : "U"}
-            </span>
-          </>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full"
+                onClick={handleLogout}
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src="https://github.com/shadcn.png"
+                    alt={`@${user.usu_nombre}`}
+                  />
+                  <AvatarFallback>
+                    {user.usu_nombre ? user.usu_nombre[0] : "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {truncateName(user.usu_nombre, 20)}
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
-      <Nav
-        isCollapsed={mobileWidth ? true : isCollapsed}
-        links={[
-          {
-            title: "Inicio",
-            href: "/homePage",
-            icon: LayoutDashboard,
-            variant: "ghost",
-          },
-          {
-            title: "Clientes",
-            href: "/mantClient",
-            icon: BookUser,
-            variant: "ghost",
-          },
-          {
-            title: "Usuarios",
-            href: "/mantUser",
-            icon: Users,
-            variant: "ghost",
-          },
-          {
-            title: "Edificios",
-            href: "/mantBuild",
-            icon: Building2,
-            variant: "ghost",
-          },
-          {
-            title: "Contabilidad",
-            href: "/accounting",
-            icon: LucideLineChart,
-            variant: "ghost",
-          },
-        ]}
-      />
-    </div>
+    </aside>
   );
-};
-
-export default SideNavbar;
+}

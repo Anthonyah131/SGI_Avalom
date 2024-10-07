@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { AvaPropiedad, AvaAlquiler, Cliente, AvaClientexAlquiler } from "@/lib/types";
+import {
+  AvaPropiedad,
+  AvaAlquiler,
+  Cliente,
+  AvaClientexAlquiler,
+} from "@/lib/types";
 
 interface PropertyState {
   selectedProperty: AvaPropiedad | null;
@@ -10,8 +15,6 @@ interface PropertyState {
   addRental: (rental: AvaAlquiler) => void;
   updateRental: (id: number, updatedRental: AvaAlquiler) => void;
   removeRental: (id: number) => void;
-  addClientToRental: (client: Cliente) => void;
-  removeClientFromRental: (clientId: number) => void;
 }
 
 const usePropertyStore = create<PropertyState>((set) => ({
@@ -43,7 +46,7 @@ const usePropertyStore = create<PropertyState>((set) => ({
       selectedProperty: state.selectedProperty
         ? {
             ...state.selectedProperty,
-            ava_alquiler: state.selectedProperty?.ava_alquiler?.map((rental) =>
+            ava_alquiler: state.selectedProperty.ava_alquiler.map((rental) =>
               rental.alq_id === id ? updatedRental : rental
             ),
           }
@@ -60,60 +63,6 @@ const usePropertyStore = create<PropertyState>((set) => ({
           }
         : null,
     })),
-  addClientToRental: (client) =>
-    set((state) => {
-      if (!state.selectedRental || !state.selectedProperty) return state;
-
-      const newClientRental: AvaClientexAlquiler = {
-        alq_id: state.selectedRental.alq_id,
-        cli_id: client.cli_id,
-        ava_alquiler: state.selectedRental,
-        ava_cliente: client,
-      };
-
-      const updatedRental = {
-        ...state.selectedRental,
-        ava_clientexalquiler: [
-          ...(state.selectedRental?.ava_clientexalquiler || []),
-          newClientRental,
-        ],
-      };
-
-      return {
-        selectedRental: updatedRental,
-        selectedProperty: {
-          ...state.selectedProperty,
-          ava_alquiler: state.selectedProperty.ava_alquiler.map((rental) =>
-            rental.alq_id === state.selectedRental?.alq_id
-              ? updatedRental
-              : rental
-          ),
-        },
-      };
-    }),
-  removeClientFromRental: (clientId) =>
-    set((state) => {
-      if (!state.selectedRental || !state.selectedProperty) return state;
-
-      const updatedRental = {
-        ...state.selectedRental,
-        ava_clientexalquiler: state.selectedRental.ava_clientexalquiler?.filter(
-          (relation) => relation.cli_id !== clientId
-        ),
-      };
-
-      return {
-        selectedRental: updatedRental,
-        selectedProperty: {
-          ...state.selectedProperty,
-          ava_alquiler: state.selectedProperty.ava_alquiler.map((rental) =>
-            rental.alq_id === state.selectedRental?.alq_id
-              ? updatedRental
-              : rental
-          ),
-        },
-      };
-    }),
 }));
 
 export default usePropertyStore;

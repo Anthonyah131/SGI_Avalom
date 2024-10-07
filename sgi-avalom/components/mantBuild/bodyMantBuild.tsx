@@ -11,13 +11,18 @@ import { ModeToggle } from "@/components/modeToggle";
 import { columns } from "./columnBuild";
 import { DataTable } from "@/components/dataTable/data-table";
 import ManageActions from "@/components/dataTable/manageActions";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BuildForm from "./buildFormProps";
 import { columnsProperty } from "./mantProperty/columnProperty";
-import PropertyManager from "./mantProperty/propertyManager";
 import PropertyForm from "./mantProperty/propertyFormProps";
-import { Separator } from "../ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const BodyMantBuild: React.FC = () => {
   const { setBuildings, buildings } = useBuildingStore();
@@ -59,10 +64,9 @@ const BodyMantBuild: React.FC = () => {
       selectedBuilding &&
       !buildings.some((b) => b.edi_id === selectedBuilding.edi_id)
     ) {
-      // Clear selectedBuilding if it no longer exists
       setSelectedBuilding(null);
     }
-  }, [buildings]);
+  }, [buildings, selectedBuilding]);
 
   useEffect(() => {
     const building = buildings.find(
@@ -74,82 +78,108 @@ const BodyMantBuild: React.FC = () => {
   }, [buildings, selectedBuilding?.edi_id]);
 
   return (
-    <div className="flex flex-col w-full space-y-10 md:flex-row md:space-y-0 md:space-x-10">
-      <section className="p-4 md:px-5 md:py-10 mx-auto w-full flex flex-col space-y-10">
-        <Card className="flex flex-col md:flex-row justify-between items-center w-full p-2">
-          <h1 className="text-xl md:text-2xl font-bold">
+    <div className="mx-auto p-4 space-y-8">
+      <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
+        <CardHeader className="">
+          <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
             Gestión de Edificios
-          </h1>
-          <div className="flex flex-wrap justify-center md:justify-end">
-            <ManageActions<AvaEdificio>
-              variant={"nuevo"}
-              titleButton={"Nuevo Edificio"}
-              icon={<Plus />}
-              title={"Nuevo Edificio"}
-              description={"Ingresa un nuevo Edificio"}
-              action={"create"}
-              classn={"m-2"}
-              FormComponent={BuildForm}
-            />
-            <Button className="m-2">Exportar Edificios</Button>
-            <Button className="m-2">Descargar Plantilla</Button>
-            <Button className="m-2">Importar</Button>
-            <ModeToggle />
-          </div>
-        </Card>
-        <div className="flex flex-col md:flex-row space-y-10 md:space-y-0 md:space-x-10">
-          <Card className="flex-1">
-            <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-              <h1 className="text-lg md:text-xl font-bold">Edificios</h1>
-            </div>
+          </CardTitle>
+        </CardHeader>
+        <div className="flex flex-wrap justify-center gap-2 p-4">
+          <ManageActions<AvaEdificio>
+            variant="default"
+            titleButton="Nuevo Edificio"
+            icon={<Plus className="mr-2 h-4 w-4" />}
+            title="Nuevo Edificio"
+            description="Ingresa un nuevo Edificio"
+            action="create"
+            FormComponent={BuildForm}
+          />
+          <Button variant="outline">Exportar Edificios</Button>
+          <Button variant="outline">Descargar Plantilla</Button>
+          <Button variant="outline">Importar</Button>
+          <ModeToggle />
+        </div>
+      </Card>
 
-            <CardContent>
-              <DataTable
-                data={buildings}
-                columns={columns}
-                onRowClick={(building: AvaEdificio) =>
-                  setSelectedBuilding(building)
-                }
-              />
-            </CardContent>
-          </Card>
-          {selectedBuilding && (
-            <div className="flex-1">
-              <Card>
-                <CardContent>
-                  <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-                    <h1 className="text-lg md:text-xl font-bold">Edificio</h1>
-                  </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <Card className="bg-background">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Edificios</CardTitle>
+            <CardDescription>
+              Listado de edificios registrados. Haz clic en un edificio para ver
+              más detalles.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              data={buildings}
+              columns={columns}
+              onRowClick={(building: AvaEdificio) =>
+                setSelectedBuilding(building)
+              }
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="bg-background">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">
+              Detalles del Edificio
+            </CardTitle>
+            <CardDescription>
+              Información y propiedades del edificio seleccionado.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="info" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="info">Información</TabsTrigger>
+                <TabsTrigger value="properties">Propiedades</TabsTrigger>
+              </TabsList>
+              <div className="mt-4">
+                <TabsContent value="info" className="mt-0">
                   <BuildForm
-                    building={selectedBuilding}
-                    action={"edit"}
+                    building={selectedBuilding ?? undefined}
+                    action="edit"
                     onSuccess={() => {}}
                   />
-                  <Separator className="my-4" />
-                  <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-                    <h1 className="text-lg md:text-xl font-bold">Propiedades</h1>
-                  </div>
-                  <ManageActions
-                    variant={"nuevo"}
-                    titleButton={"Nueva propiedad"}
-                    icon={<Plus />}
-                    title={"Nuevo Propiedad"}
-                    description={"Ingresa una nueva propiedad"}
-                    action={"create"}
-                    classn={"m-2"}
-                    FormComponent={PropertyForm}
-                    entity={selectedBuilding.edi_id}
-                  />
-                  <DataTable
-                    columns={columnsProperty}
-                    data={selectedBuilding.ava_propiedad || []}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </div>
-      </section>
+                </TabsContent>
+                <TabsContent value="properties" className="mt-0">
+                  <Card className="bg-background">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold">
+                        Propiedades
+                      </CardTitle>
+                      <CardDescription>
+                        Listado de propiedades del edificio seleccionado.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ManageActions
+                        variant="default"
+                        titleButton="Nueva propiedad"
+                        icon={<Plus className="mr-2 h-4 w-4" />}
+                        title="Nueva Propiedad"
+                        description="Ingresa una nueva propiedad"
+                        action="create"
+                        FormComponent={PropertyForm}
+                        entity={selectedBuilding?.edi_id}
+                      />
+                      <div className="overflow-x-auto">
+                        <DataTable
+                          columns={columnsProperty}
+                          data={selectedBuilding?.ava_propiedad || []}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

@@ -19,11 +19,10 @@ const rentalFormSchema = z.object({
     .min(1, "Monto es requerido")
     .max(20, "Monto no puede ser mayor a 20 caracteres"),
   alq_fechapago: z.string().optional(),
-  alq_contrato: z.string().optional(),
   alq_estado: z.enum(["A", "F", "C"]),
 });
 
-type RentalFormInputs = z.infer<typeof rentalFormSchema>;
+export type RentalFormInputs = z.infer<typeof rentalFormSchema>;
 
 export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
   const {
@@ -33,8 +32,6 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     selectedProperty,
     selectedRental,
     setSelectedRental,
-    addClientToRental,
-    removeClientFromRental,
   } = usePropertyStore((state) => ({
     addRental: state.addRental,
     updateRental: state.updateRental,
@@ -42,8 +39,6 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     selectedProperty: state.selectedProperty,
     selectedRental: state.selectedRental,
     setSelectedRental: state.setSelectedRental,
-    addClientToRental: state.addClientToRental,
-    removeClientFromRental: state.removeClientFromRental,
   }));
 
   const { clients, setClients } = useClientStore((state) => ({
@@ -51,34 +46,52 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     setClients: state.setClients,
   }));
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // Estado local para los clientes en el alquiler
+  const [clientsInRental, setClientsInRental] = useState<Cliente[]>([]);
+
+  // Inicializar clientsInRental cuando selectedRental cambie
+  useEffect(() => {
+    if (action === "edit" && selectedRental) {
+      setClientsInRental(
+        selectedRental.ava_clientexalquiler?.map(
+          (relation) => relation.ava_cliente
+        ) || []
+      );
+    } else {
+      setClientsInRental([]);
+    }
+  }, [action, selectedRental]);
+
+  // Función auxiliar para obtener el valor de alq_estado
+  const getAlqEstado = (value: string | undefined): "A" | "F" | "C" => {
+    if (value === "A" || value === "F" || value === "C") {
+      return value;
+    }
+    return "A";
+  };
 
   const defaultValues = useMemo(() => {
-    if (action === "create") {
-      return {
-        alq_monto: "",
-        alq_fechapago: "",
-        alq_contrato: "",
-        alq_estado: "A" as const,
-      };
-    } else {
-      return {
-        alq_monto: selectedRental?.alq_monto || "",
-        alq_fechapago: selectedRental?.alq_fechapago
-          ? format(
-              toDate(
-                toZonedTime(
-                  new Date(selectedRental.alq_fechapago),
-                  "America/Costa_Rica"
-                )
-              ),
-              "yyyy-MM-dd"
-            )
-          : "",
-        alq_contrato: selectedRental?.alq_contrato || "",
-        alq_estado: selectedRental?.alq_estado as "A" | "F" | "C",
-      };
-    }
+    return action === "create"
+      ? {
+          alq_monto: "",
+          alq_fechapago: "",
+          alq_estado: "A" as const,
+        }
+      : {
+          alq_monto: selectedRental?.alq_monto || "",
+          alq_fechapago: selectedRental?.alq_fechapago
+            ? format(
+                toDate(
+                  toZonedTime(
+                    new Date(selectedRental.alq_fechapago),
+                    "America/Costa_Rica"
+                  )
+                ),
+                "yyyy-MM-dd"
+              )
+            : "",
+          alq_estado: getAlqEstado(selectedRental?.alq_estado),
+        };
   }, [action, selectedRental]);
 
   const form = useForm<RentalFormInputs>({
@@ -98,11 +111,10 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     reset({
       alq_monto: "",
       alq_fechapago: "",
-      alq_contrato: "",
-      alq_estado: "A",
+      alq_estado: "A" as const,
     });
-    setSelectedFile(null);
     setSelectedRental(null);
+    setClientsInRental([]);
   };
 
   const onSubmit: SubmitHandler<RentalFormInputs> = async (formData) => {
@@ -118,26 +130,6 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         "Content-Type": "application/json",
       };
 
-      let fileUrl = selectedRental?.alq_contrato || "";
-
-      if (selectedFile) {
-        const formDataFile = new FormData();
-        formDataFile.append("file", selectedFile);
-
-        const response = await axios.post(
-          "/api/cloudinary/upload",
-          formDataFile,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
-        const { url } = response.data;
-        fileUrl = url;
-      }
-
       if (action === "create") {
         const newRental = {
           ...formData,
@@ -145,7 +137,6 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
             ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
             : null,
           prop_id: selectedProperty?.prop_id,
-          alq_contrato: fileUrl,
         };
         const response = await axios.post("/api/rent", newRental, { headers });
         if (response.data) {
@@ -159,11 +150,9 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
           alq_fechapago: formData.alq_fechapago
             ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
             : null,
-          ava_clientexalquiler:
-            selectedRental?.ava_clientexalquiler.map(({ ava_cliente }) => ({
-              cli_id: ava_cliente.cli_id,
-            })) || [],
-          alq_contrato: fileUrl,
+          ava_clientexalquiler: clientsInRental.map((client) => ({
+            cli_id: client.cli_id,
+          })),
         };
 
         const response = await axios.put(
@@ -173,6 +162,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         );
         if (response.data) {
           updateRental(selectedRental.alq_id, response.data);
+          setSelectedRental(response.data);
           onSuccess();
           clearForm();
         }
@@ -184,59 +174,24 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (selectedRental?.alq_id) {
-      try {
-        const token = cookie.get("token");
-        if (!token) {
-          console.error("No hay token disponible");
-          return;
-        }
-
-        const headers = {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        };
-
-        const response = await axios.delete(
-          `/api/rent/${selectedRental.alq_id}`,
-          { headers }
-        );
-        if (response.data) {
-          removeRental(selectedRental.alq_id);
-          onSuccess();
-          clearForm();
-        }
-      } catch (error: any) {
-        console.error("Error al borrar el alquiler:", error);
-        const errorMessage = error.response?.data?.error || "Error desconocido";
-        console.error("Error al borrar el alquiler: " + errorMessage);
-      }
-    }
-  };
-
   const handleClear = () => {
     clearForm();
-  };
-
-  const handleFileSelect = (file: File | null) => {
-    setSelectedFile(file);
   };
 
   const handleClientSelect = (client: Cliente) => {
     if (
       client &&
-      (selectedRental?.ava_clientexalquiler?.length ?? 0) < 2 &&
-      !selectedRental?.ava_clientexalquiler.some(
-        (relation) => relation.cli_id === client.cli_id
-      )
+      clientsInRental.length < 2 &&
+      !clientsInRental.some((c) => c.cli_id === client.cli_id)
     ) {
-      addClientToRental(client);
+      setClientsInRental([...clientsInRental, client]);
     }
   };
 
   const handleClientRemove = (clientId: number) => {
-    removeClientFromRental(clientId);
+    setClientsInRental(
+      clientsInRental.filter((client) => client.cli_id !== clientId)
+    );
   };
 
   useEffect(() => {
@@ -269,13 +224,12 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     form,
     handleSubmit,
     onSubmit,
-    handleDelete,
     handleClear,
-    handleFileSelect,
     handleClientSelect,
     handleClientRemove,
     isFormDisabled,
     clients,
+    clientsInRental,
     selectedRental,
   };
 };

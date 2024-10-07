@@ -27,7 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -97,45 +97,45 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="w-full">
-      <div className="flex flex-wrap items-center py-4">
-        <Input
-          placeholder="Buscar..."
-          value={globalFilterValue}
-          onChange={(event) => setGlobalFilterValue(event.target.value)}
-          className="max-w-full md:max-w-sm"
-        />
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto mt-2 md:mt-0">
-              Columnas <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="flex w-full flex-col">
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Table className="min-w-full">
+    <div className="w-full space-y-4 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <Input
+              placeholder="Buscar..."
+              value={globalFilterValue}
+              onChange={(event) => setGlobalFilterValue(event.target.value)}
+              className="w-full sm:max-w-xs"
+              aria-label="Buscar en la tabla"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Columnas <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+      <div className="flex w-full flex-col rounded-md border">
+        <main className="grid flex-1 items-start">
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -161,6 +161,7 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick?.(row.original)}
+                    className="cursor-pointer hover:bg-muted/50"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -186,11 +187,12 @@ export function DataTable<TData, TValue>({
           </Table>
         </main>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="flex items-center">
-          <label htmlFor="pageSize" className="mr-2">
-            Filas por página:
-          </label>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+          <p className="text-sm text-muted-foreground whitespace-nowrap">
+            Página {table.getState().pagination.pageIndex + 1} de{" "}
+            {table.getPageCount()}
+          </p>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => handlePageSizeChange(Number(value))}
@@ -201,19 +203,20 @@ export function DataTable<TData, TValue>({
             <SelectContent>
               {[5, 10, 20, 50].map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {size}
+                  {size} filas
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
+            <ChevronLeft className="h-4 w-4 mr-2" />
             Anterior
           </Button>
           <Button
@@ -223,6 +226,7 @@ export function DataTable<TData, TValue>({
             disabled={!table.getCanNextPage()}
           >
             Siguiente
+            <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>

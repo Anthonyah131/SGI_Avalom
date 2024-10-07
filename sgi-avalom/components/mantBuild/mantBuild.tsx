@@ -6,9 +6,11 @@ import BodyMantBuild from "./bodyMantBuild";
 const MantBuild: React.FC = () => {
   return (
     <AuthRoute>
-      <div className="flex w-full">
+      <div className="flex min-h-screen bg-background">
         <SideNavbar />
-        <BodyMantBuild />
+        <main className="flex-1 pl-14 md:pl-16">
+          <BodyMantBuild />
+        </main>
       </div>
     </AuthRoute>
   );

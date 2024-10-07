@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/dataTable/data-table";
 import { columnsClient } from "@/components/mantClient/columnsClient";
 import { ModeToggle } from "@/components/modeToggle";
@@ -45,33 +45,34 @@ const BodyMantClient: React.FC = () => {
   }, [setClients]);
 
   return (
-    <div className="flex flex-col w-full space-y-10 md:flex-row md:space-y-0 md:space-x-10">
-      <section className="p-4 md:px-5 md:py-10 mx-auto w-full flex flex-col space-y-10">
-        <Card className="flex flex-col md:flex-row justify-between items-center w-full p-2">
-          <h1 className="text-xl md:text-2xl font-bold">Gestión de Clientes</h1>
-          <div className="flex flex-wrap justify-center md:justify-end">
-            <ManageActions<Cliente>
-              variant={"nuevo"}
-              titleButton={"Nuevo Cliente"}
-              icon={<Plus />}
-              title={"Nuevo Cliente"}
-              description={"Ingresa un nuevo cliente"}
-              action={"create"}
-              classn={"m-2"}
-              FormComponent={ClienteForm}
-            />
-            <Button className="m-2">Exportar Clientes</Button>
-            <Button className="m-2">Descargar Plantilla</Button>
-            <Button className="m-2">Importar</Button>
-            <ModeToggle />
-          </div>
-        </Card>
-        <Card>
-          <CardContent>
-            <DataTable columns={columnsClient} data={clients} />
-          </CardContent>
-        </Card>
-      </section>
+    <div className="mx-auto p-4 space-y-8">
+      <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
+        <CardHeader className="">
+          <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
+            Gestión de Edificios
+          </CardTitle>
+        </CardHeader>
+        <div className="flex flex-wrap justify-center gap-2 p-4">
+          <ManageActions<Cliente>
+            variant="default"
+            titleButton={"Nuevo Cliente"}
+            icon={<Plus className="mr-2 h-4 w-4" />}
+            title={"Nuevo Cliente"}
+            description={"Ingresa un nuevo cliente"}
+            action={"create"}
+            FormComponent={ClienteForm}
+          />
+          <Button variant="outline">Exportar Clientes</Button>
+          <Button variant="outline">Descargar Plantilla</Button>
+          <Button variant="outline">Importar</Button>
+          <ModeToggle />
+        </div>
+      </Card>
+      <Card>
+        <CardContent>
+          <DataTable columns={columnsClient} data={clients} />
+        </CardContent>
+      </Card>
     </div>
   );
 };

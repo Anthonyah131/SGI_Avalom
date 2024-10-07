@@ -7,224 +7,283 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Upload, FileText, Trash2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import axios from "axios";
+import cookie from "js-cookie";
+import usePropertyStore from "@/lib/zustand/propertyStore";
+import { AvaAlquiler } from "@/lib/types";
 
 interface FileUploaderProps {
   disabled: boolean;
-  onFileSelect: (file: File | null) => void;
-  resetFile: boolean;
-  onResetComplete: () => void;
-  existingFileUrl?: string;
+  selectedRental: AvaAlquiler | null;
 }
 
 export default function FileUploader({
   disabled,
-  onFileSelect,
-  resetFile,
-  onResetComplete,
-  existingFileUrl,
+  selectedRental,
 }: FileUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(
+    selectedRental?.alq_contrato || null
+  );
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { updateRental, setSelectedRental } = usePropertyStore((state) => ({
+    updateRental: state.updateRental,
+    setSelectedRental: state.setSelectedRental,
+  }));
 
-  // Actualizar fileUrl y limpiar el archivo local cuando cambia el alquiler
   useEffect(() => {
-    if (existingFileUrl) {
-      setFile(null); // Si hay un link, eliminamos el archivo local
-      setFileUrl(existingFileUrl);
-    } else {
-      setFileUrl(null);
-    }
-  }, [existingFileUrl]);
+    setFileUrl(selectedRental?.alq_contrato || null);
+  }, [selectedRental]);
 
-  // Resetear archivo local y URL cuando se restablece el formulario
-  useEffect(() => {
-    if (resetFile) {
-      setFile(null);
-      setFileUrl(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      onResetComplete();
-    }
-  }, [resetFile, onResetComplete]);
-
-  // Manejar el archivo cargado manualmente
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type === "application/pdf") {
       setFile(selectedFile);
-      setFileUrl(null); // Si cargamos un archivo nuevo, quitamos la URL del archivo existente
-      onFileSelect(selectedFile);
     } else {
       alert("Por favor, selecciona un archivo PDF.");
     }
   };
 
-  // Eliminar el archivo local o el archivo existente en la base de datos
-  const handleDelete = () => {
-    setFile(null);
-    setFileUrl(null);
-    onFileSelect(null); // Notificamos que ya no hay archivo
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleUpload = async () => {
+    if (!file || !selectedRental) return;
+
+    try {
+      const token = cookie.get("token");
+      if (!token) {
+        console.error("No hay token disponible");
+        return;
+      }
+
+      const formDataFile = new FormData();
+      formDataFile.append("file", file);
+
+      const response = await axios.post(
+        "/api/cloudinary/upload",
+        formDataFile,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      const { url } = response.data;
+
+      const updatedRentalData = {
+        alq_contrato: url,
+      };
+
+      const rentalResponse = await axios.put(
+        `/api/rent/${selectedRental.alq_id}`,
+        updatedRentalData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (rentalResponse.data) {
+        updateRental(selectedRental.alq_id, rentalResponse.data);
+        setSelectedRental(rentalResponse.data);
+        setFileUrl(url);
+        setFile(null);
+        alert("Archivo subido y alquiler actualizado correctamente.");
+      }
+    } catch (error) {
+      console.error("Error al subir el archivo:", error);
+      alert("Error al subir el archivo.");
     }
   };
 
-  // Permitir la funcionalidad de arrastrar y soltar
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+  const handleDelete = async () => {
+    if (!fileUrl || !selectedRental) return;
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
+    try {
+      const token = cookie.get("token");
+      if (!token) {
+        console.error("No hay token disponible");
+        return;
+      }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === "application/pdf") {
-      setFile(droppedFile);
-      setFileUrl(null);
-      onFileSelect(droppedFile);
-    } else {
-      alert("Por favor, suelta un archivo PDF.");
+      const publicId = extractPublicIdFromUrl(fileUrl);
+      console.log("Eliminando archivo con public ID:", publicId);
+      await axios.post(
+        "/api/cloudinary/delete",
+        { publicId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const updatedRentalData = {
+        alq_contrato: "",
+      };
+
+      const rentalResponse = await axios.put(
+        `/api/rent/${selectedRental.alq_id}`,
+        updatedRentalData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (rentalResponse.data) {
+        updateRental(selectedRental.alq_id, rentalResponse.data);
+        setSelectedRental(rentalResponse.data);
+        setFileUrl(null);
+        alert("Archivo eliminado y alquiler actualizado correctamente.");
+      }
+    } catch (error) {
+      console.error("Error al eliminar el archivo:", error);
+      alert("Error al eliminar el archivo.");
     }
   };
+
+  function extractPublicIdFromUrl(url: string): string {
+    const parts = url.split("/");
+    const index = parts.findIndex((part) => part === "upload");
+    if (index !== -1 && index + 1 < parts.length) {
+      const publicIdWithVersionAndExtension = parts.slice(index + 2).join("/");
+      return publicIdWithVersionAndExtension;
+    }
+    return "";
+  }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Archivo PDF</CardTitle>
-        <CardDescription>
+    <Card className="w-full shadow-md dark:shadow-gray-800">
+      <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+        <CardTitle className="text-xl font-semibold text-blue-800 dark:text-blue-100">
+          Archivo PDF
+        </CardTitle>
+        <CardDescription className="text-blue-600 dark:text-blue-300">
           {!file && !fileUrl
             ? "Selecciona un archivo PDF para enviar"
-            : "Puedes abrir o eliminar el archivo cargado"}
+            : "Archivo PDF del contrato"}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          {file ? (
-            // Mostrar si hay un archivo local cargado
-            <div className="flex items-center justify-between w-full px-4">
-              <div className="flex items-center gap-2">
-                <FileIcon className="h-6 w-6 text-muted-foreground" />
-                <span className="truncate max-w-[200px]">{file.name}</span>
+      <CardContent className="p-6">
+        {fileUrl ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              <FileText className="h-6 w-6 text-blue-500 dark:text-blue-400" />
+              <span className="truncate flex-1 font-medium text-gray-700 dark:text-gray-300">
+                {fileUrl.split("/").pop()}
+              </span>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
+              >
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="w-full"
+                  aria-label="Abrir archivo PDF"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" /> Abrir PDF
+                </Button>
+              </Link>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={disabled}
+                className="flex-1"
+                aria-label="Eliminar archivo"
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={`relative flex flex-col items-center justify-center gap-4 p-8 border-2 border-dashed rounded-lg transition-colors ${
+              isDragging
+                ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/50"
+                : "border-gray-300 hover:border-blue-400 hover:bg-gray-50 dark:border-gray-600 dark:hover:border-blue-500 dark:hover:bg-gray-800/50"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            onClick={() => !disabled && fileInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              !disabled && setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              if (!disabled && e.dataTransfer.files[0]) {
+                handleFileChange({
+                  target: { files: e.dataTransfer.files },
+                } as React.ChangeEvent<HTMLInputElement>);
+              }
+            }}
+          >
+            <Upload className="h-12 w-12 text-blue-500 dark:text-blue-400" />
+            <p className="text-center text-gray-600 dark:text-gray-300">
+              Arrastra y suelta un archivo PDF o haz clic para seleccionar
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={disabled}
+              aria-label="Seleccionar archivo PDF"
+            />
+          </div>
+        )}
+
+        {file && !fileUrl && (
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              <div className="flex items-center gap-3">
+                <FileText className="h-6 w-6 text-blue-500 dark:text-blue-400" />
+                <span className="truncate max-w-[200px] font-medium text-gray-700 dark:text-gray-300">
+                  {file.name}
+                </span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="mt-2"
-                onClick={handleDelete}
+                onClick={() => setFile(null)}
                 disabled={disabled}
                 type="button"
+                aria-label="Eliminar archivo seleccionado"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
-          ) : fileUrl ? (
-            // Mostrar si hay un archivo en la base de datos (fileUrl)
-            <div className="flex flex-col items-center w-full px-4">
-              <div className="flex items-center gap-2">
-                <FileIcon className="h-6 w-6 text-muted-foreground" />
-                <span className="truncate max-w-[200px]">
-                  {fileUrl.split("/").pop()}
-                </span>
-              </div>
-              <div className="mt-2">
-                <Link href={fileUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="link" type="button">
-                    Abrir archivo PDF
-                  </Button>
-                </Link>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="mt-2"
-                onClick={handleDelete}
-                disabled={disabled}
-              >
-                <X className="h-4 w-4" /> Eliminar archivo
-              </Button>
-            </div>
-          ) : (
-            // Si no hay archivo local ni en la base de datos, permitir cargar uno nuevo
-            <div
-              className={`relative flex flex-col items-center justify-center gap-2 py-12 border-2 border-dashed rounded-lg transition-colors ${
-                isDragging ? "border-primary bg-primary/10" : "border-muted"
-              } hover:border-primary hover:bg-primary/5`}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={() => !disabled && fileInputRef.current?.click()}
-              style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+            <Button
+              variant="default"
+              onClick={handleUpload}
+              disabled={disabled}
+              type="button"
+              className="w-full"
             >
-              <CloudUploadIcon className="h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground text-center">
-                Arrastra y suelta un archivo PDF o haz clic para seleccionar
-              </p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileChange}
-                className="hidden"
-                disabled={disabled}
-              />
-            </div>
-          )}
-        </div>
+              <Upload className="h-4 w-4 mr-2" /> Guardar Archivo
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
-  );
-}
-
-function CloudUploadIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-      <path d="M12 12v9" />
-      <path d="m16 16-4-4-4 4" />
-    </svg>
-  );
-}
-
-function FileIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-    </svg>
   );
 }

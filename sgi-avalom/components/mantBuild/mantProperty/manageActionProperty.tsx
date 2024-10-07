@@ -7,20 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import PropertyManager from "./propertyManager";
 
 interface ManageActionsProps<T> {
@@ -66,18 +55,27 @@ const ManageActionsProperty = <T,>({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} className={classn} onClick={toggleOpen}>
+        <Button
+          variant={variant}
+          className={`${classn} transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary`}
+          onClick={toggleOpen}
+          aria-label={`Abrir diálogo: ${titleButton}`}
+        >
+          {icon && <span className="mr-2">{icon}</span>}
           {titleButton}
-          {icon}
         </Button>
       </DialogTrigger>
-      <DialogContent className="md:max-w-xl lg:max-w-3xl">
+      <DialogContent className="sm:max-w-[425px] md:max-w-xl lg:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogTitle className="text-2xl font-bold text-primary">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            {description}
+          </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="max-h-[400px] md:max-h-[450px] lg:max-h-[600px]rounded-md">
-          <PropertyManager propertyId={propId} />
+        <ScrollArea className="max-h-[60vh] md:max-h-[70vh] lg:max-h-[80vh] rounded-md overflow-hidden">
+            <PropertyManager propertyId={propId} />
         </ScrollArea>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import usePropertyStore from "@/lib/zustand/propertyStore";
 import { AvaAlquiler } from "@/lib/types";
@@ -9,6 +9,8 @@ import { columnsRent } from "@/components/mantBuild/mantProperty/mantRent/column
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 
 interface PropertyManagerProps {
   propertyId: number;
@@ -21,26 +23,30 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     setSelectedProperty,
     setSelectedRental,
   } = usePropertyStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleSelectRental = (rental: AvaAlquiler) => {
     setSelectedRental(rental);
   };
 
   const handleNewRental = () => {
-    setSelectedRental(null); // Ensure this sets selectedRental to null
+    setSelectedRental(null);
   };
 
   const handleSuccess = () => {
-    setSelectedRental(null); // Reset form after success
+    setSelectedRental(null);
     fetchProperty();
   };
 
   const fetchProperty = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get(`/api/property/${propertyId}`);
       setSelectedProperty(response.data);
     } catch (error) {
       console.error("Error fetching property:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,44 +54,58 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     fetchProperty();
   }, [propertyId]);
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!selectedProperty) {
-    return <div>Cargando propiedad...</div>;
+    return (
+      <div className="text-center text-muted-foreground">
+        No se pudo cargar la propiedad.
+      </div>
+    );
   }
 
   return (
-    <div>
+    <CardContent className="space-y-2">
       <PropertyForm
         property={selectedProperty}
         action="edit"
         onSuccess={() => console.log("Propiedad editada")}
       />
-      <Separator className="my-4" />
+      <Separator className="my-6" />
       <Tabs defaultValue="view" className="w-full">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="view">Ver Alquileres</TabsTrigger>
           <TabsTrigger value="create" onClick={handleNewRental}>
             Crear Alquiler
           </TabsTrigger>
-          <TabsTrigger value="edit">Ver Alquileres</TabsTrigger>
         </TabsList>
-        <TabsContent value="edit">
+        <TabsContent value="view" className="space-y-4">
           <RentalForm action="edit" onSuccess={handleSuccess} />
           <Separator className="my-4" />
-          <div className="m-2 flex flex-col md:flex-row justify-center items-center p-2">
-            <h1 className="text-lg md:text-xl font-bold">
-              Historial de alquileres
-            </h1>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Historial de alquileres</h2>
           </div>
-          <DataTable
-            columns={columnsRent}
-            data={selectedProperty.ava_alquiler}
-            onRowClick={handleSelectRental}
-          />
+          <Card>
+            <CardContent className="p-0">
+              <DataTable
+                columns={columnsRent}
+                data={selectedProperty.ava_alquiler}
+                onRowClick={handleSelectRental}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
         <TabsContent value="create">
           <RentalForm action="create" onSuccess={handleSuccess} />
         </TabsContent>
       </Tabs>
-    </div>
+    </CardContent>
   );
 };
 

@@ -18,9 +18,11 @@ const MantUser: React.FC = () => {
 
   return (
     <AuthRoute>
-      <div className="flex w-full">
+      <div className="flex min-h-screen bg-background">
         <SideNavbar />
-        <BodyMantUser />
+        <main className="flex-1 pl-14 md:pl-16">
+          <BodyMantUser />
+        </main>
       </div>
     </AuthRoute>
   );
