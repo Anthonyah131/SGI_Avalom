@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWindowWidth } from "@react-hook/window-size";
 import {
   Dialog,
@@ -76,7 +76,7 @@ const ManageActionsProperty = <T,>({
             {titleButton}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] md:max-w-xl lg:max-w-3xl">
+        <DialogContent className="sm:max-w-[425px] md:max-w-xl lg:max-w-3xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-primary">
               {title}
@@ -85,7 +85,7 @@ const ManageActionsProperty = <T,>({
               {description}
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="max-h-[60vh] md:max-h-[70vh] lg:max-h-[80vh] rounded-md overflow-hidden">
+          <ScrollArea className="h-[60vh] rounded-md">
             <PropertyManager propertyId={propId} />
           </ScrollArea>
         </DialogContent>

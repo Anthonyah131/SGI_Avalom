@@ -131,7 +131,7 @@ const BodyMantBuild: React.FC = () => {
               Información y propiedades del edificio seleccionado.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4">
             <Tabs defaultValue="info" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="info">Información</TabsTrigger>
