@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 export default function SideNavbar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const { user, logout } = useUser();
   const router = useRouter();
@@ -31,6 +32,15 @@ export default function SideNavbar() {
 
   useEffect(() => {
     setMounted(true);
+
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleLogout = () => {
@@ -76,8 +86,8 @@ export default function SideNavbar() {
         "fixed inset-y-0 left-0 z-10 flex flex-col border-r bg-background transition-all duration-300",
         isCollapsed ? "w-14" : "w-20"
       )}
-      onMouseEnter={() => setIsCollapsed(false)}
-      onMouseLeave={() => setIsCollapsed(true)}
+      onMouseEnter={() => isDesktop && setIsCollapsed(false)}
+      onMouseLeave={() => isDesktop && setIsCollapsed(true)}
     >
       <nav className="flex flex-col items-center gap-4 p-4">
         <NavItem href="/homePage" icon={LayoutDashboard} title="Inicio" />

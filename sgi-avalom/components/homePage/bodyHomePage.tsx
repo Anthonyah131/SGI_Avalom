@@ -154,7 +154,7 @@ const BodyHomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-5 w-full m-5">
+    <div className="mx-auto p-4 space-y-8">
       <h1 className="md:text-5xl text-3xl font-bold title-font mb-2">
         Dashboard
       </h1>

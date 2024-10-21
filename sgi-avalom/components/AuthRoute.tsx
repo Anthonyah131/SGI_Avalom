@@ -9,10 +9,10 @@ const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const token = cookie.get("token");
     if (!token) {
-      router.push("/"); // Redirige al login si no hay token
+      router.push("/");
       return;
     }
-  }, []); // Debes pasar un arreglo vacío para ejecutar el efecto solo una vez al montar
+  }, []);
 
   return <>{children}</>;
 };
