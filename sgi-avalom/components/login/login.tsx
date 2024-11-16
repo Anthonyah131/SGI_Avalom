@@ -8,9 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { ModeToggle } from "@/components/modeToggle";
-import { LogInIcon } from "lucide-react";
-import Image from 'next/image';
+import { Loader2Icon, LogInIcon } from "lucide-react";
+import Image from "next/image";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -18,9 +17,12 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/login", {
@@ -37,13 +39,14 @@ const Login: React.FC = () => {
 
         cookie.set("token", token, { expires: 1 });
         setUser(user);
-
         router.push("/homePage");
       } else {
-        setError("Login failed");
+        setError("Revisa el correo y la contraseña ingresados");
       }
     } catch (error) {
-      setError("Error during login: " + error);
+      setError("Hubo un error al intentar iniciar sesión. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,36 +59,39 @@ const Login: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <div className="flex justify-center">
-        <Image src="/sgi-avalom-logo-transparent.svg" alt="Login" width={150} height={150} />
-
+          <Image
+            src="/sgi-avalom-logo-transparent.svg"
+            alt="Login"
+            width={150}
+            height={150}
+          />
         </div>
         <CardContent>
           {error && <Alert variant="destructive">{error}</Alert>}
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <input type="hidden" name="remember" value="true" />
-            <div className="rounded-md shadow-sm space-y-5">
+            <div className="space-y-5">
               <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  placeholder="Email address"
+                  placeholder="Ingresa tu correo"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  placeholder="Password"
+                  placeholder="Ingresa tu contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -93,11 +99,14 @@ const Login: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Button type="submit" className="w-full">
-                <LogInIcon className="mr-2 h-4 w-4" />
-                Sign in
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <LogInIcon className="mr-2 h-4 w-4" />
+                )}
+                {isLoading ? "Cargando..." : "Iniciar sesión"}
               </Button>
-              <ModeToggle />
             </div>
           </form>
         </CardContent>

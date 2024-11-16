@@ -12,6 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useClientForm } from "@/hooks/mantClient/useClientForm";
 import { ClienteFormProps } from "@/lib/typesForm";
+import { Alert } from "@/components/ui/alert";
+import { Loader2Icon } from "lucide-react";
+import { useState } from "react";
 
 const ClienteForm: React.FC<ClienteFormProps> = ({
   action,
@@ -24,12 +27,45 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     onSuccess,
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  const handleFormSubmit = async (data: any) => {
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      await onSubmit(data);
+      setMessage({ type: "success", text: "¡Cliente guardado exitosamente!" });
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: "Hubo un error al guardar el cliente. Inténtalo de nuevo.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(handleFormSubmit)}
         className="grid grid-cols-2 gap-4"
       >
+        {message && (
+          <div className="col-span-2">
+            <Alert
+              variant={message.type === "success" ? "default" : "destructive"}
+            >
+              {message.text}
+            </Alert>
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="cli_nombre"
@@ -37,7 +73,11 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Nombre</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={30} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={30}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -50,7 +90,11 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Primer Apellido</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={30} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={30}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -63,7 +107,11 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Segundo Apellido</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={30} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={30}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,7 +124,11 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Cédula</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={15} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={15}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,7 +141,11 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Teléfono</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={15} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={15}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -102,22 +158,35 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             <FormItem>
               <FormLabel>Correo</FormLabel>
               <FormControl>
-                <Input {...field} disabled={action === "view"} maxLength={50} />
+                <Input
+                  {...field}
+                  disabled={isLoading || action === "view"}
+                  maxLength={50}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         {action !== "view" && (
-          <div className="pt-4">
-            <Button type="submit">
+          <div className="col-span-2 flex gap-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
               {action === "create" ? "Crear Cliente" : "Guardar Cambios"}
             </Button>
-            {action !== "edit" && (
-              <Button type="button" onClick={handleClear} className="ml-4">
-                Limpiar
-              </Button>
-            )}
+            <Button
+              type="button"
+              onClick={handleClear}
+              disabled={isLoading}
+              variant="outline"
+            >
+              Limpiar
+            </Button>
           </div>
         )}
       </form>
