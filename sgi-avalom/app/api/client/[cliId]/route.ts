@@ -6,10 +6,12 @@ import { stringifyWithBigInt } from "@/utils/converters";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { cliId: string } }
+  context: { params: Promise<{ cliId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
+      const params = await context.params;
+
       const client = await prisma.ava_cliente.findUnique({
         where: { cli_id: BigInt(params.cliId) },
       });
@@ -38,10 +40,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { cliId: string } }
+  context: { params: Promise<{ cliId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
+      const params = await context.params;
       const body = await request.json();
 
       let cliId: bigint;
@@ -96,10 +99,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { cliId: string } }
+  context: { params: Promise<{ cliId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
+      const params = await context.params;
+
       await prisma.ava_cliente.delete({
         where: { cli_id: BigInt(params.cliId) },
       });
