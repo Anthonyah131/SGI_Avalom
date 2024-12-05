@@ -36,13 +36,16 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
 import FileUploader from "@/components/ui/fileUploader";
-import { RentalFormInputs } from "@/hooks/mantBuild/useRentalForm";
 import React from "react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2Icon } from "lucide-react";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
     form,
     onSubmit,
+    handleSubmit,
     handleClear,
     handleClientSelect,
     handleClientRemove,
@@ -52,13 +55,42 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     selectedRental,
   } = useRentalForm({ action, onSuccess });
 
-  const handleFormSubmit = form.handleSubmit(async (data: RentalFormInputs) => {
-    await onSubmit(data);
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFormSubmit = async (data: any) => {
+    setIsLoading(true);
+
+    try {
+      await onSubmit(data);
+      toast({
+        title: "Éxito",
+        description:
+          action === "create"
+            ? "Alquiler creado exitosamente."
+            : "Alquiler actualizado exitosamente.",
+        typet: "success",
+      });
+
+      onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Ocurrió un error al guardar el Alquiler.",
+        typet: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleFormSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit(handleFormSubmit)}
+        className="space-y-6"
+      >
         <Card className="bg-background">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">
@@ -220,19 +252,28 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
             </CardContent>
           </Card>
         )}
-        <div className="flex gap-4">
-          <Button type="submit" disabled={isFormDisabled}>
-            {action === "create" ? "Crear Alquiler" : "Guardar Cambios"}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleClear}
-            disabled={isFormDisabled}
-            variant="outline"
-          >
-            Limpiar
-          </Button>
-        </div>
+        {action !== "view" && (
+          <div className="col-span-2 flex gap-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
+              {action === "create" ? "Crear Alquiler" : "Guardar Cambios"}
+            </Button>
+            {action !== "edit" && (
+              <Button
+                type="button"
+                onClick={handleClear}
+                disabled={isLoading}
+                variant="outline"
+              >
+                Limpiar
+              </Button>
+            )}
+          </div>
+        )}
       </form>
     </Form>
   );

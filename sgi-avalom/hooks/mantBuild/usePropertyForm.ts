@@ -1,8 +1,6 @@
-// hooks/usePropertyForm.ts
-
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,11 +24,15 @@ const propertyFormSchema = z.object({
 
 type PropertyFormInputs = z.infer<typeof propertyFormSchema>;
 
-export const usePropertyForm = ({ action, property, entity, onSuccess }: PropertyFormProps) => {
+export const usePropertyForm = ({
+  action,
+  property,
+  entity,
+  onSuccess,
+}: PropertyFormProps) => {
   const { setSelectedProperty, updateSelectedProperty } = usePropertyStore();
   const { updateProperty, addProperty } = useBuildingStore();
   const { types, fetchTypes } = useTypeStore();
-  const [error, setError] = useState<string | null>(null);
 
   const defaultValues = useMemo(() => {
     return action === "create"
@@ -54,7 +56,8 @@ export const usePropertyForm = ({ action, property, entity, onSuccess }: Propert
   const { handleSubmit, reset } = form;
 
   useEffect(() => {
-    if (action === "edit") {
+    if (action === "edit" && property) {
+      console.log("Reset con valores actualizados:", defaultValues);
       reset(defaultValues);
     }
   }, [property, action, reset, defaultValues]);
@@ -83,33 +86,40 @@ export const usePropertyForm = ({ action, property, entity, onSuccess }: Propert
         edi_id: entity,
       };
 
+      let response;
+
       if (action === "create") {
-        const response = await axios.post(`/api/property`, propertyData, {
+        response = await axios.post(`/api/property`, propertyData, {
           headers,
         });
         if (response.data.data) {
-          setSelectedProperty(response.data.data);
-          addProperty(entity?.toString() || "0", response.data.data);
-          onSuccess();
-          reset(defaultValues);
         }
       } else if (action === "edit" && property?.prop_id) {
-        const response = await axios.put(
+        response = await axios.put(
           `/api/property/${property.prop_id}`,
           propertyData,
           { headers }
         );
         if (response.data.data) {
-          updateSelectedProperty(response.data.data);
-          updateProperty(property?.edi_id || "0", response.data.data);
-          onSuccess();
-          reset(defaultValues);
-          setSelectedProperty(null);
         }
       }
+      if (response?.data?.success) {
+        if (action === "create") {
+          setSelectedProperty(response.data.data);
+          addProperty(entity?.toString() || "0", response.data.data);
+        } else {
+          updateSelectedProperty(response.data.data);
+          updateProperty(property?.edi_id || "0", response.data.data);
+        }
+        onSuccess();
+        reset(defaultValues);
+      } else {
+        throw new Error(response?.data?.error || "Error desconocido");
+      }
     } catch (error: any) {
-      console.error("Error al guardar propiedad:", error);
-      setError("Hubo un error al guardar la propiedad.");
+      const message =
+        error.response?.data?.error || error.message || "Error desconocido";
+      throw new Error(message);
     }
   };
 
@@ -123,7 +133,6 @@ export const usePropertyForm = ({ action, property, entity, onSuccess }: Propert
     handleSubmit,
     onSubmit,
     handleClear,
-    error,
     types,
   };
 };

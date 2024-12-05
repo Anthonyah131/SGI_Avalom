@@ -19,9 +19,10 @@ import {
 } from "@/components/ui/select";
 import { PropertyFormProps } from "@/lib/typesForm";
 import { usePropertyForm } from "@/hooks/mantBuild/usePropertyForm";
-import {
-  CardFooter,
-} from "@/components/ui/card";
+import { CardFooter } from "@/components/ui/card";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2Icon } from "lucide-react";
 
 const PropertyForm: React.FC<PropertyFormProps> = ({
   action,
@@ -29,12 +30,46 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
   entity,
   onSuccess,
 }) => {
-  const { form, handleSubmit, onSubmit, handleClear, error, types } =
-    usePropertyForm({ action, property, entity, onSuccess });
+  const { form, handleSubmit, onSubmit, handleClear, types } = usePropertyForm({
+    action,
+    property,
+    entity,
+    onSuccess,
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFormSubmit = async (data: any) => {
+    setIsLoading(true);
+
+    try {
+      await onSubmit(data);
+      toast({
+        title: "Éxito",
+        description:
+          action === "create"
+            ? "Propiedad creada exitosamente."
+            : "Propiedad actualizada exitosamente.",
+        typet: "success",
+      });
+
+      onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Ocurrió un error al guardar la Propiedad.",
+        typet: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -79,9 +114,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
                 <FormControl>
                   <Select
                     value={field.value?.toString() || ""}
-                    onValueChange={(value) =>
-                      field.onChange(value)
-                    }
+                    onValueChange={(value) => field.onChange(value)}
                     disabled={action === "view"}
                   >
                     <SelectTrigger className="w-full bg-background">
@@ -89,10 +122,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
                     </SelectTrigger>
                     <SelectContent>
                       {types.map((type) => (
-                        <SelectItem
-                          key={type.tipp_id}
-                          value={type.tipp_id}
-                        >
+                        <SelectItem key={type.tipp_id} value={type.tipp_id}>
                           {type.tipp_nombre}
                         </SelectItem>
                       ))}
@@ -105,16 +135,26 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
           />
         </div>
         {action !== "view" && (
-          <CardFooter className="flex justify-between">
-            <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+          <div className="col-span-2 flex gap-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
               {action === "create" ? "Crear Propiedad" : "Guardar Cambios"}
             </Button>
             {action !== "edit" && (
-              <Button type="button" onClick={handleClear} variant="outline">
+              <Button
+                type="button"
+                onClick={handleClear}
+                disabled={isLoading}
+                variant="outline"
+              >
                 Limpiar
               </Button>
             )}
-          </CardFooter>
+          </div>
         )}
       </form>
     </Form>

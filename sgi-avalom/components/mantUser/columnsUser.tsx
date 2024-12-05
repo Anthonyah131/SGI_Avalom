@@ -78,15 +78,14 @@ export const columns: ColumnDef<User>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const user = row.original; // User from the row
+      const user = row.original;
       const { toast } = useToast();
       const { removeUser } = useUserStore((state) => ({
         removeUser: state.removeUser,
       }));
 
-      const { user: currentUser } = useUser(); // Current logged-in user
+      const { user: currentUser } = useUser();
 
-      // Determine if the current user can edit/delete/view this user based on their role
       const canEdit =
         (currentUser?.usu_rol === "A" &&
           ["A", "E", "R"].includes(user.usu_rol)) ||
@@ -110,7 +109,7 @@ export const columns: ColumnDef<User>[] = [
           const response = await axios.delete(`/api/users/${user.usu_id}`, {
             headers,
           });
-          if (response.data) {
+          if (response?.data?.success) {
             removeUser(user.usu_id);
             toast({
               title: "Usuario eliminado",

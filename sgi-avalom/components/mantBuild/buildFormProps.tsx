@@ -12,6 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { BuildFormProps } from "@/lib/typesForm";
 import { useBuildForm } from "@/hooks/mantBuild/useBuildForm";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2Icon } from "lucide-react";
 
 const BuildForm: React.FC<BuildFormProps> = ({
   action,
@@ -24,10 +27,40 @@ const BuildForm: React.FC<BuildFormProps> = ({
     onSuccess,
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleFormSubmit = async (data: any) => {
+    setIsLoading(true);
+
+    try {
+      await onSubmit(data);
+      toast({
+        title: "Éxito",
+        description:
+          action === "create"
+            ? "Edificio creado exitosamente."
+            : "Edificio actualizado exitosamente.",
+        typet: "success",
+      });
+
+      onSuccess();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Ocurrió un error al guardar el Edificio.",
+        typet: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(handleFormSubmit)}
         className="grid grid-cols-2 gap-4 m-3"
       >
         <FormField
@@ -57,12 +90,22 @@ const BuildForm: React.FC<BuildFormProps> = ({
           )}
         />
         {action !== "view" && (
-          <div className="pt-4 m-3 flex flex-row">
-            <Button type="submit">
+          <div className="col-span-2 flex gap-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
               {action === "create" ? "Crear Edificio" : "Guardar Cambios"}
             </Button>
             {action !== "edit" && (
-              <Button type="button" onClick={handleClear} className="ml-4">
+              <Button
+                type="button"
+                onClick={handleClear}
+                disabled={isLoading}
+                variant="outline"
+              >
                 Limpiar
               </Button>
             )}

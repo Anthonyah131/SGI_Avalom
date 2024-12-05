@@ -57,8 +57,7 @@ export const useBuildForm = ({
     try {
       const token = cookie.get("token");
       if (!token) {
-        console.error("No hay token disponible");
-        return;
+        throw new Error("Token no disponible");
       }
 
       const headers = {
@@ -66,27 +65,29 @@ export const useBuildForm = ({
         "Content-Type": "application/json",
       };
 
+      let response;
+
       if (action === "create") {
-        const response = await axios.post("/api/building", data, { headers });
-        if (response.data.data) {
-          addBuilding(response.data.data);
-          onSuccess();
-          reset(defaultValues);
-        }
+        response = await axios.post("/api/building", data, { headers });
       } else if (action === "edit" && building?.edi_id) {
-        const response = await axios.put(
-          `/api/building/${building.edi_id}`,
-          data,
-          { headers }
-        );
-        if (response.data.data) {
-          updateBuilding(response.data.data);
-          onSuccess();
-          reset(defaultValues);
-        }
+        response = await axios.put(`/api/building/${building.edi_id}`, data, {
+          headers,
+        });
+      }
+
+      if (response?.data?.success) {
+        action === "create"
+          ? addBuilding(response.data.data)
+          : updateBuilding(response.data.data);
+        onSuccess();
+        reset(defaultValues);
+      } else {
+        throw new Error(response?.data?.error || "Error desconocido");
       }
     } catch (error: any) {
-      console.error("Error al guardar el Edificio:", error);
+      const message =
+        error.response?.data?.error || error.message || "Error desconocido";
+      throw new Error(message);
     }
   };
 

@@ -109,7 +109,7 @@ export async function DELETE(
         where: { cli_id: BigInt(params.cliId) },
       });
       return NextResponse.json(
-        { status: 204, message: "Cliente eliminado" },
+        { success: true, message: "Cliente eliminado" },
         { status: 200 }
       );
     } catch (error: any) {

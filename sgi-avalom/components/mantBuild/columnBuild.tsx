@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const columns: ColumnDef<AvaEdificio>[] = [
   {
@@ -39,6 +40,7 @@ export const columns: ColumnDef<AvaEdificio>[] = [
     id: "actions",
     cell: ({ row }) => {
       const building = row.original;
+      const { toast } = useToast();
       const { removeBuilding } = useBuildingStore();
 
       const handleAction = async () => {
@@ -56,14 +58,22 @@ export const columns: ColumnDef<AvaEdificio>[] = [
 
           const response = await axios.delete(
             `/api/building/${building.edi_id}`,
-            {
-              headers,
-            }
+            { headers }
           );
-          if (response.data) {
+          if (response?.data?.success) {
             removeBuilding(building.edi_id);
+            toast({
+              title: "Edificio Borrado",
+              description: `El Edificio ${building.edi_identificador} ha sido borrado.`,
+              typet: "success",
+            });
           }
         } catch (error) {
+          toast({
+            title: "Error",
+            description: "Error al borrar Edificio",
+            typet: "error",
+          });
           console.error("Error al borrar Edificio:", error);
         }
       };

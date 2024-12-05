@@ -76,9 +76,8 @@ export default function FileUploader({
       );
       const { url } = response.data;
 
-      const updatedRentalData = {
-        alq_contrato: url,
-      };
+      const { alq_id, ...rentalDataWithoutId } = selectedRental;
+      const updatedRentalData = { ...rentalDataWithoutId, alq_contrato: url };
 
       const rentalResponse = await axios.put(
         `/api/rent/${selectedRental.alq_id}`,
@@ -92,8 +91,8 @@ export default function FileUploader({
       );
 
       if (rentalResponse.data) {
-        updateRental(selectedRental.alq_id, rentalResponse.data);
-        setSelectedRental(rentalResponse.data);
+        updateRental(selectedRental.alq_id, rentalResponse.data.data);
+        setSelectedRental(rentalResponse.data.data);
         setFileUrl(url);
         setFile(null);
         alert("Archivo subido y alquiler actualizado correctamente.");
@@ -127,9 +126,8 @@ export default function FileUploader({
         }
       );
 
-      const updatedRentalData = {
-        alq_contrato: "",
-      };
+      const { alq_id, ...rentalDataWithoutId } = selectedRental;
+      const updatedRentalData = { ...rentalDataWithoutId, alq_contrato: "" };
 
       const rentalResponse = await axios.put(
         `/api/rent/${selectedRental.alq_id}`,
@@ -143,8 +141,8 @@ export default function FileUploader({
       );
 
       if (rentalResponse.data) {
-        updateRental(selectedRental.alq_id, rentalResponse.data);
-        setSelectedRental(rentalResponse.data);
+        updateRental(selectedRental.alq_id, rentalResponse.data.data);
+        setSelectedRental(rentalResponse.data.data);
         setFileUrl(null);
         alert("Archivo eliminado y alquiler actualizado correctamente.");
       }

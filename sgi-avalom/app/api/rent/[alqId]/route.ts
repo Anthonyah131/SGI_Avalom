@@ -86,8 +86,8 @@ export async function PUT(
         { success: true, data: stringifyWithBigInt(updatedRental) },
         { status: 200 }
       );
-    } catch (error) {
-      console.error("Error actualizando el alquiler:", error);
+    } catch (error: any) {
+      console.error("Error actualizando el alquiler:", error.message);
       return NextResponse.json(
         { success: false, error: "Error interno del servidor." },
         { status: 500 }

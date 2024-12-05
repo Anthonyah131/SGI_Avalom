@@ -12,7 +12,7 @@ import { useUser } from "@/lib/UserContext";
 
 const userFormSchema = z
   .object({
-    action: z.enum(["create", "edit"]), // Define la acción como parte del esquema
+    action: z.enum(["create", "edit"]),
     usu_nombre: z
       .string()
       .min(1, "Nombre es requerido")
@@ -39,7 +39,7 @@ const userFormSchema = z
     usu_contrasena: z
       .string()
       .max(50, "La contraseña no puede tener más de 30 caracteres")
-      .optional(), // Opcional por defecto
+      .optional(),
     usu_estado: z.enum(["A", "I"]),
     usu_rol: z.enum(["A", "J", "E", "R"]),
   })
@@ -52,7 +52,7 @@ const userFormSchema = z
     },
     {
       message: "Contraseña es requerida al crear un usuario",
-      path: ["usu_contrasena"], // Apunta al campo específico
+      path: ["usu_contrasena"],
     }
   );
 
@@ -68,26 +68,26 @@ export const useUserForm = ({ action, entity, onSuccess }: UserFormProps) => {
   const defaultValues = useMemo(() => {
     return entity
       ? {
-          action: "edit" as const, // Usa "as const" para forzar el tipo literal
+          action: "edit" as const,
           usu_nombre: entity.usu_nombre || "",
           usu_papellido: entity.usu_papellido || "",
           usu_sapellido: entity.usu_sapellido || "",
           usu_cedula: entity.usu_cedula || "",
           usu_telefono: entity.usu_telefono || "",
           usu_correo: entity.usu_correo || "",
-          usu_contrasena: "", // Contraseña vacía para edición
+          usu_contrasena: "",
           usu_estado: entity.usu_estado as "A" | "I",
           usu_rol: entity.usu_rol as "A" | "J" | "E" | "R",
         }
       : {
-          action: "create" as const, // Usa "as const" para forzar el tipo literal
+          action: "create" as const,
           usu_nombre: "",
           usu_papellido: "",
           usu_sapellido: "",
           usu_cedula: "",
           usu_telefono: "",
           usu_correo: "",
-          usu_contrasena: "", // Contraseña requerida al crear
+          usu_contrasena: "",
           usu_estado: "A" as const,
           usu_rol: "R" as const,
         };

@@ -75,7 +75,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
       <PropertyForm
         property={selectedProperty}
         action="edit"
-        onSuccess={() => console.log("Propiedad editada")}
+        onSuccess={() => {}}
       />
       <Separator className="my-6" />
       <Tabs defaultValue="view" className="w-full">

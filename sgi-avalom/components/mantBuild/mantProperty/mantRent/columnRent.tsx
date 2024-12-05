@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
 
 export const columnsRent: ColumnDef<AvaAlquiler>[] = [
   {
@@ -57,9 +58,8 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
       if (!value) return "Sin fecha";
 
       try {
-        // Ajusta a la zona horaria local
         const zonedDate = toZonedTime(parseISO(value), "America/Costa_Rica");
-        return format(zonedDate, "PPP", { locale: es }); // Formatea la fecha
+        return format(zonedDate, "PPP", { locale: es });
       } catch {
         return "Formato inválido";
       }
@@ -73,6 +73,7 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
     id: "actions",
     cell: ({ row }) => {
       const rent = row.original;
+      const { toast } = useToast();
       const { removeRental } = usePropertyStore();
 
       const handleAction = async () => {
@@ -91,10 +92,20 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
           const response = await axios.delete(`/api/rent/${rent.alq_id}`, {
             headers,
           });
-          if (response.data) {
+          if (response?.data?.success) {
             removeRental(rent.alq_id);
+            toast({
+              title: "Alquiler Borrado",
+              description: `El Alquiler ${rent.alq_id} ha sido borrado.`,
+              typet: "success",
+            });
           }
         } catch (error) {
+          toast({
+            title: "Error",
+            description: "Error al borrar Alquiler",
+            typet: "error",
+          });
           console.error("Error al borrar el alquiler:", error);
         }
       };

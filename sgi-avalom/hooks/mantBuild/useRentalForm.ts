@@ -45,10 +45,8 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     setClients: state.setClients,
   }));
 
-  // Estado local para los clientes en el alquiler
   const [clientsInRental, setClientsInRental] = useState<Cliente[]>([]);
 
-  // Inicializar clientsInRental cuando selectedRental cambie
   useEffect(() => {
     if (action === "edit" && selectedRental) {
       setClientsInRental(
@@ -61,7 +59,6 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     }
   }, [action, selectedRental]);
 
-  // Función auxiliar para obtener el valor de alq_estado
   const getAlqEstado = (value: string | undefined): "A" | "F" | "C" => {
     if (value === "A" || value === "F" || value === "C") {
       return value;
@@ -120,14 +117,15 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     try {
       const token = cookie.get("token");
       if (!token) {
-        console.error("No hay token disponible");
-        return;
+        throw new Error("Token no disponible");
       }
 
       const headers = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
+
+      let response;
 
       if (action === "create") {
         const newRental = {
@@ -138,12 +136,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
           alq_monto: Number(formData.alq_monto) || 0,
           prop_id: selectedProperty?.prop_id,
         };
-        const response = await axios.post("/api/rent", newRental, { headers });
-        if (response.data.data) {
-          addRental(response.data.data);
-          onSuccess();
-          clearForm();
-        }
+        response = await axios.post("/api/rent", newRental, { headers });
       } else if (action === "edit" && selectedRental?.alq_id) {
         const updatedRentalData = {
           ...formData,
@@ -155,22 +148,28 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
           })),
         };
 
-        const response = await axios.put(
+        response = await axios.put(
           `/api/rent/${selectedRental.alq_id}`,
           updatedRentalData,
           { headers }
         );
-        if (response.data.data) {
-          updateRental(selectedRental.alq_id, response.data.data);
+      }
+      if (response?.data?.success) {
+        if (action === "create") {
+          addRental(response.data.data);
+        } else if (action === "edit" && selectedRental?.alq_id) {
+          updateRental(selectedRental?.alq_id, response.data.data);
           setSelectedRental(response.data.data);
-          onSuccess();
-          clearForm();
+        } else {
+          throw new Error(response?.data?.error || "Error desconocido");
         }
+        onSuccess();
+        clearForm();
       }
     } catch (error: any) {
-      console.error("Error al guardar el alquiler:", error);
-      const errorMessage = error.response?.data?.error || "Error desconocido";
-      console.error("Error al guardar el alquiler: " + errorMessage);
+      const message =
+        error.response?.data?.error || error.message || "Error desconocido";
+      throw new Error(message);
     }
   };
 

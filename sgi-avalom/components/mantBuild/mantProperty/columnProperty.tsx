@@ -5,10 +5,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import useBuildingStore from "@/lib/zustand/buildStore";
 import useTypeStore from "@/lib/zustand/typeStore";
-import { AvaPropiedad } from "@/lib/types"; // Importa AvaProperty si lo defines
+import { AvaPropiedad } from "@/lib/types";
 import AlertDialog from "@/components/alertDialog";
-// import BuildForm from "./buildFormProps";
-import ManageActions from "@/components/dataTable/manageActions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import ManageActionsProperty from "./manageActionProperty";
+import { useToast } from "@/hooks/use-toast";
 
 export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
   {
@@ -51,7 +50,7 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
       </Button>
     ),
     cell: ({ row }) => {
-      const { types } = useTypeStore(); // Obtén los tipos de propiedad desde Zustand
+      const { types } = useTypeStore();
       const type = types.find((type) => type.tipp_id === row.original.tipp_id);
       return <span>{type ? type.tipp_nombre : "Desconocido"}</span>;
     },
@@ -60,6 +59,7 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
     id: "actions",
     cell: ({ row }) => {
       const property = row.original;
+      const { toast } = useToast();
       const { removeProperty } = useBuildingStore();
 
       const handleAction = async () => {
@@ -79,10 +79,20 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
             `/api/property/${property.prop_id}`,
             { headers }
           );
-          if (response.data) {
+          if (response?.data?.success) {
             removeProperty(property.edi_id || "0", property.prop_id);
+            toast({
+              title: "Edificio Borrado",
+              description: `La propiedad ${property.prop_identificador} ha sido borrado.`,
+              typet: "success",
+            });
           }
         } catch (error: any) {
+          toast({
+            title: "Error",
+            description: "Error al borrar la propiedad",
+            typet: "error",
+          });
           console.error("Error al borrar la propiedad:", error);
         }
       };
