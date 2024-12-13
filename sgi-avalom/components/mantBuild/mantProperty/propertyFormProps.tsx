@@ -21,7 +21,7 @@ import { PropertyFormProps } from "@/lib/typesForm";
 import { usePropertyForm } from "@/hooks/mantBuild/usePropertyForm";
 import { CardFooter } from "@/components/ui/card";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 
 const PropertyForm: React.FC<PropertyFormProps> = ({
@@ -38,29 +38,24 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
 
     try {
       await onSubmit(data);
-      toast({
-        title: "Éxito",
+      toast.success("Exito", {
         description:
           action === "create"
             ? "Propiedad creada exitosamente."
             : "Propiedad actualizada exitosamente.",
-        typet: "success",
       });
 
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description:
           error.message || "Ocurrió un error al guardar la Propiedad.",
-        typet: "error",
       });
     } finally {
       setIsLoading(false);

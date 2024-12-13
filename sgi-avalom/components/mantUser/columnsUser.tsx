@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/UserContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -79,7 +79,6 @@ export const columns: ColumnDef<User>[] = [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
-      const { toast } = useToast();
       const { removeUser } = useUserStore((state) => ({
         removeUser: state.removeUser,
       }));
@@ -111,17 +110,13 @@ export const columns: ColumnDef<User>[] = [
           });
           if (response?.data?.success) {
             removeUser(user.usu_id);
-            toast({
-              title: "Usuario eliminado",
+            toast.success("Usuario eliminado", {
               description: `El usuario ${user.usu_nombre} fue eliminado correctamente.`,
-              typet: "success",
             });
           }
         } catch (error) {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: "No se pudo eliminar el usuario.",
-            typet: "error",
           });
           console.error("Error al borrar usuario:", error);
         }

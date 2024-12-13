@@ -38,7 +38,7 @@ import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
 import FileUploader from "@/components/ui/fileUploader";
 import React from "react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
@@ -56,29 +56,24 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   } = useRentalForm({ action, onSuccess });
 
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
 
     try {
       await onSubmit(data);
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description:
           action === "create"
             ? "Alquiler creado exitosamente."
             : "Alquiler actualizado exitosamente.",
-        typet: "success",
       });
 
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description:
           error.message || "Ocurrió un error al guardar el Alquiler.",
-        typet: "error",
       });
     } finally {
       setIsLoading(false);
@@ -87,10 +82,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={handleSubmit(handleFormSubmit)}
-        className="space-y-6"
-      >
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <Card className="bg-background">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">

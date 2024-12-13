@@ -17,7 +17,7 @@ const rentalFormSchema = z.object({
   alq_monto: z.string().refine((value) => !isNaN(Number(value)), {
     message: "El monto debe ser un número",
   }),
-  alq_fechapago: z.string().optional(),
+  alq_fechapago: z.string(),
   alq_estado: z.enum(["A", "F", "C"]),
 });
 

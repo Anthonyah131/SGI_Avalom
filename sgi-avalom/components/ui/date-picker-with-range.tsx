@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "./scroll-area";
 
 const COSTA_RICA_TZ = "America/Costa_Rica";
 
@@ -93,67 +94,71 @@ export function DatePickerWithRange({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 p-3">
-            <div className="w-full sm:w-1/2">
-              <label
-                htmlFor="start-date"
-                className="text-sm font-medium block mb-1"
-              >
-                Fecha inicial:
-              </label>
-              <Input
-                id="start-date"
-                type="date"
-                value={adjustToTimeZone(date?.from)}
-                onChange={(e) => handleManualDateChange(e, true)}
-                className="w-full"
-              />
-            </div>
-            <div className="w-full sm:w-1/2">
-              <label
-                htmlFor="end-date"
-                className="text-sm font-medium block mb-1"
-              >
-                Fecha final:
-              </label>
-              <Input
-                id="end-date"
-                type="date"
-                value={adjustToTimeZone(date?.to)}
-                onChange={(e) => handleManualDateChange(e, false)}
-                className="w-full"
-              />
-            </div>
-          </div>
-          <div className="p-3">
-            <Calendar
-              initialFocus
-              mode="range"
-              defaultMonth={date?.from}
-              selected={{
-                from: date?.from
-                  ? toDate(toZonedTime(date.from, COSTA_RICA_TZ))
-                  : undefined,
-                to: date?.to
-                  ? toDate(toZonedTime(date.to, COSTA_RICA_TZ))
-                  : undefined,
-              }}
-              onSelect={(selectedDate) =>
-                onDateChange({
-                  from: selectedDate?.from
-                    ? toDate(toZonedTime(selectedDate.from, COSTA_RICA_TZ))
-                    : undefined,
-                  to: selectedDate?.to
-                    ? toDate(toZonedTime(selectedDate.to, COSTA_RICA_TZ))
-                    : undefined,
-                })
-              }
-              numberOfMonths={2}
-              fromYear={2000}
-              toYear={2050}
-            />
-          </div>
+        <PopoverContent className="w-auto p-0 scroll-mx-10" align="start">
+          <ScrollArea className="h-[50vh] sm:h-auto rounded-md">
+            <>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 p-2">
+                <div className="w-full sm:w-1/2">
+                  <label
+                    htmlFor="start-date"
+                    className="text-sm font-medium block mb-1"
+                  >
+                    Fecha inicial:
+                  </label>
+                  <Input
+                    id="start-date"
+                    type="date"
+                    value={adjustToTimeZone(date?.from)}
+                    onChange={(e) => handleManualDateChange(e, true)}
+                    className="w-auto"
+                  />
+                </div>
+                <div className="w-full sm:w-1/2">
+                  <label
+                    htmlFor="end-date"
+                    className="text-sm font-medium block mb-1"
+                  >
+                    Fecha final:
+                  </label>
+                  <Input
+                    id="end-date"
+                    type="date"
+                    value={adjustToTimeZone(date?.to)}
+                    onChange={(e) => handleManualDateChange(e, false)}
+                    className="w-auto"
+                  />
+                </div>
+              </div>
+              <div className="p-2">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={{
+                    from: date?.from
+                      ? toDate(toZonedTime(date.from, COSTA_RICA_TZ))
+                      : undefined,
+                    to: date?.to
+                      ? toDate(toZonedTime(date.to, COSTA_RICA_TZ))
+                      : undefined,
+                  }}
+                  onSelect={(selectedDate) =>
+                    onDateChange({
+                      from: selectedDate?.from
+                        ? toDate(toZonedTime(selectedDate.from, COSTA_RICA_TZ))
+                        : undefined,
+                      to: selectedDate?.to
+                        ? toDate(toZonedTime(selectedDate.to, COSTA_RICA_TZ))
+                        : undefined,
+                    })
+                  }
+                  numberOfMonths={2}
+                  fromYear={2000}
+                  toYear={2050}
+                />
+              </div>
+            </>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     </div>

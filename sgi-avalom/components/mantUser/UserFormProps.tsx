@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { useUserForm } from "@/hooks/mantUser/useUserForm";
 import { UserFormProps } from "@/lib/typesForm";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useState } from "react";
 import { Loader2Icon } from "lucide-react";
 
@@ -26,7 +26,6 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     useUserForm({ action, entity, onSuccess });
 
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
@@ -34,21 +33,17 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
     try {
       await onSubmit(data);
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description:
           action === "create"
             ? "Usuario creado exitosamente."
             : "Usuario actualizado exitosamente.",
-        typet: "success",
       });
 
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: error.message || "Ocurrió un error al guardar el usuario.",
-        typet: "error",
       });
     } finally {
       setIsLoading(false);

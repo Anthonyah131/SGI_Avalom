@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { BuildFormProps } from "@/lib/typesForm";
 import { useBuildForm } from "@/hooks/mantBuild/useBuildForm";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 
 const BuildForm: React.FC<BuildFormProps> = ({
@@ -28,29 +28,24 @@ const BuildForm: React.FC<BuildFormProps> = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
 
     try {
       await onSubmit(data);
-      toast({
-        title: "Éxito",
+      toast.success("Exito", {
         description:
           action === "create"
             ? "Edificio creado exitosamente."
             : "Edificio actualizado exitosamente.",
-        typet: "success",
       });
 
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description:
           error.message || "Ocurrió un error al guardar el Edificio.",
-        typet: "error",
       });
     } finally {
       setIsLoading(false);

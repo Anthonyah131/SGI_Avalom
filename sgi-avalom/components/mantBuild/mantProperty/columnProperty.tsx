@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import ManageActionsProperty from "./manageActionProperty";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
   {
@@ -59,7 +59,6 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
     id: "actions",
     cell: ({ row }) => {
       const property = row.original;
-      const { toast } = useToast();
       const { removeProperty } = useBuildingStore();
 
       const handleAction = async () => {
@@ -81,17 +80,13 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
           );
           if (response?.data?.success) {
             removeProperty(property.edi_id || "0", property.prop_id);
-            toast({
-              title: "Edificio Borrado",
+            toast.success("Propiedad eliminada", {
               description: `La propiedad ${property.prop_identificador} ha sido borrado.`,
-              typet: "success",
             });
           }
         } catch (error: any) {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: "Error al borrar la propiedad",
-            typet: "error",
           });
           console.error("Error al borrar la propiedad:", error);
         }

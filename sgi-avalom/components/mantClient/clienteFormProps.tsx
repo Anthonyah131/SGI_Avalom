@@ -14,7 +14,7 @@ import { useClientForm } from "@/hooks/mantClient/useClientForm";
 import { ClienteFormProps } from "@/lib/typesForm";
 import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const ClienteForm: React.FC<ClienteFormProps> = ({
   action,
@@ -28,7 +28,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
@@ -36,21 +35,17 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     try {
       await onSubmit(data);
 
-      toast({
-        title: "Éxito",
+      toast.success("Éxito", {
         description:
           action === "create"
             ? "Cliente creado exitosamente."
             : "Cliente actualizado exitosamente.",
-        typet: "success",
       });
 
       onSuccess();
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: error.message || "Ocurrió un error al guardar el cliente.",
-        typet: "error",
       });
     } finally {
       setIsLoading(false);

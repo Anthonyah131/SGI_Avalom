@@ -13,14 +13,14 @@ export function DateRangeCalculator() {
   });
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 space-y-8">
+    <div className="w-full max-w-4xl mx-auto space-y-4 pb-4">
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-center">
+        <CardHeader className="py-2">
+          <CardTitle className="text-center text-lg">
             Selecciona un Rango de Fechas
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex justify-center">
+        <CardContent className="flex justify-center py-2">
           <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
         </CardContent>
       </Card>

@@ -29,8 +29,9 @@ model ava_alquiler {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ava_alquilermensual {
   alqm_id            BigInt        @id(map: "ava_alquilermensual_pk") @default(sequence(minValue: 0))
-  alqm_anio          String        @db.String(4)
-  alqm_mes           String        @db.String(2)
+  alqm_identificador String        @db.String(15)
+  alqm_fechainicio   DateTime      @db.Timestamp(6)
+  alqm_fechafin      DateTime      @db.Timestamp(6)
   alqm_montototal    BigInt
   alqm_montopagado   BigInt
   alqm_fechapago     DateTime?     @db.Timestamp(6)

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { parseISO, format } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { es } from "date-fns/locale";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const columnsRent: ColumnDef<AvaAlquiler>[] = [
   {
@@ -73,7 +73,6 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
     id: "actions",
     cell: ({ row }) => {
       const rent = row.original;
-      const { toast } = useToast();
       const { removeRental } = usePropertyStore();
 
       const handleAction = async () => {
@@ -94,17 +93,13 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
           });
           if (response?.data?.success) {
             removeRental(rent.alq_id);
-            toast({
-              title: "Alquiler Borrado",
+            toast.success("Éxito", {
               description: `El Alquiler ${rent.alq_id} ha sido borrado.`,
-              typet: "success",
             });
           }
         } catch (error) {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: "Error al borrar Alquiler",
-            typet: "error",
           });
           console.error("Error al borrar el alquiler:", error);
         }

@@ -13,6 +13,7 @@ import cookie from "js-cookie";
 import ClienteForm from "@/components/mantClient/clienteFormProps";
 import { Cliente } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const BodyMantClient: React.FC = () => {
   const { clients, setClients } = useClientStore((state) => ({

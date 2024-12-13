@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const columnsClient: ColumnDef<Cliente>[] = [
   // {
@@ -92,7 +92,6 @@ export const columnsClient: ColumnDef<Cliente>[] = [
     id: "actions",
     cell: ({ row }) => {
       const cliente = row.original;
-      const { toast } = useToast();
       const { removeClient } = useClientStore((state) => ({
         removeClient: state.removeClient,
       }));
@@ -115,17 +114,13 @@ export const columnsClient: ColumnDef<Cliente>[] = [
 
           if (response?.data?.success) {
             removeClient(cliente.cli_id);
-            toast({
-              title: "Cliente eliminado",
+            toast.success("Cliente eliminado", {
               description: `El cliente ${cliente.cli_nombre} fue eliminado correctamente.`,
-              typet: "success",
             });
           }
         } catch (error: any) {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description: error.message || "No se pudo eliminar el cliente.",
-            typet: "error",
           });
         }
       };
