@@ -76,12 +76,19 @@ export default function FileUploader({
       );
       const { url } = response.data;
 
-      const { alq_id, ...rentalDataWithoutId } = selectedRental;
-      const updatedRentalData = { ...rentalDataWithoutId, alq_contrato: url };
+      const updatedRentalData = {
+        alq_monto: selectedRental.alq_monto,
+        alq_contrato: url,
+        alq_estado: selectedRental.alq_estado,
+        alq_fechacreacion: selectedRental.alq_fechacreacion,
+        prop_id: selectedRental.prop_id,
+        ava_clientexalquiler: selectedRental.ava_clientexalquiler,
+      };
+      const rentalDataWithoutId = updatedRentalData;
 
       const rentalResponse = await axios.put(
         `/api/rent/${selectedRental.alq_id}`,
-        updatedRentalData,
+        rentalDataWithoutId,
         {
           headers: {
             Authorization: `Bearer ${token}`,

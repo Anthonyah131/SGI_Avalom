@@ -10,17 +10,18 @@ datasource db {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ava_alquiler {
-  alq_id               BigInt                 @id(map: "ava_alquiler_pk") @default(sequence(minValue: 0))
-  alq_monto            BigInt
-  alq_fechapago        DateTime               @db.Timestamp(6)
-  alq_contrato         String?                @db.String(500)
-  alq_estado           String                 @db.String(1)
-  alq_fechacreacion    DateTime               @default(now()) @db.Timestamp(6)
-  prop_id              BigInt?
-  ava_propiedad        ava_propiedad?         @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship34")
-  ava_alquilermensual  ava_alquilermensual[]
-  ava_clientexalquiler ava_clientexalquiler[]
-  ava_deposito         ava_deposito[]
+  alq_id                BigInt                  @id(map: "ava_alquiler_pk") @default(sequence(minValue: 0))
+  alq_monto             BigInt
+  alq_fechapago         DateTime                @db.Timestamp(6)
+  alq_contrato          String?                 @db.String(500)
+  alq_estado            String                  @db.String(1)
+  alq_fechacreacion     DateTime                @default(now()) @db.Timestamp(6)
+  prop_id               BigInt?
+  ava_propiedad         ava_propiedad?          @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship34")
+  ava_alquilercancelado ava_alquilercancelado[]
+  ava_alquilermensual   ava_alquilermensual[]
+  ava_clientexalquiler  ava_clientexalquiler[]
+  ava_deposito          ava_deposito[]
 
   @@index([prop_id], map: "ava_alquiler_fk01")
 }
@@ -66,13 +67,18 @@ model ava_clientexalquiler {
 }
 
 model ava_deposito {
-  depo_id          BigInt        @id(map: "ava_deposito_pk") @default(sequence(minValue: 0))
-  depo_montoactual BigInt
-  depo_total       BigInt
-  depo_descripcion String?       @db.String(50)
-  alq_id           BigInt?
-  ava_alquiler     ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship23")
-  ava_pago         ava_pago[]
+  depo_id                BigInt        @id(map: "ava_deposito_pk") @default(sequence(minValue: 0))
+  depo_montoactual       BigInt
+  depo_total             BigInt
+  depo_montodevuelto     BigInt?
+  depo_montocastigo      BigInt?
+  depo_descmontodevuelto String?       @db.String(50)
+  depo_descrmontocastigo String?       @db.String(50)
+  depo_fechadevolucion   DateTime?     @db.Timestamp(6)
+  depo_fechacreacion     DateTime      @default(now()) @db.Timestamp(6)
+  alq_id                 BigInt?
+  ava_alquiler           ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship23")
+  ava_pago               ava_pago[]
 
   @@index([alq_id], map: "ava_deposito_fk01")
 }
@@ -89,10 +95,12 @@ model ava_pago {
   pag_monto           BigInt
   pag_descripcion     String?              @db.String(50)
   pag_cuenta          String?              @db.String(50)
+  pag_estado          String               @db.String(1)
   pag_fechapago       DateTime             @db.Timestamp(6)
   res_id              BigInt?
   alqm_id             BigInt?
   depo_id             BigInt?
+  ava_anulacionpago   ava_anulacionpago[]
   ava_alquilermensual ava_alquilermensual? @relation(fields: [alqm_id], references: [alqm_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship22")
   ava_deposito        ava_deposito?        @relation(fields: [depo_id], references: [depo_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship24")
   ava_reservacion     ava_reservacion?     @relation(fields: [res_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship21")
@@ -141,6 +149,8 @@ model ava_reservacion {
   res_correocliente   String?        @db.String(50)
   res_fechaentrada    DateTime       @db.Timestamp(6)
   res_fechasalida     DateTime       @db.Timestamp(6)
+  res_montototal      BigInt
+  res_montoactual     BigInt
   res_estado          String         @db.String(1)
   res_fechacreacion   DateTime       @default(now()) @db.Timestamp(6)
   prop_id             BigInt?
@@ -167,17 +177,18 @@ model ava_tipopropiedad {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ava_usuario {
-  usu_id            BigInt   @id(map: "ava_usuario_pk") @default(sequence(minValue: 0))
-  usu_nombre        String   @db.String(30)
-  usu_papellido     String   @db.String(30)
-  usu_sapellido     String?  @db.String(30)
-  usu_cedula        String   @unique(map: "ava_usuario_unq01") @db.String(15)
-  usu_correo        String   @unique(map: "ava_usuario_unq02") @db.String(50)
-  usu_contrasena    String   @db.String(500)
-  usu_telefono      String?  @db.String(15)
-  usu_fechacreacion DateTime @default(now()) @db.Timestamp(6)
-  usu_estado        String   @db.String(1)
-  usu_rol           String   @db.String(1)
+  usu_id            BigInt              @id(map: "ava_usuario_pk") @default(sequence(minValue: 0))
+  usu_nombre        String              @db.String(30)
+  usu_papellido     String              @db.String(30)
+  usu_sapellido     String?             @db.String(30)
+  usu_cedula        String              @unique(map: "ava_usuario_unq01") @db.String(15)
+  usu_correo        String              @unique(map: "ava_usuario_unq02") @db.String(50)
+  usu_contrasena    String              @db.String(500)
+  usu_telefono      String?             @db.String(15)
+  usu_fechacreacion DateTime            @default(now()) @db.Timestamp(6)
+  usu_estado        String              @db.String(1)
+  usu_rol           String              @db.String(1)
+  ava_anulacionpago ava_anulacionpago[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -188,4 +199,37 @@ model parametros {
   par_descripcion String? @db.String(200)
 
   @@ignore
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ava_alquilercancelado {
+  alqc_id                  BigInt        @id(map: "pk_ava_alquilercancelado") @default(sequence(minValue: 0))
+  alqc_motivo              String        @db.String(50)
+  alqc_montodevuelto       BigInt?
+  alqc_castigo             BigInt?
+  alqc_motivomontodevuelto String?       @db.String(50)
+  alqc_motivocastigo       String?       @db.String(50)
+  alqc_fecha_cancelacion   DateTime      @db.Timestamp(6)
+  alqc_fechacreacion       DateTime      @default(now()) @db.Timestamp(6)
+  alq_id                   BigInt?
+  ava_alquiler             ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_alquiler_x_ava_alquilercancelado")
+
+  @@index([alq_id], map: "ava_alquilercancelado_fk01")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ava_anulacionpago {
+  anp_id             BigInt       @id(map: "pk_ava_anulacionpago") @default(sequence(minValue: 0))
+  anp_motivo         String       @db.String(50)
+  anp_descripcion    String       @db.String(50)
+  anp_montooriginal  BigInt
+  anp_montofinal     BigInt
+  anp_fechaanulacion DateTime     @default(now()) @db.Timestamp(6)
+  pag_id             BigInt?
+  usu_id             BigInt?
+  ava_pago           ava_pago?    @relation(fields: [pag_id], references: [pag_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_pago_x_ava_anulacionpago")
+  ava_usuario        ava_usuario? @relation(fields: [usu_id], references: [usu_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_usuario_x_ava_anulacionpago")
+
+  @@index([pag_id], map: "ava_anulacionpago_fk01")
+  @@index([usu_id], map: "ava_anulacionpago_fk02")
 }
