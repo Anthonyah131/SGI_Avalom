@@ -39,7 +39,7 @@ interface ManageActionsProps {
     | undefined;
   classn?: string;
   icon?: React.ReactNode;
-  FormComponent: React.ReactNode; // Acepta directamente un componente React
+  FormComponent: React.ReactNode;
 }
 
 const ManageActions: React.FC<ManageActionsProps> = ({
@@ -69,12 +69,16 @@ const ManageActions: React.FC<ManageActionsProps> = ({
             {titleButton}
           </Button>
         </DialogTrigger>
-        <DialogContent className="md:max-w-xl lg:max-w-3xl">
+        <DialogContent className="sm:max-w-[425px] md:max-w-xl lg:max-w-3xl max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>{description}</DialogDescription>
+            <DialogTitle className="text-2xl font-bold text-primary">
+              {title}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {description}
+            </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="max-h-[600px] rounded-md">
+          <ScrollArea className="h-[60vh] rounded-md">
             {FormComponent}
           </ScrollArea>
         </DialogContent>
@@ -90,13 +94,13 @@ const ManageActions: React.FC<ManageActionsProps> = ({
           {titleButton}
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
+      <DrawerContent className="flex flex-col h-[85vh]">
+        <DrawerHeader className="text-left">
           <DrawerTitle>{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
-        <ScrollArea>{FormComponent}</ScrollArea>
-        <DrawerFooter>
+        <ScrollArea className="flex-1 px-4">{FormComponent}</ScrollArea>
+        <DrawerFooter className="pt-2">
           <DrawerClose asChild>
             <Button variant="secondary">Cerrar</Button>
           </DrawerClose>

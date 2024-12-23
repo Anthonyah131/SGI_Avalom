@@ -149,6 +149,9 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                           date > new Date() || date < new Date("1900-01-01")
                         }
                         initialFocus
+                        defaultMonth={
+                          field.value ? parseISO(field.value) : new Date()
+                        }
                       />
                     </PopoverContent>
                   </Popover>

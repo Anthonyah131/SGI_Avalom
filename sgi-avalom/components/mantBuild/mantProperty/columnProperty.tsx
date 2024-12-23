@@ -16,8 +16,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import ManageActionsProperty from "./manageActionProperty";
 import { toast } from "sonner";
+import PropertyManager from "./propertyManager";
+import ManageActions from "@/components/dataTable/manageActions";
 
 export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
   {
@@ -111,13 +112,15 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
               Copiar ID Propiedad
             </DropdownMenuItem>
             <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-              <ManageActionsProperty<AvaPropiedad>
+              <ManageActions
+                titleButton={"Editar Propiedad"}
                 title={"Editar Propiedad"}
-                titleButton="Editar Propiedad"
-                description={"Edita los datos de la propiedad"}
-                classn={"p-4 m-0 h-8 w-full"}
+                description={"Editar la Propiedad seleccionada"}
                 variant={"ghost"}
-                propId={property.prop_id}
+                classn={"p-4 m-0 h-8 w-full"}
+                FormComponent={
+                  <PropertyManager propertyId={property.prop_id} />
+                }
               />
             </div>
             <div className="h-8 relative flex cursor-default select-none items-center rounded-sm text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">

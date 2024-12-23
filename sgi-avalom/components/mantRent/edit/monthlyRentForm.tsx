@@ -34,43 +34,33 @@ import { Loader2Icon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
 
-const EditMonthlyRentModal = ({
-  alqmId,
-  onSuccess,
-}: {
-  alqmId: string | null;
+const MonthlyRentForm: React.FC<{
+  action: "create" | "edit" | "view";
+  alqmId?: string | null;
   onSuccess: () => void;
-}) => {
-  const { form, handleSubmit, onSubmit, setRentId } = useMonthlyRentForm({
+}> = ({ action, alqmId, onSuccess }) => {
+  const { form, handleSubmit, onSubmit } = useMonthlyRentForm({
+    action,
     alqm_id: alqmId,
     onSuccess,
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (alqmId) {
-      setRentId(alqmId);
-    }
-    console.log("alqmId", alqmId);
-  }, [alqmId, setRentId]);
-
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
     try {
       await onSubmit(data);
-      toast.success("Alquiler mensual actualizado");
+      toast.success(alqmId ? "Alquiler actualizado" : "Alquiler creado");
       onSuccess();
-    } catch (error) {
-      toast.error("Error al actualizar el alquiler mensual");
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message
+          ? error.message
+          : "Error al guardar el alquiler",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -129,24 +119,31 @@ const EditMonthlyRentModal = ({
                         disabled={isLoading}
                       >
                         {field.value
-                          ? format(parseISO(field.value), "PPP")
+                          ? convertToCostaRicaTime(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                    sideOffset={-40}
+                  >
                     <Calendar
                       mode="single"
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
                         field.onChange(
-                          date ? date.toISOString().split("T")[0] : ""
+                          date ? convertToUTC(date.toISOString()) : ""
                         )
                       }
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
+                      defaultMonth={
+                        field.value ? parseISO(field.value) : new Date()
+                      }
                     />
                   </PopoverContent>
                 </Popover>
@@ -174,24 +171,31 @@ const EditMonthlyRentModal = ({
                         disabled={isLoading}
                       >
                         {field.value
-                          ? format(parseISO(field.value), "PPP")
+                          ? convertToCostaRicaTime(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                    sideOffset={-40}
+                  >
                     <Calendar
                       mode="single"
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
                         field.onChange(
-                          date ? date.toISOString().split("T")[0] : ""
+                          date ? convertToUTC(date.toISOString()) : ""
                         )
                       }
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
+                      defaultMonth={
+                        field.value ? parseISO(field.value) : new Date()
+                      }
                     />
                   </PopoverContent>
                 </Popover>
@@ -219,24 +223,30 @@ const EditMonthlyRentModal = ({
                         disabled={isLoading}
                       >
                         {field.value
-                          ? format(parseISO(field.value), "PPP")
+                          ? convertToCostaRicaTime(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent
+                    className="w-auto p-0"
+                    align="start"
+                  >
                     <Calendar
                       mode="single"
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
                         field.onChange(
-                          date ? date.toISOString().split("T")[0] : ""
+                          date ? convertToUTC(date.toISOString()) : ""
                         )
                       }
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
+                      defaultMonth={
+                        field.value ? parseISO(field.value) : new Date()
+                      }
                     />
                   </PopoverContent>
                 </Popover>
@@ -285,4 +295,4 @@ const EditMonthlyRentModal = ({
   );
 };
 
-export default EditMonthlyRentModal;
+export default MonthlyRentForm;
