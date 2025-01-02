@@ -15,9 +15,42 @@ import { Button } from "@/components/ui/button";
 
 const BodyEditRent: React.FC = () => {
   const { alqId } = useParams();
-  const { setSelectedRental, monthlyRents, isLoading, setLoadingState, setMonthlyRents, createMonthlyRents } =
-    useRentalStore();
+  const {
+    setSelectedRental,
+    monthlyRents,
+    isLoading,
+    setLoadingState,
+    setMonthlyRents,
+    createMonthlyRents,
+  } = useRentalStore();
   const [selectedTab, setSelectedTab] = useState<"view" | "create">("create");
+
+  const handleSaveAll = async () => {
+    try {
+      const token = cookie.get("token");
+      if (!token) toast.error("Token no disponible");
+
+      const response = await axios.post(
+        `/api/monthlyrent/saveall`,
+        { rents: createMonthlyRents, alqId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response?.data?.success) {
+        const savedRents = response.data.data;
+        setMonthlyRents(savedRents);
+        setSelectedTab("view");
+      } else {
+        toast.error(response?.data?.error || "Error al guardar alquileres.");
+      }
+    } catch (error: any) {
+      toast.error("Error", {
+        description: error.message || "Error al guardar alquileres.",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchRental = async () => {
@@ -126,16 +159,7 @@ const BodyEditRent: React.FC = () => {
             <TabsContent value="create" className="mt-4">
               <DateRangeCalculator />
               <div className="flex justify-end mt-4">
-                <Button
-                  onClick={() => {
-                    setMonthlyRents(createMonthlyRents); // Sincronizar los alquileres creados
-                    toast.success(
-                      "Alquileres creados guardados correctamente."
-                    );
-                  }}
-                >
-                  Guardar Todos
-                </Button>
+                <Button onClick={handleSaveAll}>Guardar Todos</Button>
               </div>
             </TabsContent>
           </Tabs>

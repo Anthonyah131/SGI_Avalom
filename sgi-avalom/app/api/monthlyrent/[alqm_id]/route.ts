@@ -54,7 +54,9 @@ export async function PUT(
           alqm_fechafin: new Date(data.alqm_fechafin),
           alqm_montototal: BigInt(data.alqm_montototal),
           alqm_montopagado: BigInt(data.alqm_montopagado),
-          alqm_fechapago: data.alqm_fechapago ? new Date(data.alqm_fechapago) : null,
+          alqm_fechapago: data.alqm_fechapago
+            ? new Date(data.alqm_fechapago)
+            : null,
           alqm_estado: data.alqm_estado,
         },
       });
@@ -80,6 +82,23 @@ export async function DELETE(
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const { alqm_id } = await context.params;
+
+      const rentWithPayments = await prisma.ava_alquilermensual.findFirst({
+        where: {
+          alqm_id: BigInt(alqm_id),
+          ava_pago: { some: {} },
+        },
+      });
+
+      if (rentWithPayments) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "No se puede eliminar un alquiler con pagos relacionados.",
+          },
+          { status: 400 }
+        );
+      }
 
       await prisma.ava_alquilermensual.delete({
         where: { alqm_id: BigInt(alqm_id) },

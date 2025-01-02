@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { act, useEffect, useMemo } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 import { AvaAlquilerMensual } from "@/lib/types";
 import { convertToUTC } from "@/utils/dateUtils";
+import axios from "axios";
+import cookie from "js-cookie";
 
 const monthlyRentSchema = z.object({
   alqm_identificador: z.string().min(1, { message: "Identificador requerido" }),
@@ -35,7 +37,7 @@ export const useMonthlyRentForm = ({
 }: {
   action: "create" | "edit";
   alqm_id?: string | null;
-  mode: "view" | "create"; // Modo en el que el formulario está operando
+  mode: "view" | "create";
   onSuccess: () => void;
 }) => {
   const {
@@ -61,7 +63,7 @@ export const useMonthlyRentForm = ({
 
   const defaultValues = useMemo(() => {
     let startDate, endDate;
-    if (action === "edit") {
+    if (mode === "view") {
       ({ startDate, endDate } = calculateNextDates());
     } else {
       ({ startDate, endDate } = calculateCreateNextDates());
@@ -98,26 +100,47 @@ export const useMonthlyRentForm = ({
     }
   }, [rent, reset, action, defaultValues]);
 
-  const onSubmit: SubmitHandler<MonthlyRentFormInputs> = (formData) => {
+  const onSubmit: SubmitHandler<MonthlyRentFormInputs> = async (formData) => {
     try {
+      const token = cookie.get("token");
+      if (!token) throw new Error("Token no disponible");
+
+      let isDuplicateIdentifier = false;
       let isValid;
+
       if (mode === "view") {
         isValid = validateRentDates(
           formData.alqm_fechainicio,
           formData.alqm_fechafin,
           formData.alqm_identificador
         );
-      } else {
+        isDuplicateIdentifier = monthlyRents.some(
+          (rent) =>
+            rent.alqm_identificador === formData.alqm_identificador &&
+            rent.alqm_id !== alqm_id
+        );
+      } else if (mode === "create") {
         isValid = validateCreateRentDates(
           formData.alqm_fechainicio,
           formData.alqm_fechafin,
           formData.alqm_identificador
         );
+
+        isDuplicateIdentifier = createMonthlyRents.some(
+          (rent) =>
+            rent.alqm_identificador === formData.alqm_identificador &&
+            rent.alqm_fechafin !== formData.alqm_fechafin &&
+            rent.alqm_fechainicio !== formData.alqm_fechainicio
+        );
       }
 
       if (!isValid) {
+        throw new Error("Las fechas no son válidas.");
+      }
+
+      if (isDuplicateIdentifier) {
         throw new Error(
-          "Las fechas ingresadas se superponen con un alquiler existente."
+          "El identificador ya está en uso. Por favor, elige otro."
         );
       }
 
@@ -135,6 +158,24 @@ export const useMonthlyRentForm = ({
             : undefined,
           alqm_estado: formData.alqm_estado,
         };
+
+        if (mode === "view") {
+          const response = await axios.put(
+            `/api/monthlyrent/${Rent.alqm_id}`,
+            Rent,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (!response?.data?.success) {
+            throw new Error(response?.data?.error || "Error al actualizar.");
+          }
+
+          updateMonthlyRent(response.data.data);
+        } else {
+          updateCreateMonthlyRent(Rent);
+        }
       } else if (action === "create") {
         Rent = {
           alqm_id: formData.alqm_identificador,
@@ -148,18 +189,27 @@ export const useMonthlyRentForm = ({
             : undefined,
           alqm_estado: formData.alqm_estado,
           alqm_montopagado: "0",
+          alq_id: selectedRental?.alq_id || "",
         };
+
+        if (mode === "view") {
+          const response = await axios.post(`/api/monthlyrent`, Rent, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (!response?.data?.success) {
+            throw new Error(response?.data?.error || "Error al crear.");
+          }
+
+          addMonthlyRent(response.data.data);
+        } else {
+          addCreateMonthlyRent(Rent);
+        }
       }
-      if (action === "edit" && Rent) {
-        mode === "create"
-          ? updateCreateMonthlyRent(Rent)
-          : updateMonthlyRent(Rent);
-      } else if (action === "create" && Rent) {
-        mode === "create" ? addCreateMonthlyRent(Rent) : addMonthlyRent(Rent);
-      }
+
       onSuccess();
     } catch (error: any) {
-      throw new Error(error.message || "Error en el envío del formulario");
+      throw new Error(error.message || "Error en el envío del formulario.");
     }
   };
 
