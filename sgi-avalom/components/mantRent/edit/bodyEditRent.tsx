@@ -12,6 +12,8 @@ import axios from "axios";
 import cookie from "js-cookie";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
+import { ModeToggle } from "@/components/modeToggle";
 
 const BodyEditRent: React.FC = () => {
   const { alqId } = useParams();
@@ -20,7 +22,7 @@ const BodyEditRent: React.FC = () => {
     monthlyRents,
     isLoading,
     setLoadingState,
-    setMonthlyRents,
+    setRents,
     createMonthlyRents,
   } = useRentalStore();
   const [selectedTab, setSelectedTab] = useState<"view" | "create">("create");
@@ -40,7 +42,7 @@ const BodyEditRent: React.FC = () => {
 
       if (response?.data?.success) {
         const savedRents = response.data.data;
-        setMonthlyRents(savedRents);
+        setRents("monthlyRents", savedRents);
         setSelectedTab("view");
       } else {
         toast.error(response?.data?.error || "Error al guardar alquileres.");
@@ -92,10 +94,20 @@ const BodyEditRent: React.FC = () => {
       <div className="mx-auto p-4 max-w-7xl">
         <Card className="bg-background">
           <CardHeader>
+            <BreadcrumbResponsive
+              items={[
+                { label: "Inicio", href: "/homePage" },
+                { label: "Gestión de alquileres", href: "/mantRent" },
+                { label: "Modificar alquiler" },
+              ]}
+            />
             <CardTitle className="text-2xl font-bold">
               Modificar alquiler
             </CardTitle>
           </CardHeader>
+          <div className="flex flex-wrap justify-center gap-2 p-4">
+            <ModeToggle />
+          </div>
           <CardContent>
             <p className="text-center text-muted-foreground">
               Cargando datos...
@@ -110,10 +122,20 @@ const BodyEditRent: React.FC = () => {
     <div className="mx-auto p-4 max-w-7xl space-y-8">
       <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
+          <BreadcrumbResponsive
+            items={[
+              { label: "Inicio", href: "/homePage" },
+              { label: "Gestión de alquileres", href: "/mantRent" },
+              { label: "Modificar alquiler" },
+            ]}
+          />
           <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
             Modificar alquiler
           </CardTitle>
         </CardHeader>
+        <div className="flex flex-wrap justify-center gap-2 p-4">
+          <ModeToggle />
+        </div>
       </Card>
 
       <RentalForm action="edit" onSuccess={() => {}} />

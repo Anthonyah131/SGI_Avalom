@@ -5,24 +5,22 @@ import { stringifyWithBigInt } from "@/utils/converters";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ alqm_id: string }> }
+  context: { params: Promise<{ pagId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
-      const { alqm_id } = await context.params;
+      const { pagId } = await context.params;
 
-      const monthlyRent = await prisma.ava_alquilermensual.findUnique({
-        where: { alqm_id: BigInt(alqm_id) },
+      const monthlyRent = await prisma.ava_pago.findUnique({
+        where: { pag_id: BigInt(pagId) },
         include: {
-          ava_pago: {
-            include: { ava_anulacionpago: true },
-          },
+          ava_anulacionpago: true,
         },
       });
 
       if (!monthlyRent) {
         return NextResponse.json(
-          { success: false, error: "Alquiler mensual no encontrado" },
+          { success: false, error: "Pago no encontrado" },
           { status: 404 }
         );
       }
@@ -32,7 +30,7 @@ export async function GET(
         { status: 200 }
       );
     } catch (error) {
-      console.error("Error al obtener el alquiler mensual:", error);
+      console.error("Error al obtener el pago: ", error);
       return NextResponse.json(
         { success: false, error: "Error interno del servidor" },
         { status: 500 }
@@ -43,19 +41,19 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ alqm_id: string }> }
+  context: { params: Promise<{ pagId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
-      const { alqm_id } = await context.params;
+      const { pagId } = await context.params;
       const data = await req.json();
 
-      const updatedMonthlyRent = await prisma.ava_alquilermensual.update({
-        where: { alqm_id: BigInt(alqm_id) },
+      const updatedMonthlyRent = await prisma.ava_pago.update({
+        where: { pag_id: BigInt(pagId) },
         data: {
-          alqm_montototal: BigInt(data.alqm_montototal),
-          alqm_montopagado: BigInt(data.alqm_montopagado),
-          alqm_estado: data.alqm_estado,
+          pag_estado: data.pag_estado,
+          pag_descripcion: data.pag_descripcion,
+          pag_cuenta: data.pag_cuenta,
         },
       });
 
@@ -64,7 +62,7 @@ export async function PUT(
         { status: 200 }
       );
     } catch (error) {
-      console.error("Error al actualizar el alquiler mensual:", error);
+      console.error("Error al actualizar el pago: ", error);
       return NextResponse.json(
         { success: false, error: "Error interno del servidor" },
         { status: 500 }

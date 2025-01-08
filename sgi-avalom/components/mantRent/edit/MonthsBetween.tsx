@@ -15,12 +15,7 @@ interface MonthsBetweenProps {
 }
 
 const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
-  const {
-    monthlyRents,
-    deleteMonthlyRent,
-    createMonthlyRents,
-    deleteCreateMonthlyRent,
-  } = useRentalStore();
+  const { monthlyRents, deleteRent, createMonthlyRents } = useRentalStore();
 
   const [rents, setRents] = useState(
     mode === "create" ? createMonthlyRents : monthlyRents
@@ -33,7 +28,7 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
 
   const handleDelete = async (alqm_id: string) => {
     if (mode === "create") {
-      const { success, message } = deleteCreateMonthlyRent(alqm_id);
+      const { success, message } = deleteRent("createMonthlyRents", alqm_id);
       if (success) {
         toast.success("Alquiler mensual eliminado localmente.");
       } else {
@@ -49,7 +44,7 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
         });
 
         if (response?.data?.success) {
-          deleteMonthlyRent(alqm_id); // Actualizar Zustand
+          deleteRent("monthlyRents", alqm_id);
           toast.success("Alquiler mensual eliminado correctamente.");
         } else {
           throw new Error(response?.data?.error || "Error al eliminar.");

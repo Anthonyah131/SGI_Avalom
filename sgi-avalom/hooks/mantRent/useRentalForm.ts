@@ -31,10 +31,10 @@ export const useRentalForm = ({
     selectedRental,
     setSelectedRental,
     monthlyRents,
-    setMonthlyRents,
-    addMonthlyRent,
-    updateMonthlyRent,
-    deleteMonthlyRent,
+    setRents,
+    addRent,
+    updateRent,
+    deleteRent,
   } = useRentalStore();
 
   const [clients, setClients] = useState<Cliente[]>([]);
@@ -74,9 +74,9 @@ export const useRentalForm = ({
       setClientsInRental(
         selectedRental.ava_clientexalquiler?.map((rel) => rel.ava_cliente) || []
       );
-      setMonthlyRents(selectedRental.ava_alquilermensual || []);
+      setRents("monthlyRents", selectedRental.ava_alquilermensual || []);
     }
-  }, [selectedRental, reset, setMonthlyRents]);
+  }, [selectedRental, reset, setRents]);
 
   const fetchClients = async () => {
     try {
@@ -112,8 +112,8 @@ export const useRentalForm = ({
           {
             ...formData,
             alq_fechapago: formData.alq_fechapago
-            ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
-            : null,
+              ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
+              : null,
             ava_clientexalquiler: clientsInRental.map((c) => ({
               cli_id: c.cli_id,
             })),
@@ -155,7 +155,7 @@ export const useRentalForm = ({
     });
     setClientsInRental([]);
     setSelectedRental(null);
-    setMonthlyRents([]);
+    setRents("monthlyRents", []);
   };
 
   const isFormDisabled = action === "view";

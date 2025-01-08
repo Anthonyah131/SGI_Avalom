@@ -41,17 +41,13 @@ export const useMonthlyRentForm = ({
   onSuccess: () => void;
 }) => {
   const {
+    selectedRental,
     monthlyRents,
     createMonthlyRents,
-    addMonthlyRent,
-    updateMonthlyRent,
+    addRent,
+    updateRent,
     validateRentDates,
-    selectedRental,
     calculateNextDates,
-    calculateCreateNextDates,
-    updateCreateMonthlyRent,
-    addCreateMonthlyRent,
-    validateCreateRentDates,
   } = useRentalStore();
 
   const rents = mode === "create" ? createMonthlyRents : monthlyRents;
@@ -64,9 +60,9 @@ export const useMonthlyRentForm = ({
   const defaultValues = useMemo(() => {
     let startDate, endDate;
     if (mode === "view") {
-      ({ startDate, endDate } = calculateNextDates());
+      ({ startDate, endDate } = calculateNextDates("monthlyRents"));
     } else {
-      ({ startDate, endDate } = calculateCreateNextDates());
+      ({ startDate, endDate } = calculateNextDates("createMonthlyRents"));
     }
     return rent
       ? {
@@ -110,6 +106,7 @@ export const useMonthlyRentForm = ({
 
       if (mode === "view") {
         isValid = validateRentDates(
+          "monthlyRents",
           formData.alqm_fechainicio,
           formData.alqm_fechafin,
           formData.alqm_identificador
@@ -120,7 +117,8 @@ export const useMonthlyRentForm = ({
             rent.alqm_id !== alqm_id
         );
       } else if (mode === "create") {
-        isValid = validateCreateRentDates(
+        isValid = validateRentDates(
+          "createMonthlyRents",
           formData.alqm_fechainicio,
           formData.alqm_fechafin,
           formData.alqm_identificador
@@ -172,9 +170,9 @@ export const useMonthlyRentForm = ({
             throw new Error(response?.data?.error || "Error al actualizar.");
           }
 
-          updateMonthlyRent(response.data.data);
+          updateRent("monthlyRents", response.data.data);
         } else {
-          updateCreateMonthlyRent(Rent);
+          updateRent("createMonthlyRents", Rent);
         }
       } else if (action === "create") {
         Rent = {
@@ -201,9 +199,9 @@ export const useMonthlyRentForm = ({
             throw new Error(response?.data?.error || "Error al crear.");
           }
 
-          addMonthlyRent(response.data.data);
+          addRent("monthlyRents", response.data.data);
         } else {
-          addCreateMonthlyRent(Rent);
+          addRent("createMonthlyRents", Rent);
         }
       }
 

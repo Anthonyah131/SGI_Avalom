@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import UserForm from "./UserFormProps";
 import { Skeleton } from "../ui/skeleton";
+import { BreadcrumbResponsive } from "../breadcrumbResponsive";
 
 const BodyMantUser: React.FC = () => {
   const { users, setUsers } = useUserStore((state) => ({
@@ -53,6 +54,12 @@ const BodyMantUser: React.FC = () => {
     <div className="mx-auto p-4 space-y-8">
       <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
         <CardHeader className="">
+          <BreadcrumbResponsive
+            items={[
+              { label: "Inicio", href: "/homePage" },
+              { label: "Gesteión de usuarios" },
+            ]}
+          />
           <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
             Gestión de Usuarios
           </CardTitle>

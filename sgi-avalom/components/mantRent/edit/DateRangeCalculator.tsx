@@ -9,7 +9,7 @@ import { getMonthsBetween } from "@/utils/dateUtils";
 import MonthsBetween from "./MonthsBetween";
 
 export function DateRangeCalculator() {
-  const { setCreateMonthlyRents, selectedRental } = useRentalStore();
+  const { setRents, selectedRental } = useRentalStore();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
@@ -30,9 +30,9 @@ export function DateRangeCalculator() {
         alqm_montopagado: "0",
         ava_pago: [],
       }));
-      setCreateMonthlyRents(generatedRents);
+      setRents("createMonthlyRents", generatedRents);
     }
-  }, [dateRange, setCreateMonthlyRents]);
+  }, [dateRange, setRents]);
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4 pb-4">

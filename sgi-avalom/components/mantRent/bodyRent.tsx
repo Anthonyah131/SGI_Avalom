@@ -8,6 +8,7 @@ import { ModeToggle } from "../modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { DataTable } from "./data_table_filter";
 import { columns } from "./columnsRent";
+import { BreadcrumbResponsive } from "../breadcrumbResponsive";
 
 const BodyRent: React.FC = () => {
   const { rentals, setRentals } = useRentalStore();
@@ -42,8 +43,14 @@ const BodyRent: React.FC = () => {
     <div className="mx-auto p-4 space-y-8">
       <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
+          <BreadcrumbResponsive
+            items={[
+              { label: "Inicio", href: "/homePage" },
+              { label: "Gestión de alquileres" },
+            ]}
+          />
           <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
-            Mantenimiento de Alquileres
+            Gestión de Alquileres
           </CardTitle>
         </CardHeader>
         <div className="flex flex-wrap justify-center gap-2 p-4">

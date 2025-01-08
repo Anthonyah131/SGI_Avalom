@@ -8,6 +8,7 @@ import { ModeToggle } from "../modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { DataTable } from "./data_table_filter";
 import { columns } from "./columnsAccounting";
+import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
 
 const BodyAccounting: React.FC = () => {
   const { rentals, setRentals } = useRentalStore();
@@ -42,6 +43,12 @@ const BodyAccounting: React.FC = () => {
     <div className="mx-auto p-4 space-y-8">
       <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
+          <BreadcrumbResponsive
+            items={[
+              { label: "Inicio", href: "/homePage" },
+              { label: "Contabilidad" },
+            ]}
+          />
           <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
             Contabilidad
           </CardTitle>
@@ -50,7 +57,6 @@ const BodyAccounting: React.FC = () => {
           <ModeToggle />
         </div>
       </Card>
-
       <Card>
         <CardContent>
           <DataTable

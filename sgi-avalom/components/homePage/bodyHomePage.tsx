@@ -19,6 +19,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ModeToggle } from "../modeToggle";
+import { BreadcrumbResponsive } from "../breadcrumbResponsive";
 
 const uesrSalesData = [
   {
@@ -70,7 +71,7 @@ const uesrSalesData = [
     name: "Ava Anderson",
     email: "ava.anderson@email.com",
     saleAmount: "+$599.00",
-  }
+  },
 ];
 
 const cardData = [
@@ -155,6 +156,7 @@ const BodyHomePage: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 space-y-8">
+      <BreadcrumbResponsive items={[{ label: "Inicio" }]} />
       <h1 className="md:text-5xl text-3xl font-bold title-font mb-2">
         Dashboard
       </h1>
@@ -218,7 +220,9 @@ const BodyHomePage: React.FC = () => {
                 </div>
                 <div className="grid gap-1">
                   <p className="text-sm font-medium leading-none">{d.name}</p>
-                  <p className="text-sm text-muted-foreground text-ellipsis overflow-hidden">{d.email}</p>
+                  <p className="text-sm text-muted-foreground text-ellipsis overflow-hidden">
+                    {d.email}
+                  </p>
                 </div>
                 <div className="ml-auto font-medium">{d.saleAmount}</div>
               </div>

@@ -5,17 +5,14 @@ import { stringifyWithBigInt } from "@/utils/converters";
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ pag_id: string }> }
+  context: { params: Promise<{ anpId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
-      const { pag_id } = await context.params;
+      const { anpId } = await context.params;
 
-      const monthlyRent = await prisma.ava_pago.findUnique({
-        where: { pag_id: BigInt(pag_id) },
-        include: {
-          ava_anulacionpago: true,
-        },
+      const monthlyRent = await prisma.ava_anulacionpago.findUnique({
+        where: { anp_id: BigInt(anpId) },
       });
 
       if (!monthlyRent) {
@@ -30,7 +27,7 @@ export async function GET(
         { status: 200 }
       );
     } catch (error) {
-      console.error("Error al obtener el pago: ", error);
+      console.error("Error al obtener la anulación de pago: ", error);
       return NextResponse.json(
         { success: false, error: "Error interno del servidor" },
         { status: 500 }
@@ -41,19 +38,18 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ pag_id: string }> }
+  context: { params: Promise<{ anpId: string }> }
 ) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
-      const { pag_id } = await context.params;
+      const { anpId } = await context.params;
       const data = await req.json();
 
-      const updatedMonthlyRent = await prisma.ava_pago.update({
-        where: { pag_id: BigInt(pag_id) },
+      const updatedMonthlyRent = await prisma.ava_anulacionpago.update({
+        where: { anp_id: BigInt(anpId) },
         data: {
-          pag_estado: data.pag_estado,
-          pag_descripcion: data.pag_descripcion,
-          pag_cuenta: data.pag_cuenta,
+          anp_descripcion: data.anp_descripcion,
+          anp_motivo: data.anp_motivo,
         },
       });
 
@@ -62,7 +58,7 @@ export async function PUT(
         { status: 200 }
       );
     } catch (error) {
-      console.error("Error al actualizar el pago: ", error);
+      console.error("Error al actualizar la anulación de pagos: ", error);
       return NextResponse.json(
         { success: false, error: "Error interno del servidor" },
         { status: 500 }

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { AvaAlquiler, AvaAlquilerMensual } from "@/lib/types";
-import { addMonths, endOfMonth, format, isValid, parseISO } from "date-fns";
+import { addMonths, endOfMonth, format, parseISO } from "date-fns";
 import { convertToUTC, safeParseISO } from "@/utils/dateUtils";
 import { toDate } from "date-fns-tz";
 
@@ -11,32 +11,34 @@ interface RentalState {
   isLoading: boolean;
 
   setSelectedRental: (rental: AvaAlquiler | null) => void;
-  setMonthlyRents: (rents: AvaAlquilerMensual[]) => void;
-  setCreateMonthlyRents: (rents: AvaAlquilerMensual[]) => void;
+  setRents: (
+    type: "monthlyRents" | "createMonthlyRents",
+    rents: AvaAlquilerMensual[]
+  ) => void;
 
-  addMonthlyRent: (rent: AvaAlquilerMensual) => void;
-  updateMonthlyRent: (updatedRent: AvaAlquilerMensual) => void;
-  deleteMonthlyRent: (alqm_id: string) => { success: boolean; message: string };
-
-  addCreateMonthlyRent: (rent: AvaAlquilerMensual) => void;
-  updateCreateMonthlyRent: (updatedRent: AvaAlquilerMensual) => void;
-  deleteCreateMonthlyRent: (alqm_id: string) => {
-    success: boolean;
-    message: string;
-  };
+  addRent: (
+    type: "monthlyRents" | "createMonthlyRents",
+    rent: AvaAlquilerMensual
+  ) => void;
+  updateRent: (
+    type: "monthlyRents" | "createMonthlyRents",
+    updatedRent: AvaAlquilerMensual
+  ) => void;
+  deleteRent: (
+    type: "monthlyRents" | "createMonthlyRents",
+    alqm_id: string
+  ) => { success: boolean; message: string };
 
   validateRentDates: (
+    type: "monthlyRents" | "createMonthlyRents",
     startDate: string,
     endDate: string,
     alqm_identificador: string
   ) => boolean;
-  calculateNextDates: () => { startDate: string; endDate: string };
-  validateCreateRentDates: (
-    startDate: string,
-    endDate: string,
-    alqm_identificador: string
-  ) => boolean;
-  calculateCreateNextDates: () => { startDate: string; endDate: string };
+  calculateNextDates: (type: "monthlyRents" | "createMonthlyRents") => {
+    startDate: string;
+    endDate: string;
+  };
 
   setLoadingState: (loading: boolean) => void;
   resetRentalState: () => void;
@@ -54,254 +56,60 @@ const useRentalStore = create<RentalState>((set, get) => ({
       monthlyRents: rental?.ava_alquilermensual || [],
     }),
 
-  setMonthlyRents: (rents) => set({ monthlyRents: rents }),
+  setRents: (type, rents) => set({ [type]: rents }),
 
-  setCreateMonthlyRents: (rents) => set({ createMonthlyRents: rents }),
-
-  addMonthlyRent: (rent) =>
-    set((state) => ({ monthlyRents: [...state.monthlyRents, rent] })),
-
-  updateMonthlyRent: (updatedRent) =>
+  addRent: (type, rent) =>
     set((state) => ({
-      monthlyRents: state.monthlyRents.map((rent) =>
+      [type]: [...state[type], rent],
+    })),
+
+  updateRent: (type, updatedRent) =>
+    set((state) => ({
+      [type]: state[type].map((rent) =>
         rent.alqm_id === updatedRent.alqm_id ? updatedRent : rent
       ),
     })),
 
-  deleteMonthlyRent: (alqm_id) => {
-    let result = { success: false, message: "" };
-    set((state) => {
-      const rentToDelete = state.monthlyRents.find(
-        (rent) => rent.alqm_id === alqm_id
-      );
+  deleteRent: (type, alqm_id) => {
+    const state = get();
+    const rentToDelete = state[type].find((rent) => rent.alqm_id === alqm_id);
 
-      if (rentToDelete?.ava_pago?.length) {
-        result = {
-          success: false,
-          message:
-            "No se puede eliminar un alquiler mensual con pagos relacionados.",
-        };
-        return state;
-      }
-
-      result = {
-        success: true,
-        message: "Alquiler mensual eliminado correctamente.",
-      };
-
+    if (rentToDelete?.ava_pago?.length) {
       return {
-        monthlyRents: state.monthlyRents.filter(
-          (rent) => rent.alqm_id !== alqm_id
-        ),
-      };
-    });
-    return result;
-  },
-
-  addCreateMonthlyRent: (rent) =>
-    set((state) => ({
-      createMonthlyRents: [...state.createMonthlyRents, rent],
-    })),
-
-  updateCreateMonthlyRent: (updatedRent) =>
-    set((state) => ({
-      createMonthlyRents: state.createMonthlyRents.map((rent) =>
-        rent.alqm_id === updatedRent.alqm_id ? updatedRent : rent
-      ),
-    })),
-
-  deleteCreateMonthlyRent: (alqm_id) => {
-    let result = { success: false, message: "" };
-    set((state) => {
-      const rentToDelete = state.createMonthlyRents.find(
-        (rent) => rent.alqm_id === alqm_id
-      );
-
-      if (rentToDelete?.ava_pago?.length) {
-        result = {
-          success: false,
-          message:
-            "No se puede eliminar un alquiler mensual con pagos relacionados.",
-        };
-        return state;
-      }
-
-      result = {
-        success: true,
-        message: "Alquiler mensual eliminado correctamente.",
-      };
-
-      return {
-        createMonthlyRents: state.createMonthlyRents.filter(
-          (rent) => rent.alqm_id !== alqm_id
-        ),
-      };
-    });
-    return result;
-  },
-
-  validateRentDates: (startDate, endDate, alqm_identificador) => {
-    const { monthlyRents } = get();
-
-    // Validar entrada
-    if (!startDate || !endDate) {
-      console.error("Fechas de entrada están vacías o nulas.", {
-        startDate,
-        endDate,
-      });
-      return false;
-    }
-
-    // Normalizar y validar fechas ingresadas
-    const newStartDate = safeParseISO(convertToUTC(startDate));
-    const newEndDate = safeParseISO(convertToUTC(endDate));
-
-    if (!newStartDate || !newEndDate) {
-      console.error("Fechas ingresadas no son válidas.", {
-        newStartDate,
-        newEndDate,
-      });
-      return false;
-    }
-
-    for (const rent of monthlyRents) {
-      // Ignorar el alquiler que estamos modificando
-      if (rent.alqm_identificador === alqm_identificador) {
-        continue;
-      }
-      // Validar y normalizar fechas de alquiler existente
-      const rentStartDate = safeParseISO(rent.alqm_fechainicio);
-      const rentEndDate = safeParseISO(rent.alqm_fechafin);
-      console.log("rentStartDate", rentStartDate);
-      console.log("rentEndDate", rentEndDate);
-      console.log("newStartDate", newStartDate);
-      console.log("newEndDate", newEndDate);
-
-      if (!rentStartDate || !rentEndDate) {
-        console.error(
-          `Fechas inválidas en el alquiler ${rent.alqm_identificador}:`,
-          { rentStartDate, rentEndDate }
-        );
-        continue; // Ignorar alquiler con fechas inválidas
-      }
-
-      // Comparar rangos
-      if (
-        (newStartDate >= rentStartDate && newStartDate < rentEndDate) || // Inicio dentro del rango
-        (newEndDate > rentStartDate && newEndDate <= rentEndDate) || // Fin dentro del rango
-        (newStartDate <= rentStartDate && newEndDate >= rentEndDate) // Engloba el rango
-      ) {
-        console.error(
-          `Conflicto detectado con el alquiler ${rent.alqm_identificador}.`
-        );
-        return false;
-      }
-    }
-
-    return true;
-  },
-
-  calculateNextDates: () => {
-    const { monthlyRents } = get();
-
-    if (monthlyRents.length === 0) {
-      const todayUTC = new Date();
-
-      const todayCR = toDate(todayUTC, { timeZone: "America/Costa_Rica" });
-      const endOfNextMonthCR = toDate(endOfMonth(addMonths(todayCR, 1)), {
-        timeZone: "America/Costa_Rica",
-      });
-
-      return {
-        startDate: format(todayCR, "yyyy-MM-dd"),
-        endDate: format(endOfNextMonthCR, "yyyy-MM-dd"),
+        success: false,
+        message: "No se puede eliminar un alquiler con pagos relacionados.",
       };
     }
 
-    const lastRent = monthlyRents[monthlyRents.length - 1];
-    const lastEndDateUTC = safeParseISO(lastRent.alqm_fechafin);
-
-    if (!lastEndDateUTC) {
-      console.error(
-        `Error al procesar la última fecha de fin del alquiler (${lastRent.alqm_fechafin}).`
-      );
-      const todayUTC = new Date();
-      return {
-        startDate: format(todayUTC, "yyyy-MM-dd"),
-        endDate: format(endOfMonth(addMonths(todayUTC, 1)), "yyyy-MM-dd"),
-      };
-    }
-
-    // Convertir última fecha al horario de Costa Rica
-    const lastEndDateCR = toDate(lastEndDateUTC, {
-      timeZone: "America/Costa_Rica",
+    set({
+      [type]: state[type].filter((rent) => rent.alqm_id !== alqm_id),
     });
 
-    // Obtener el día exacto del primer alquiler mensual
-    const firstRent = monthlyRents[0];
-    const firstStartDateUTC = safeParseISO(firstRent.alqm_fechainicio);
-    const firstStartDateCR = firstStartDateUTC
-      ? toDate(firstStartDateUTC, { timeZone: "America/Costa_Rica" })
-      : new Date();
-    const dayOfMonth = firstStartDateCR.getDate();
-
-    // La fecha de inicio del nuevo alquiler es la misma que la fecha final del último alquiler
-    const nextStartDateCR = lastEndDateCR;
-
-    // Calcular la fecha de fin del nuevo alquiler respetando el día inicial del primer alquiler
-    const potentialEndDateCR = addMonths(nextStartDateCR, 1);
-    let nextEndDateCR: Date;
-
-    if (potentialEndDateCR.getDate() < dayOfMonth) {
-      // Si el mes siguiente no tiene el mismo día, tomar el último día del mes
-      nextEndDateCR = toDate(endOfMonth(potentialEndDateCR), {
-        timeZone: "America/Costa_Rica",
-      });
-    } else {
-      // Si el mes tiene el día exacto, usarlo
-      nextEndDateCR = new Date(
-        potentialEndDateCR.getFullYear(),
-        potentialEndDateCR.getMonth(),
-        dayOfMonth
-      );
-    }
-
-    // Convertir a UTC para guardar en la base de datos
     return {
-      startDate: convertToUTC(nextStartDateCR.toISOString()),
-      endDate: convertToUTC(nextEndDateCR.toISOString()),
+      success: true,
+      message: "Alquiler eliminado correctamente.",
     };
   },
 
-  validateCreateRentDates: (startDate, endDate, alqm_identificador) => {
-    const { createMonthlyRents } = get();
+  validateRentDates: (type, startDate, endDate, alqm_identificador) => {
+    const rents = get()[type];
 
-    // Validar entrada
     if (!startDate || !endDate) {
-      console.error("Fechas de entrada están vacías o nulas.", {
-        startDate,
-        endDate,
-      });
+      console.error("Fechas inválidas:", { startDate, endDate });
       return false;
     }
 
-    // Normalizar y validar fechas ingresadas
     const newStartDate = safeParseISO(convertToUTC(startDate));
     const newEndDate = safeParseISO(convertToUTC(endDate));
 
     if (!newStartDate || !newEndDate) {
-      console.error("Fechas ingresadas no son válidas.", {
-        newStartDate,
-        newEndDate,
-      });
+      console.error("Fechas inválidas:", { newStartDate, newEndDate });
       return false;
     }
 
-    for (const rent of createMonthlyRents) {
-      if (rent.alqm_identificador === alqm_identificador) {
-        continue; // Ignorar el alquiler con el alqm_id especificado
-      }
-      // Validar y normalizar fechas de alquiler existente
+    for (const rent of rents) {
+      if (rent.alqm_identificador === alqm_identificador) continue;
+
       const rentStartDate = safeParseISO(rent.alqm_fechainicio);
       const rentEndDate = safeParseISO(rent.alqm_fechafin);
 
@@ -310,14 +118,13 @@ const useRentalStore = create<RentalState>((set, get) => ({
           `Fechas inválidas en el alquiler ${rent.alqm_identificador}:`,
           { rentStartDate, rentEndDate }
         );
-        continue; // Ignorar alquiler con fechas inválidas
+        continue;
       }
 
-      // Comparar rangos
       if (
-        (newStartDate >= rentStartDate && newStartDate < rentEndDate) || // Inicio dentro del rango
-        (newEndDate > rentStartDate && newEndDate <= rentEndDate) || // Fin dentro del rango
-        (newStartDate <= rentStartDate && newEndDate >= rentEndDate) // Engloba el rango
+        (newStartDate >= rentStartDate && newStartDate < rentEndDate) ||
+        (newEndDate > rentStartDate && newEndDate <= rentEndDate) ||
+        (newStartDate <= rentStartDate && newEndDate >= rentEndDate)
       ) {
         console.error(
           `Conflicto detectado con el alquiler ${rent.alqm_identificador}.`
@@ -329,12 +136,11 @@ const useRentalStore = create<RentalState>((set, get) => ({
     return true;
   },
 
-  calculateCreateNextDates: () => {
-    const { createMonthlyRents } = get();
+  calculateNextDates: (type) => {
+    const rents = get()[type];
 
-    if (createMonthlyRents.length === 0) {
+    if (rents.length === 0) {
       const todayUTC = new Date();
-
       const todayCR = toDate(todayUTC, { timeZone: "America/Costa_Rica" });
       const endOfNextMonthCR = toDate(endOfMonth(addMonths(todayCR, 1)), {
         timeZone: "America/Costa_Rica",
@@ -346,13 +152,11 @@ const useRentalStore = create<RentalState>((set, get) => ({
       };
     }
 
-    const lastRent = createMonthlyRents[createMonthlyRents.length - 1];
+    const lastRent = rents[rents.length - 1];
     const lastEndDateUTC = safeParseISO(lastRent.alqm_fechafin);
 
     if (!lastEndDateUTC) {
-      console.error(
-        `Error al procesar la última fecha de fin del alquiler (${lastRent.alqm_fechafin}).`
-      );
+      console.error("Error con última fecha:", lastRent.alqm_fechafin);
       const todayUTC = new Date();
       return {
         startDate: format(todayUTC, "yyyy-MM-dd"),
@@ -360,41 +164,22 @@ const useRentalStore = create<RentalState>((set, get) => ({
       };
     }
 
-    // Convertir última fecha al horario de Costa Rica
     const lastEndDateCR = toDate(lastEndDateUTC, {
       timeZone: "America/Costa_Rica",
     });
-
-    // Obtener el día exacto del primer alquiler mensual
-    const firstRent = createMonthlyRents[0];
-    const firstStartDateUTC = safeParseISO(firstRent.alqm_fechainicio);
-    const firstStartDateCR = firstStartDateUTC
-      ? toDate(firstStartDateUTC, { timeZone: "America/Costa_Rica" })
-      : new Date();
-    const dayOfMonth = firstStartDateCR.getDate();
-
-    // La fecha de inicio del nuevo alquiler es la misma que la fecha final del último alquiler
     const nextStartDateCR = lastEndDateCR;
-
-    // Calcular la fecha de fin del nuevo alquiler respetando el día inicial del primer alquiler
     const potentialEndDateCR = addMonths(nextStartDateCR, 1);
-    let nextEndDateCR: Date;
+    const nextEndDateCR =
+      potentialEndDateCR.getDate() < nextStartDateCR.getDate()
+        ? toDate(endOfMonth(potentialEndDateCR), {
+            timeZone: "America/Costa_Rica",
+          })
+        : new Date(
+            potentialEndDateCR.getFullYear(),
+            potentialEndDateCR.getMonth(),
+            nextStartDateCR.getDate()
+          );
 
-    if (potentialEndDateCR.getDate() < dayOfMonth) {
-      // Si el mes siguiente no tiene el mismo día, tomar el último día del mes
-      nextEndDateCR = toDate(endOfMonth(potentialEndDateCR), {
-        timeZone: "America/Costa_Rica",
-      });
-    } else {
-      // Si el mes tiene el día exacto, usarlo
-      nextEndDateCR = new Date(
-        potentialEndDateCR.getFullYear(),
-        potentialEndDateCR.getMonth(),
-        dayOfMonth
-      );
-    }
-
-    // Convertir a UTC para guardar en la base de datos
     return {
       startDate: convertToUTC(nextStartDateCR.toISOString()),
       endDate: convertToUTC(nextEndDateCR.toISOString()),

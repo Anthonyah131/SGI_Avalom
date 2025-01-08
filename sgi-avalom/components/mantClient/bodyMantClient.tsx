@@ -14,6 +14,7 @@ import ClienteForm from "@/components/mantClient/clienteFormProps";
 import { Cliente } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { BreadcrumbResponsive } from "../breadcrumbResponsive";
 
 const BodyMantClient: React.FC = () => {
   const { clients, setClients } = useClientStore((state) => ({
@@ -53,6 +54,12 @@ const BodyMantClient: React.FC = () => {
     <div className="mx-auto p-4 space-y-8">
       <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
+          <BreadcrumbResponsive
+            items={[
+              { label: "Inicio", href: "/homePage" },
+              { label: "Gestión de clientes" },
+            ]}
+          />
           <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
             Gestión de Clientes
           </CardTitle>

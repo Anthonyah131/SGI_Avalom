@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { AvaAlquiler } from "@/lib/types";
+import Link from "next/link";
 
 export const columns: ColumnDef<AvaAlquiler>[] = [
   {
@@ -122,11 +123,9 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
             >
               Copiar ID alquiler
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {}}
-            >
-              Realizar movimiento
-            </DropdownMenuItem>
+            <Link href={`/accounting/payments/${rental.alq_id}`}>
+              <DropdownMenuItem>Realizar movimiento</DropdownMenuItem>
+            </Link>
           </DropdownMenuContent>
         </DropdownMenu>
       );
