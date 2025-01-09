@@ -44,7 +44,7 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
       );
     },
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("alq_monto"));
+      const amount = BigInt(row.getValue("alq_monto"));
       const formatted = new Intl.NumberFormat("es-CR", {
         style: "currency",
         currency: "CRC",
