@@ -64,7 +64,7 @@ const BodyCancelPayment: React.FC = () => {
                 { label: "Contabilidad", href: "/accounting" },
                 {
                   label: "Realizar movimiento",
-                  //   href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
+                  href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
                 },
                 { label: "Anular pago" },
               ]}
