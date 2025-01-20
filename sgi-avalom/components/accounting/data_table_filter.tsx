@@ -89,6 +89,8 @@ export function DataTable({
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [pageSize, setPageSize] = useState(5);
+  const [pageIndex, setPageIndex] = useState(0);
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -113,6 +115,7 @@ export function DataTable({
       globalFilter: globalFilterValue,
       columnVisibility,
       rowSelection,
+      pagination: { pageSize, pageIndex },
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilterValue,
@@ -123,6 +126,14 @@ export function DataTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn,
+    onPaginationChange: (updater) => {
+      const newState =
+        typeof updater === "function"
+          ? updater({ pageIndex, pageSize })
+          : updater;
+      setPageIndex(newState.pageIndex);
+      setPageSize(newState.pageSize);
+    },
   });
 
   const handlePageSizeChange = (size: number) => {
@@ -344,6 +355,21 @@ export function DataTable({
             Página {table.getState().pagination.pageIndex + 1} de{" "}
             {table.getPageCount()}
           </p>
+          <Select
+            value={String(pageSize)}
+            onValueChange={(value) => handlePageSizeChange(Number(value))}
+          >
+            <SelectTrigger className="w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[5, 10, 20, 50].map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size} filas
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <Button

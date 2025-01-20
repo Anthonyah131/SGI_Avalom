@@ -58,8 +58,8 @@ export function DataTable<TData, TValue>({
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [pageSize, setPageSize] = useState(5); // Estado para el tamaño de la página
-  const [pageIndex, setPageIndex] = useState(0); // Estado para el índice de la página
+  const [pageSize, setPageSize] = useState(5);
+  const [pageIndex, setPageIndex] = useState(0);
 
   const table = useReactTable({
     data,
@@ -90,10 +90,9 @@ export function DataTable<TData, TValue>({
     globalFilterFn: globalFilter,
   });
 
-  // Función para manejar el cambio de tamaño de la página
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
-    setPageIndex(0); // Reiniciar el índice de la página a 0
+    setPageIndex(0);
   };
 
   return (

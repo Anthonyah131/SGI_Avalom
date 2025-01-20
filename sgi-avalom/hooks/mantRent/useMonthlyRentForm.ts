@@ -71,7 +71,7 @@ export const useMonthlyRentForm = ({
           alqm_fechainicio: rent.alqm_fechainicio,
           alqm_fechafin: rent.alqm_fechafin,
           alqm_fechapago: rent.alqm_fechapago,
-          alqm_estado: rent.alqm_estado as "A" | "P" | "I",
+          alqm_estado: rent.alqm_estado as "I" | "P" | "I",
         }
       : {
           alqm_identificador: `Mes ${monthlyRents.length + 1}`,
@@ -79,7 +79,7 @@ export const useMonthlyRentForm = ({
           alqm_fechainicio: startDate,
           alqm_fechafin: endDate,
           alqm_fechapago: selectedRental?.alq_fechapago || "",
-          alqm_estado: "A" as "A" | "P" | "I",
+          alqm_estado: "I" as "A" | "P" | "I",
         };
   }, [calculateNextDates, monthlyRents.length, rent, rents]);
 

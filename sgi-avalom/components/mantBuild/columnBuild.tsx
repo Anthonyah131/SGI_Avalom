@@ -59,17 +59,24 @@ export const columns: ColumnDef<AvaEdificio>[] = [
             `/api/building/${building.edi_id}`,
             { headers }
           );
+
           if (response?.data?.success) {
             removeBuilding(building.edi_id);
             toast.success("Edificio eliminado", {
               description: `El Edificio ${building.edi_identificador} ha sido borrado.`,
             });
+          } else {
+            toast.error("No se puede eliminar el edificio", {
+              description: response?.data?.error || "Error desconocido",
+            });
           }
-        } catch (error) {
+        } catch (error: any) {
           toast.error("Error", {
-            description: "Error al borrar Edificio",
+            description:
+              error.response?.data?.error ||
+              error.message ||
+              "Error interno del servidor",
           });
-          console.error("Error al borrar Edificio:", error);
         }
       };
 

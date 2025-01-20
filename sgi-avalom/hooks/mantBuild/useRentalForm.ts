@@ -14,10 +14,13 @@ import { Cliente } from "@/lib/types";
 import { RentalFormProps } from "@/lib/typesForm";
 
 const rentalFormSchema = z.object({
-  alq_monto: z.string().refine((value) => !isNaN(Number(value)), {
-    message: "El monto debe ser un número",
-  }),
-  alq_fechapago: z.string(),
+  alq_monto: z
+    .string()
+    .min(1, "El monto es requerido")
+    .refine((value) => !isNaN(Number(value)), {
+      message: "El monto debe ser un número",
+    }),
+  alq_fechapago: z.string().min(1, "La fecha de pago es requerida"),
   alq_estado: z.enum(["A", "F", "C"]),
 });
 
@@ -69,12 +72,12 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
   const defaultValues = useMemo(() => {
     return action === "create"
       ? {
-          alq_monto: "1000",
+          alq_monto: "0",
           alq_fechapago: "",
           alq_estado: "A" as const,
         }
       : {
-          alq_monto: selectedRental?.alq_monto || "1000",
+          alq_monto: selectedRental?.alq_monto || "0",
           alq_fechapago: selectedRental?.alq_fechapago
             ? format(
                 toDate(
@@ -105,7 +108,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
 
   const clearForm = () => {
     reset({
-      alq_monto: "1000",
+      alq_monto: "0",
       alq_fechapago: "",
       alq_estado: "A" as const,
     });

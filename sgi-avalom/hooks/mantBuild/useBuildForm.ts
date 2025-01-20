@@ -76,7 +76,8 @@ export const useBuildForm = ({
       }
 
       if (response?.data?.success) {
-        action === "create"
+      console.log(response.data.data);
+      action === "create"
           ? addBuilding(response.data.data)
           : updateBuilding(response.data.data);
         onSuccess();

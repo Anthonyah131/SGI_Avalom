@@ -39,13 +39,13 @@ import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
 const MonthlyRentForm: React.FC<{
   action: "create" | "edit";
   alqmId?: string | null;
-  mode: "view" | "create"; // Nuevo parámetro
+  mode: "view" | "create";
   onSuccess: () => void;
 }> = ({ action, alqmId, mode, onSuccess }) => {
   const { form, handleSubmit, onSubmit } = useMonthlyRentForm({
     action,
     alqm_id: alqmId,
-    mode, // Pasar el modo al hook
+    mode,
     onSuccess,
   });
 
@@ -72,7 +72,6 @@ const MonthlyRentForm: React.FC<{
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <div className="bg-background grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Identificador */}
           <FormField
             control={form.control}
             name="alqm_identificador"
@@ -87,7 +86,6 @@ const MonthlyRentForm: React.FC<{
             )}
           />
 
-          {/* Monto Total */}
           <FormField
             control={form.control}
             name="alqm_montototal"
@@ -102,7 +100,6 @@ const MonthlyRentForm: React.FC<{
             )}
           />
 
-          {/* Fecha de Inicio */}
           <FormField
             control={form.control}
             name="alqm_fechainicio"
@@ -154,7 +151,6 @@ const MonthlyRentForm: React.FC<{
             )}
           />
 
-          {/* Fecha de Fin */}
           <FormField
             control={form.control}
             name="alqm_fechafin"
@@ -206,7 +202,6 @@ const MonthlyRentForm: React.FC<{
             )}
           />
 
-          {/* Fecha de Pago */}
           <FormField
             control={form.control}
             name="alqm_fechapago"
@@ -254,7 +249,6 @@ const MonthlyRentForm: React.FC<{
             )}
           />
 
-          {/* Estado */}
           <FormField
             control={form.control}
             name="alqm_estado"
@@ -271,9 +265,9 @@ const MonthlyRentForm: React.FC<{
                       <SelectValue placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="A">Activo</SelectItem>
-                      <SelectItem value="P">Pendiente</SelectItem>
-                      <SelectItem value="I">Inactivo</SelectItem>
+                      <SelectItem value="A">Atrasado</SelectItem>
+                      <SelectItem value="P">Pagado</SelectItem>
+                      <SelectItem value="I">Incompleto</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>

@@ -53,6 +53,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({
 
       onSuccess();
     } catch (error: any) {
+      console.error(error);
       toast.error("Error", {
         description:
           error.message || "Ocurrió un error al guardar la Propiedad.",

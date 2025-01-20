@@ -15,15 +15,33 @@ interface BuildingState {
 
 const useBuildingStore = create<BuildingState>((set) => ({
   buildings: [],
+
   setBuildings: (buildings) => set({ buildings }),
+
   addBuilding: (building) =>
-    set((state) => ({ buildings: [...state.buildings, building] })),
+    set((state) => ({
+      buildings: [
+        ...state.buildings,
+        {
+          ...building,
+          ava_propiedad: [],
+        },
+      ],
+    })),
+
   updateBuilding: (updatedBuilding) =>
     set((state) => ({
       buildings: state.buildings.map((building) =>
-        building.edi_id === updatedBuilding.edi_id ? updatedBuilding : building
+        building.edi_id === updatedBuilding.edi_id
+          ? {
+              ...building,
+              edi_identificador: updatedBuilding.edi_identificador,
+              edi_descripcion: updatedBuilding.edi_descripcion,
+            }
+          : building
       ),
     })),
+
   removeBuilding: (edi_id) =>
     set((state) => ({
       buildings: state.buildings.filter(
@@ -37,7 +55,7 @@ const useBuildingStore = create<BuildingState>((set) => ({
         building.edi_id === edi_id
           ? {
               ...building,
-              ava_propiedad: [...building.ava_propiedad, property],
+              ava_propiedad: [...(building.ava_propiedad || []), property],
             }
           : building
       ),

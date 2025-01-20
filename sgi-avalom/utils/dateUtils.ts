@@ -5,27 +5,61 @@ import {
   isAfter,
   parseISO,
   isValid,
+  endOfMonth,
 } from "date-fns";
 import { toDate } from "date-fns-tz";
 
-export function getMonthsBetween(
+export function calculateMonthsBetween(
   startDate: Date,
-  endDate: Date
-): { start: Date; end: Date }[] {
-  const months: { start: Date; end: Date }[] = [];
-  let currentStart = startDate;
-  let currentEnd = addMonths(currentStart, 1);
+  endDate: Date,
+  timeZone: string = "America/Costa_Rica"
+): { startDate: string; endDate: string }[] {
+  const months: { startDate: string; endDate: string }[] = [];
+  let currentStart = toDate(startDate, { timeZone });
+  const dayOfMonth = currentStart.getDate(); // Día del mes a respetar
 
-  while (isSameDay(currentEnd, endDate) || isAfter(endDate, currentEnd)) {
-    months.push({ start: currentStart, end: currentEnd });
-    currentStart = currentEnd;
-    currentEnd = addMonths(currentStart, 1);
+  while (isAfter(endDate, currentStart)) {
+    // Calcula el mes potencial siguiente.
+    const potentialEndDate = addMonths(currentStart, 1);
+
+    // Ajusta el día final basado en el día de inicio o el último día del mes.
+    const daysInMonth = new Date(
+      potentialEndDate.getFullYear(),
+      potentialEndDate.getMonth() + 1,
+      0
+    ).getDate();
+    const adjustedDay = Math.min(dayOfMonth, daysInMonth);
+
+    const currentEndDate = new Date(
+      potentialEndDate.getFullYear(),
+      potentialEndDate.getMonth(),
+      adjustedDay
+    );
+
+    // Si la fecha ajustada excede la fecha final, usa la fecha final directamente.
+    if (isAfter(currentEndDate, endDate)) {
+      months.push({
+        startDate: currentStart.toISOString(),
+        endDate: toDate(endDate, { timeZone }).toISOString(),
+      });
+      break;
+    }
+
+    // Agrega el intervalo calculado al resultado.
+    months.push({
+      startDate: currentStart.toISOString(),
+      endDate: currentEndDate.toISOString(),
+    });
+
+    // Avanza al siguiente mes.
+    currentStart = new Date(
+      currentEndDate.getFullYear(),
+      currentEndDate.getMonth(),
+      adjustedDay
+    );
   }
 
-  if (isAfter(endDate, currentStart)) {
-    months.push({ start: currentStart, end: endDate });
-  }
-
+  console.log("Meses calculados:", months);
   return months;
 }
 

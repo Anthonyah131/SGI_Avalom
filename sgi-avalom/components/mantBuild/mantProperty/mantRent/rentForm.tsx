@@ -150,9 +150,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                             date ? date.toISOString().split("T")[0] : ""
                           )
                         }
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
+                        disabled={(date) => date < new Date("1900-01-01")}
                         initialFocus
                         defaultMonth={
                           field.value ? parseISO(field.value) : new Date()

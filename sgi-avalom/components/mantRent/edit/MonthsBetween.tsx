@@ -11,7 +11,7 @@ import axios from "axios";
 import cookie from "js-cookie";
 
 interface MonthsBetweenProps {
-  mode: "view" | "create"; // Diferenciar entre los modos
+  mode: "view" | "create";
 }
 
 const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
@@ -21,7 +21,6 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
     mode === "create" ? createMonthlyRents : monthlyRents
   );
 
-  // Actualizar `rents` cuando los datos de Zustand cambien
   useEffect(() => {
     setRents(mode === "create" ? createMonthlyRents : monthlyRents);
   }, [createMonthlyRents, monthlyRents, mode]);
@@ -69,7 +68,7 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
             <MonthlyRentForm
               action="create"
               alqmId={null}
-              mode={mode} // Pasar el modo al formulario
+              mode={mode}
               onSuccess={() => {}}
             />
           }
@@ -128,6 +127,9 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
                 </p>
                 <p>
                   <strong>Total:</strong> ₡{rent.alqm_montototal}
+                </p>
+                <p>
+                  <strong>Estado:</strong> {rent.alqm_estado}
                 </p>
               </CardContent>
             </Card>

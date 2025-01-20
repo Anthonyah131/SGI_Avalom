@@ -73,18 +73,47 @@ export async function DELETE(
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const params = await context.params;
+      const ediId = BigInt(params.ediId);
+
+      const buildingWithProperties = await prisma.ava_edificio.findFirst({
+        where: { edi_id: ediId },
+        include: {
+          ava_propiedad: true,
+        },
+      });
+
+      if (!buildingWithProperties) {
+        return NextResponse.json(
+          { success: false, error: "Edificio no encontrado" },
+          { status: 404 }
+        );
+      }
+
+      if (buildingWithProperties.ava_propiedad.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `No se puede eliminar el edificio ${buildingWithProperties.edi_identificador} porque tiene propiedades relacionadas.`,
+          },
+          { status: 400 }
+        );
+      }
 
       await prisma.ava_edificio.delete({
-        where: { edi_id: BigInt(params.ediId) },
+        where: { edi_id: ediId },
       });
+
       return NextResponse.json(
-        { success: true, message: "Edificio eliminado" },
+        { success: true, message: "Edificio eliminado exitosamente" },
         { status: 200 }
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       return NextResponse.json(
-        { success: false, error: "Error interno del servidor" },
+        {
+          success: false,
+          error: error.message || "Error interno del servidor",
+        },
         { status: 500 }
       );
     }
