@@ -33,10 +33,6 @@ const MonthlyRentsView: React.FC = () => {
     setRents(monthlyRents);
   }, [monthlyRents]);
 
-  const handleCancelPayment = (alqm_id: string) => {
-    console.log(`Anular pago para el alquiler mensual con ID: ${alqm_id}`);
-  };
-
   const getStatusColor = (rent: any) => {
     const now = new Date();
     const endDate = new Date(rent.alqm_fechafin);
@@ -175,7 +171,6 @@ const MonthlyRentsView: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCancelPayment(rent.alqm_id)}
                 className="flex items-center bg-white hover:bg-gray-100 hover:text-red-700 w-full sm:w-auto"
               >
                 <Link

@@ -25,7 +25,7 @@ export function DateRangeCalculator() {
         alqm_fechainicio: month.startDate,
         alqm_fechafin: month.endDate,
         alqm_fechapago: selectedRental?.alq_fechapago || "",
-        alqm_estado: "A" as "A" | "P" | "I",
+        alqm_estado: "I" as "A" | "P" | "I",
         alqm_montopagado: "0",
         ava_pago: [],
       }));
