@@ -3,11 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { authenticate } from "@/lib/auth";
 import { stringifyWithBigInt } from "@/utils/converters";
 
-export async function POST(
+export async function PUT(
   request: NextRequest,
   context: { params: { alqId: string } }
 ) {
-  return authenticate(async () => {
+  return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const { alqId } = context.params;
       const {
