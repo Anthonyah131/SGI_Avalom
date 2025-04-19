@@ -30,7 +30,7 @@ export const columns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Nombre
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -44,7 +44,7 @@ export const columns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Primer Apellido
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -62,7 +62,7 @@ export const columns: ColumnDef<User>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Correo
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -70,10 +70,47 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "usu_estado",
     header: "Estado",
+    cell: ({ row }) => {
+      const status = row.getValue("usu_estado") as string;
+      return (
+        <div
+          className={`font-medium ${
+            status === "A"
+              ? "text-green-600"
+              : status === "I"
+              ? "text-red-600"
+              : ""
+          }`}
+        >
+          {status === "A"
+            ? "Activo"
+            : status === "I"
+            ? "Inactivo"
+            : "Desconocido"}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "usu_rol",
     header: "Rol",
+    cell: ({ row }) => {
+      const status = row.getValue("usu_rol") as string;
+      return (
+        <div
+        >
+          {status === "A"
+            ? "Administrador"
+            : status === "J"
+            ? "Jefe"
+            : status === "E"
+            ? "Empleado"
+            : status === "R"
+            ? "Auditor"
+            : "Desconocido"}
+        </div>
+      );
+    },
   },
   {
     id: "actions",

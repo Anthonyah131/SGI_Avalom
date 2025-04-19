@@ -30,7 +30,7 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Identificador
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -68,6 +68,30 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
   {
     accessorKey: "alq_estado",
     header: "Estado",
+    cell: ({ row }) => {
+      const status = row.getValue("alq_estado") as string;
+      return (
+        <div
+          className={`font-medium ${
+            status === "A"
+              ? "text-green-600"
+              : status === "F"
+              ? "text-red-600"
+              : status === "C"
+              ? "text-yellow-600"
+              : "text-gray-600"
+          }`}
+        >
+          {status === "A"
+            ? "Activo"
+            : status === "F"
+            ? "Finalizado"
+            : status === "C"
+            ? "Cancelado"
+            : "Desconocido"}
+        </div>
+      );
+    },
   },
   {
     id: "actions",

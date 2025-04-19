@@ -98,40 +98,40 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full space-y-4 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <Input
-              placeholder="Buscar..."
-              value={globalFilterValue}
-              onChange={(event) => setGlobalFilterValue(event.target.value)}
-              className="w-full sm:max-w-xs"
-              aria-label="Buscar en la tabla"
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-auto">
-                  Columnas <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        <Input
+          placeholder="Buscar..."
+          value={globalFilterValue}
+          onChange={(event) => setGlobalFilterValue(event.target.value)}
+          className="w-full sm:max-w-xs"
+          aria-label="Buscar en la tabla"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="borderOrange" className="w-full sm:w-auto">
+              Columnas <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <div className="flex w-full flex-col rounded-md border">
         <main className="grid flex-1 items-start">
           <Table>
@@ -160,7 +160,7 @@ export function DataTable<TData, TValue>({
                     key={row.id}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick?.(row.original)}
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
@@ -210,7 +210,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <Button
-            variant="outline"
+            variant="green"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
@@ -219,7 +219,7 @@ export function DataTable<TData, TValue>({
             Anterior
           </Button>
           <Button
-            variant="outline"
+            variant="green"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}

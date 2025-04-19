@@ -83,9 +83,9 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        <Card className="bg-background">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-2xl text-primary font-bold">
               {action === "create" ? "Nuevo Alquiler" : "Editar Alquiler"}
             </CardTitle>
             <CardDescription>
@@ -200,10 +200,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
               />
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {clientsInRental.map((client) => (
-                  <Card
-                    key={client.cli_id}
-                    className="relative p-3 bg-background"
-                  >
+                  <Card key={client.cli_id} className="relative p-3">
                     <CardHeader className="p-0 mb-2">
                       <CardTitle className="text-sm font-medium">
                         {client.cli_nombre} {client.cli_papellido}
@@ -228,7 +225,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
           )}
         </Card>
         {action !== "create" && (
-          <Card className="bg-background">
+          <Card>
             <CardHeader>
               <CardTitle className="text-xl font-semibold">Contrato</CardTitle>
               <CardDescription>Adjuntar contrato del alquiler</CardDescription>
@@ -255,16 +252,14 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
               {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
               {action === "create" ? "Crear Alquiler" : "Guardar Cambios"}
             </Button>
-            {action !== "edit" && (
-              <Button
-                type="button"
-                onClick={handleClear}
-                disabled={isLoading}
-                variant="outline"
-              >
-                Limpiar
-              </Button>
-            )}
+            <Button
+              type="button"
+              onClick={handleClear}
+              disabled={isLoading}
+              variant="green"
+            >
+              Limpiar
+            </Button>
           </div>
         )}
       </form>

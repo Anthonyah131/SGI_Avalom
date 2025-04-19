@@ -51,7 +51,7 @@ export const columnsClient: ColumnDef<Cliente>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Nombre
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -65,7 +65,7 @@ export const columnsClient: ColumnDef<Cliente>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Apellido
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },
@@ -83,7 +83,7 @@ export const columnsClient: ColumnDef<Cliente>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Correo
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
     },

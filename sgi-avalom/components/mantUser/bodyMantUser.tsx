@@ -4,12 +4,10 @@ import cookie from "js-cookie";
 import axios from "axios";
 import { Plus } from "lucide-react";
 import useUserStore from "@/lib/zustand/userStore";
-import { User } from "@/lib/types";
 import { ModeToggle } from "@/components/modeToggle";
 import { columns } from "./columnsUser";
 import { DataTable } from "@/components/dataTable/data-table";
 import ManageActions from "@/components/dataTable/manageActions";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import UserForm from "./UserFormProps";
@@ -52,53 +50,73 @@ const BodyMantUser: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 space-y-8">
-      <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
-        <CardHeader className="">
-          <BreadcrumbResponsive
-            items={[
-              { label: "Inicio", href: "/homePage" },
-              { label: "Gesteión de usuarios" },
-            ]}
-          />
-          <CardTitle className="text-2xl font-bold mb-4 sm:mb-0">
-            Gestión de Usuarios
-          </CardTitle>
-        </CardHeader>
-        <div className="flex flex-wrap justify-center gap-2 p-4">
-          <ManageActions
-            variant="default"
-            titleButton={"Nuevo Usuario"}
-            icon={<Plus className="mr-2 h-4 w-4" />}
-            title={"Nuevo Usuario"}
-            description={"Ingresa un nuevo Usuario"}
-            FormComponent={<UserForm action={"create"} onSuccess={() => {}} />}
-          />
-          <Button variant="outline">Exportar Usuarios</Button>
-          <Button variant="outline">Descargar Plantilla</Button>
-          <Button variant="outline">Importar</Button>
-          <ModeToggle />
-        </div>
-      </Card>
-      <Card>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {[...Array(5)].map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 sm:gap-8 m-10"
-                >
-                  <Skeleton className="w-full sm:w-[200px] h-[20px] rounded-full" />
-                  <Skeleton className="w-full sm:w-[100px] h-[20px] rounded-full" />
-                  <Skeleton className="w-full sm:w-[150px] h-[20px] rounded-full" />
-                </div>
-              ))}
+      {isLoading ? (
+        <>
+          <div className="space-y-4 mb-3">
+            <div className="h-4 w-40 sm:w-56 rounded-md bg-muted animate-pulse" />{" "}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
+              <div className="w-60 h-8 rounded-md bg-muted animate-pulse" />{" "}
+              <div className="flex flex-wrap gap-2">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    className="h-8 w-[120px] rounded-md bg-muted animate-pulse"
+                  />
+                ))}
+              </div>
             </div>
-          ) : (
-            <DataTable columns={columns} data={users} />
-          )}
-        </CardContent>
-      </Card>
+          </div>
+          <div className="space-y-4">
+            {[...Array(6)].map((_, index) => (
+              <div
+                key={index}
+                className="flex flex-col sm:flex-row items-center sm:justify-between gap-4 sm:gap-8 m-10"
+              >
+                <Skeleton className="w-full sm:w-[200px] h-[30px] rounded-full" />
+                <Skeleton className="w-full sm:w-[100px] h-[30px] rounded-full" />
+                <Skeleton className="w-full sm:w-[150px] h-[30px] rounded-full" />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <Card className="flex flex-col sm:flex-row justify-between items-center">
+            <CardHeader className="">
+              <BreadcrumbResponsive
+                items={[
+                  { label: "Inicio", href: "/homePage" },
+                  { label: "Gesteión de usuarios" },
+                ]}
+              />
+              <CardTitle className="text-2xl font-bold text-primary mb-4 sm:mb-0">
+                Gestión de Usuarios
+              </CardTitle>
+            </CardHeader>
+            <div className="flex flex-wrap justify-center gap-2 p-4">
+              <ManageActions
+                variant="default"
+                titleButton={"Nuevo Usuario"}
+                icon={<Plus className="mr-2 h-4 w-4" />}
+                title={"Nuevo Usuario"}
+                description={"Ingresa un nuevo Usuario"}
+                FormComponent={
+                  <UserForm action={"create"} onSuccess={() => {}} />
+                }
+              />
+              <Button variant="outline">Exportar Usuarios</Button>
+              <Button variant="outline">Descargar Plantilla</Button>
+              <Button variant="outline">Importar</Button>
+              <ModeToggle />
+            </div>
+          </Card>
+          <Card>
+            <CardContent>
+              <DataTable columns={columns} data={users} />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

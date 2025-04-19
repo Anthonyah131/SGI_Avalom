@@ -26,7 +26,8 @@ interface ClientAlertDialogProps {
     | "outline"
     | "secondary"
     | "ghost"
-    | "nuevo"
+    | "green"
+    | "orange"
     | null
     | undefined;
   classn?: string;

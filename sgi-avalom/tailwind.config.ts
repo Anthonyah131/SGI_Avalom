@@ -32,13 +32,17 @@ const config = {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        green: {
+          DEFAULT: "hsl(var(--green))",
+          foreground: "hsl(var(--green-foreground))",
+        },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
-        },
-        nuevo: {
-          DEFAULT: "hsl(var(--nuevo))",
-          foreground: "hsl(var(--nuevo-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -59,10 +63,6 @@ const config = {
         sideBar: {
           DEFAULT: "hsl(var(--sideBar))",
           foreground: "hsl(var(--sideBar-foreground))",
-        },
-        backgroundWhite: {
-          DEFAULT: "hsl(var(--backgroundWhite))",
-          foreground: "hsl(var(--backgroundWhite-foreground))",
         },
       },
       borderRadius: {

@@ -217,7 +217,9 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
       }
     };
 
-    fetchClients();
+    if (action === "edit") {
+      fetchClients();
+    }
   }, [setClients]);
 
   const isFormDisabled = action === "edit" && !selectedRental;

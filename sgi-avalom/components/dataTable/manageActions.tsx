@@ -34,7 +34,7 @@ interface ManageActionsProps {
     | "outline"
     | "secondary"
     | "ghost"
-    | "nuevo"
+    | "green"
     | null
     | undefined;
   classn?: string;
@@ -96,7 +96,7 @@ const ManageActions: React.FC<ManageActionsProps> = ({
       </DrawerTrigger>
       <DrawerContent className="flex flex-col h-[85vh]">
         <DrawerHeader className="text-left">
-          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerTitle className="font-bold text-primary">{title}</DrawerTitle>
           <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
         <ScrollArea className="flex-1 px-4">{FormComponent}</ScrollArea>

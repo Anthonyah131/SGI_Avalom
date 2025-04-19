@@ -41,7 +41,7 @@ const BodyRent: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 space-y-8">
-      <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
+      <Card className="flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
           <BreadcrumbResponsive
             items={[

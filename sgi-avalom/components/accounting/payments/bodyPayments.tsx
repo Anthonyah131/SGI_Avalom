@@ -54,7 +54,7 @@ const BodyPayments: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 max-w-7xl space-y-8">
-      <Card className="bg-background flex flex-col sm:flex-row justify-between items-center">
+      <Card className="flex flex-col sm:flex-row justify-between items-center">
         <CardHeader>
           <BreadcrumbResponsive
             items={[
@@ -74,7 +74,7 @@ const BodyPayments: React.FC = () => {
 
       <DepositView></DepositView>
 
-      <Card className="bg-background">
+      <Card>
         <CardHeader>
           <CardTitle className="text-xl font-semibold">
             Alquileres Mensuales

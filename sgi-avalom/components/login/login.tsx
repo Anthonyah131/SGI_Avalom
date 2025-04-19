@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import cookie from "js-cookie";
 import { useUser } from "@/lib/UserContext";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Loader2Icon, LogInIcon } from "lucide-react";
 import Image from "next/image";
+import { ModeToggle } from "../modeToggle";
 
 const Login: React.FC = () => {
   const router = useRouter();
@@ -51,13 +52,19 @@ const Login: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const token = cookie.get("token");
+    if (token) router.push("/homePage");
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-md w-full space-y-8">
+      <Card className="transition-all duration-300 shadow-md hover:shadow-lg bg-card">
         <CardHeader>
           <CardTitle className="text-center text-3xl font-extrabold">
             Inicia sesión con tu cuenta
           </CardTitle>
+          <ModeToggle />
         </CardHeader>
         <div className="flex justify-center">
           <Image
@@ -68,7 +75,7 @@ const Login: React.FC = () => {
           />
         </div>
         <CardContent>
-          {error && <Alert variant="destructive">{error}</Alert>}
+          {error && <Alert className="mt-2" variant="destructive">{error}</Alert>}
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-5">
               <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -78,6 +85,7 @@ const Login: React.FC = () => {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  className="focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   required
                   placeholder="Ingresa tu correo"
                   value={email}
@@ -91,6 +99,7 @@ const Login: React.FC = () => {
                   name="password"
                   type="password"
                   autoComplete="current-password"
+                  className="focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   required
                   placeholder="Ingresa tu contraseña"
                   value={password}
@@ -100,7 +109,12 @@ const Login: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                variant="default"
+                disabled={!email || !password || isLoading}
+              >
                 {isLoading ? (
                   <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                 ) : (

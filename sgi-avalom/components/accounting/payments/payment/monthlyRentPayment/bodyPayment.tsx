@@ -32,7 +32,7 @@ const BodyPayment: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 max-w-7xl space-y-8">
-      <Card className="bg-background">
+      <Card>
         <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
           <div>
             <BreadcrumbResponsive

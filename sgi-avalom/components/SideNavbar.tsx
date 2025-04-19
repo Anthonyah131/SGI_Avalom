@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   BookUser,
@@ -14,13 +12,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/lib/UserContext";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/lib/UserContext";
 
 export default function SideNavbar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -117,7 +117,7 @@ export default function SideNavbar() {
             pathname === href && "bg-accent text-accent-foreground"
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="text-orange h-5 w-5" />
           <span className="sr-only">{title}</span>
         </Link>
       </TooltipTrigger>
@@ -128,7 +128,7 @@ export default function SideNavbar() {
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-10 flex flex-col border-r bg-background transition-all duration-300",
+        "fixed inset-y-0 left-0 z-10 flex flex-col border-r bg-card transition-all duration-300",
         isCollapsed ? "w-14" : "w-20"
       )}
       onMouseEnter={() => isDesktop && setIsCollapsed(false)}

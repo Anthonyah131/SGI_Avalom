@@ -57,7 +57,6 @@ export const usePropertyForm = ({
 
   useEffect(() => {
     if (action === "edit" && property) {
-      console.log("Reset con valores actualizados:", defaultValues);
       reset(defaultValues);
     }
   }, [property, action, reset, defaultValues]);

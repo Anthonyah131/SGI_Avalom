@@ -43,6 +43,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     try {
       const response = await axios.get(`/api/property/${propertyId}`);
       setSelectedProperty(response.data.data);
+      setSelectedRental(null);
     } catch (error) {
       console.error("Error fetching property:", error);
     } finally {
@@ -73,13 +74,13 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
   const isAirbnb = selectedProperty.tipp_id === "1";
 
   return (
-    <CardContent className="space-y-2">
+    <CardContent className="space-y-6">
       <PropertyForm
         property={selectedProperty}
         action="edit"
         onSuccess={() => {}}
       />
-      <Separator className="my-6" />
+      <Separator className="my-6 h-1 rounded-xl" />
       {!isAirbnb && (
         <Tabs defaultValue="view" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -89,10 +90,10 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="view" className="space-y-4">
-            <RentalForm action="edit" onSuccess={handleSuccess} />
-            <Separator className="my-4" />
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Historial de alquileres</h2>
+              <h2 className="text-xl text-primary font-semibold">
+                Historial de alquileres
+              </h2>
             </div>
             <Card>
               <CardContent className="p-0">
@@ -103,6 +104,10 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
                 />
               </CardContent>
             </Card>
+            <Separator className="my-6 h-1 rounded-xl" />
+            {selectedRental && (
+              <RentalForm action="edit" onSuccess={handleSuccess} />
+            )}
           </TabsContent>
           <TabsContent value="create">
             <RentalForm action="create" onSuccess={handleSuccess} />
