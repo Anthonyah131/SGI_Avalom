@@ -23,7 +23,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { X, CalendarIcon } from "lucide-react";
+import { X, CalendarIcon, AlertCircle } from "lucide-react";
 import { ClientComboBox } from "@/components/mantBuild/mantProperty/mantRent/ClientComboBox";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -40,6 +40,7 @@ import React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
@@ -53,6 +54,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     clients,
     clientsInRental,
     selectedRental,
+    disableEstadoField,
   } = useRentalForm({ action, onSuccess });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +82,18 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        {disableEstadoField && (
+          <Alert
+            variant="default"
+            className="border-yellow-400 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800"
+          >
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-sm text-yellow-800 dark:text-yellow-100">
+              Este alquiler tiene pagos registrados. El estado solo puede
+              modificarse desde la vista de <strong>Contabilidad</strong>.
+            </AlertDescription>
+          </Alert>
+        )}
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-primary font-bold">
@@ -170,7 +184,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={isFormDisabled}
+                      disabled={isFormDisabled || disableEstadoField}
                     >
                       <SelectTrigger className="w-full bg-background">
                         <SelectValue placeholder="Selecciona el estado" />
@@ -197,10 +211,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
               />
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {clientsInRental.map((client) => (
-                  <Card
-                    key={client.cli_id}
-                    className="relative p-3"
-                  >
+                  <Card key={client.cli_id} className="relative p-3">
                     <CardHeader className="p-0 mb-2">
                       <CardTitle className="text-sm font-medium">
                         {client.cli_nombre} {client.cli_papellido}
@@ -227,7 +238,9 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
         {action !== "create" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl text-primary font-semibold">Contrato</CardTitle>
+              <CardTitle className="text-xl text-primary font-semibold">
+                Contrato
+              </CardTitle>
               <CardDescription>Adjuntar contrato del alquiler</CardDescription>
             </CardHeader>
             <CardContent>

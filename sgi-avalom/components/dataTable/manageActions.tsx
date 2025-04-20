@@ -40,6 +40,7 @@ interface ManageActionsProps {
   classn?: string;
   icon?: React.ReactNode;
   FormComponent: React.ReactNode;
+  disabled?: boolean;
 }
 
 const ManageActions: React.FC<ManageActionsProps> = ({
@@ -50,6 +51,7 @@ const ManageActions: React.FC<ManageActionsProps> = ({
   classn,
   icon,
   FormComponent,
+  disabled,
 }) => {
   const [open, setOpen] = useState(false);
   const onlyWidth = useWindowWidth();
@@ -64,7 +66,12 @@ const ManageActions: React.FC<ManageActionsProps> = ({
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant={variant} className={classn} onClick={toggleOpen}>
+          <Button
+            disabled={disabled}
+            variant={variant}
+            className={classn}
+            onClick={toggleOpen}
+          >
             {icon && <span className="mr-2">{icon}</span>}
             {titleButton}
           </Button>
@@ -89,7 +96,12 @@ const ManageActions: React.FC<ManageActionsProps> = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant={variant} className={classn} onClick={toggleOpen}>
+        <Button
+          disabled={disabled}
+          variant={variant}
+          className={classn}
+          onClick={toggleOpen}
+        >
           {icon && <span className="mr-2">{icon}</span>}
           {titleButton}
         </Button>

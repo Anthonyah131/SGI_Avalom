@@ -40,6 +40,33 @@ export const useRentalForm = ({
   const [clients, setClients] = useState<Cliente[]>([]);
   const [clientsInRental, setClientsInRental] = useState<Cliente[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasPayments, setHasPayments] = useState(false);
+
+  const fetchHasPayments = async (alqId: string) => {
+    try {
+      const token = cookie.get("token");
+      if (!token) return;
+
+      const response = await axios.get(`/api/rent/haspayments/${alqId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response?.data?.success) {
+        setHasPayments(response.data.data.hasPayments);
+      }
+    } catch (error) {
+      console.error("Error verificando pagos del alquiler:", error);
+    }
+  };
+
+  const getAlqEstado = (value: string | undefined): "A" | "F" | "C" => {
+    if (["A", "F", "C"].includes(value || "")) {
+      return value as "A" | "F" | "C";
+    }
+    return "A";
+  };
 
   const defaultValues: RentalFormInputs = useMemo(() => {
     return selectedRental
@@ -54,14 +81,7 @@ export const useRentalForm = ({
             ),
             "yyyy-MM-dd"
           ),
-          alq_estado: ["A", "F", "C"].includes(
-            selectedRental.alq_estado?.trim().toUpperCase()
-          )
-            ? (selectedRental.alq_estado.trim().toUpperCase() as
-                | "A"
-                | "F"
-                | "C")
-            : "A",
+          alq_estado: getAlqEstado(selectedRental?.alq_estado),
         }
       : {
           alq_monto: "0",
@@ -84,6 +104,7 @@ export const useRentalForm = ({
         selectedRental.ava_clientexalquiler?.map((rel) => rel.ava_cliente) || []
       );
       setRents("monthlyRents", selectedRental.ava_alquilermensual || []);
+      fetchHasPayments(selectedRental.alq_id);
     }
   }, [selectedRental, reset, defaultValues, setRents]);
 
@@ -168,6 +189,7 @@ export const useRentalForm = ({
   };
 
   const isFormDisabled = action === "view";
+  const disableEstadoField = action === "edit" && hasPayments;
 
   return {
     form,
@@ -181,5 +203,6 @@ export const useRentalForm = ({
     isLoading,
     selectedRental,
     isFormDisabled,
+    disableEstadoField,
   };
 };

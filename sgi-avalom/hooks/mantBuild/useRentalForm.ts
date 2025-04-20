@@ -17,8 +17,8 @@ const rentalFormSchema = z.object({
   alq_monto: z
     .string()
     .min(1, "El monto es requerido")
-    .refine((value) => !isNaN(Number(value)), {
-      message: "El monto debe ser un número",
+    .refine((value) => !isNaN(Number(value)) && Number(value) > 0, {
+      message: "Monto inválido",
     }),
   alq_fechapago: z.string().min(1, "La fecha de pago es requerida"),
   alq_estado: z.enum(["A", "F", "C"]),
@@ -34,37 +34,45 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     selectedProperty,
     selectedRental,
     setSelectedRental,
-  } = usePropertyStore((state) => ({
-    addRental: state.addRental,
-    updateRental: state.updateRental,
-    removeRental: state.removeRental,
-    selectedProperty: state.selectedProperty,
-    selectedRental: state.selectedRental,
-    setSelectedRental: state.setSelectedRental,
-  }));
+  } = usePropertyStore();
 
-  const { clients, setClients } = useClientStore((state) => ({
-    clients: state.clients,
-    setClients: state.setClients,
-  }));
-
+  const { clients, setClients } = useClientStore();
   const [clientsInRental, setClientsInRental] = useState<Cliente[]>([]);
+  const [hasPayments, setHasPayments] = useState(false);
+
+  const fetchHasPayments = async (alqId: string) => {
+    try {
+      const token = cookie.get("token");
+      if (!token) return;
+
+      const response = await axios.get(`/api/rent/haspayments/${alqId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response?.data?.success) {
+        setHasPayments(response.data.data.hasPayments);
+      }
+    } catch (error) {
+      console.error("Error verificando pagos del alquiler:", error);
+    }
+  };
 
   useEffect(() => {
-    if (action === "edit" && selectedRental) {
+    if (action === "edit" && selectedRental?.alq_id) {
       setClientsInRental(
-        selectedRental.ava_clientexalquiler?.map(
-          (relation) => relation.ava_cliente
-        ) || []
+        selectedRental.ava_clientexalquiler?.map((rel) => rel.ava_cliente) || []
       );
+      fetchHasPayments(selectedRental.alq_id);
     } else {
       setClientsInRental([]);
     }
   }, [action, selectedRental]);
 
   const getAlqEstado = (value: string | undefined): "A" | "F" | "C" => {
-    if (value === "A" || value === "F" || value === "C") {
-      return value;
+    if (["A", "F", "C"].includes(value || "")) {
+      return value as "A" | "F" | "C";
     }
     return "A";
   };
@@ -72,7 +80,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
   const defaultValues = useMemo(() => {
     return action === "create"
       ? {
-          alq_monto: "0",
+          alq_monto: "100000",
           alq_fechapago: "",
           alq_estado: "A" as const,
         }
@@ -110,7 +118,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     reset({
       alq_monto: "0",
       alq_fechapago: "",
-      alq_estado: "A" as const,
+      alq_estado: "A",
     });
     setSelectedRental(null);
     setClientsInRental([]);
@@ -119,9 +127,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
   const onSubmit: SubmitHandler<RentalFormInputs> = async (formData) => {
     try {
       const token = cookie.get("token");
-      if (!token) {
-        throw new Error("Token no disponible");
-      }
+      if (!token) throw new Error("Token no disponible");
 
       const headers = {
         Authorization: `Bearer ${token}`,
@@ -131,53 +137,56 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
       let response;
 
       if (action === "create") {
+        const activeRents = selectedProperty?.ava_alquiler?.filter(
+          (r) => r.alq_estado === "A"
+        );
+
+        if (activeRents && activeRents.length > 0) {
+          throw new Error("Ya existe un alquiler activo en esta propiedad.");
+        }
+
         const newRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
             ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
             : null,
-          alq_monto: Number(formData.alq_monto) || 0,
+          alq_monto: Number(formData.alq_monto),
           prop_id: selectedProperty?.prop_id,
         };
+
         response = await axios.post("/api/rent", newRental, { headers });
       } else if (action === "edit" && selectedRental?.alq_id) {
-        const updatedRentalData = {
+        const updatedRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
             ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
             : null,
-          ava_clientexalquiler: clientsInRental.map((client) => ({
-            cli_id: client.cli_id,
+          ava_clientexalquiler: clientsInRental.map((c) => ({
+            cli_id: c.cli_id,
           })),
         };
 
         response = await axios.put(
           `/api/rent/${selectedRental.alq_id}`,
-          updatedRentalData,
+          updatedRental,
           { headers }
         );
       }
+
       if (response?.data?.success) {
         if (action === "create") {
           addRental(response.data.data);
-        } else if (action === "edit" && selectedRental?.alq_id) {
-          updateRental(selectedRental?.alq_id, response.data.data);
-          setSelectedRental(response.data.data);
         } else {
-          throw new Error(response?.data?.error || "Error desconocido");
+          updateRental(selectedRental?.alq_id!, response.data.data);
+          setSelectedRental(response.data.data);
         }
+
         onSuccess();
         clearForm();
       }
     } catch (error: any) {
-      const message =
-        error.response?.data?.error || error.message || "Error desconocido";
-      throw new Error(message);
+      throw new Error(error.message || "Error al guardar el alquiler");
     }
-  };
-
-  const handleClear = () => {
-    clearForm();
   };
 
   const handleClientSelect = (client: Cliente) => {
@@ -190,31 +199,21 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
     }
   };
 
-  const handleClientRemove = (clientId: string) => {
-    setClientsInRental(
-      clientsInRental.filter((client) => client.cli_id !== clientId)
-    );
+  const handleClientRemove = (cliId: string) => {
+    setClientsInRental(clientsInRental.filter((c) => c.cli_id !== cliId));
   };
 
   useEffect(() => {
     const fetchClients = async () => {
       const token = cookie.get("token");
-      if (!token) {
-        console.error("No hay token disponible");
-        return;
-      }
+      if (!token) return;
 
-      try {
-        const response = await axios.get("/api/client", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-        setClients(response.data.data);
-      } catch (error) {
-        console.error("Error al buscar clientes: " + error);
-      }
+      const res = await axios.get("/api/client", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setClients(res.data.data);
     };
 
     if (action === "edit") {
@@ -223,15 +222,17 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
   }, [setClients]);
 
   const isFormDisabled = action === "edit" && !selectedRental;
+  const disableEstadoField = action === "edit" && hasPayments;
 
   return {
     form,
     handleSubmit,
     onSubmit,
-    handleClear,
+    handleClear: clearForm,
     handleClientSelect,
     handleClientRemove,
     isFormDisabled,
+    disableEstadoField,
     clients,
     clientsInRental,
     selectedRental,

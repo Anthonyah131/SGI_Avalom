@@ -42,6 +42,7 @@ const PropertyManager: React.FC<PropertyManagerProps> = ({ propertyId }) => {
     setIsLoading(true);
     try {
       const response = await axios.get(`/api/property/${propertyId}`);
+      console.log("Property data:", response.data.data);
       setSelectedProperty(response.data.data);
       setSelectedRental(null);
     } catch (error) {

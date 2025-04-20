@@ -29,6 +29,24 @@ export async function POST(request: NextRequest) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const data = await req.json();
+
+      const existingActiveRent = await prisma.ava_alquiler.findFirst({
+        where: {
+          prop_id: data.prop_id,
+          alq_estado: "A",
+        },
+      });
+
+      if (existingActiveRent) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Ya existe un alquiler activo para esta propiedad.",
+          },
+          { status: 400 }
+        );
+      }
+
       const rent = await prisma.ava_alquiler.create({
         data,
       });

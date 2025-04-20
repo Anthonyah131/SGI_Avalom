@@ -40,6 +40,8 @@ import React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
@@ -53,6 +55,7 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     clients,
     clientsInRental,
     selectedRental,
+    disableEstadoField,
   } = useRentalForm({ action, onSuccess });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +86,19 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        {disableEstadoField && (
+          <Alert
+            variant="default"
+            className="border-yellow-400 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800"
+          >
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-sm text-yellow-800 dark:text-yellow-100">
+              Este alquiler tiene pagos registrados. El estado solo puede
+              modificarse desde la vista de <strong>Contabilidad</strong>.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl text-primary font-bold">
@@ -173,7 +189,11 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                     <Select
                       value={field.value}
                       onValueChange={field.onChange}
-                      disabled={isFormDisabled || action === "view"}
+                      disabled={
+                        isFormDisabled ||
+                        action === "view" ||
+                        disableEstadoField
+                      }
                     >
                       <SelectTrigger className="w-full bg-background">
                         <SelectValue placeholder="Selecciona el estado" />
