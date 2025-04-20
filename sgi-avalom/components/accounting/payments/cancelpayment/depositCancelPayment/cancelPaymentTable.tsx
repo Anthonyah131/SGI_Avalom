@@ -53,7 +53,7 @@ export function CancelPaymentTable() {
   const renderMobileView = () => (
     <div className="space-y-4">
       {filteredPayments.map((payment) => (
-        <Card key={payment.pag_id} className="bg-background">
+        <Card key={payment.pag_id}>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">
               Pago ID: {payment.pag_id}
@@ -140,31 +140,27 @@ export function CancelPaymentTable() {
   const renderDesktopView = () => (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("pag_id")}
-          >
-            ID <ArrowUpDown className="ml-2 h-4 w-4" />
+        <TableRow className="cursor-pointer hover:bg-muted">
+          <TableHead>
+            <Button variant="table" onClick={() => handleSort("pag_id")}>
+              ID <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+            </Button>
           </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("pag_monto")}
-          >
-            Monto <ArrowUpDown className="ml-2 h-4 w-4" />
+          <TableHead>
+            <Button variant="table" onClick={() => handleSort("pag_monto")}>
+              Monto <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+            </Button>
           </TableHead>
           <TableHead>Descripción</TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("pag_estado")}
-          >
-            Estado <ArrowUpDown className="ml-2 h-4 w-4" />
+          <TableHead>
+            <Button variant="table" onClick={() => handleSort("pag_estado")}>
+              Estado <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+            </Button>
           </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("pag_fechapago")}
-          >
-            Fecha de Pago <ArrowUpDown className="ml-2 h-4 w-4" />
+          <TableHead>
+            <Button variant="table" onClick={() => handleSort("pag_fechapago")}>
+              Fecha de Pago <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+            </Button>
           </TableHead>
           <TableHead>Acciones</TableHead>
         </TableRow>
@@ -227,9 +223,9 @@ export function CancelPaymentTable() {
   );
 
   return (
-    <Card className="bg-background">
+    <Card>
       <CardHeader>
-        <CardTitle>Pagos Asociados</CardTitle>
+        <CardTitle className="text-primary">Pagos Asociados</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="mb-4">

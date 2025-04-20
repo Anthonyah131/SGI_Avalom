@@ -57,7 +57,7 @@ export function PaymentForm({
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-xl text-primary font-semibold">
               Detalles del Pago
             </CardTitle>
           </CardHeader>

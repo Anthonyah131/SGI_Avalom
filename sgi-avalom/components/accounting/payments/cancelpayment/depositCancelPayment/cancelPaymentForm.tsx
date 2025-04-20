@@ -58,7 +58,7 @@ export function CancelPaymentForm({
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-xl text-primary font-semibold">
               Detalles del Pago
             </CardTitle>
           </CardHeader>

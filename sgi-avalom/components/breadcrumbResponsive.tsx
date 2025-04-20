@@ -77,7 +77,7 @@ export function BreadcrumbResponsive({
                   asChild
                   className="max-w-[100px] truncate md:max-w-none"
                 >
-                  <Link href={item.href}>{item.label}</Link>
+                  <Link className="hover:text-orange" href={item.href}>{item.label}</Link>
                 </BreadcrumbLink>
               ) : (
                 <BreadcrumbPage className="max-w-[100px] truncate md:max-w-none">
@@ -101,7 +101,7 @@ export function BreadcrumbResponsive({
                       <DropdownMenuContent align="start">
                         {hiddenItems.map((item, index) => (
                           <DropdownMenuItem key={index}>
-                            <Link href={item.href ?? "#"} className="w-full">
+                            <Link href={item.href ?? "#"} className="hover:text-orange w-full">
                               {item.label}
                             </Link>
                           </DropdownMenuItem>
@@ -129,7 +129,7 @@ export function BreadcrumbResponsive({
                             <Link
                               key={index}
                               href={item.href ?? "#"}
-                              className="py-1 text-sm"
+                              className="hover:text-orange py-1 text-sm"
                             >
                               {item.label}
                             </Link>

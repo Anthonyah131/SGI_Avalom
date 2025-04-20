@@ -2,7 +2,13 @@
 
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
 import { ModeToggle } from "@/components/modeToggle";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePayment } from "@/hooks/accounting/monthlyRentPayment/usePayment";
 import { formatCurrency } from "@/utils/currencyConverter";
@@ -32,112 +38,166 @@ const BodyPayment: React.FC = () => {
 
   return (
     <div className="mx-auto p-4 max-w-7xl space-y-8">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-          <div>
-            <BreadcrumbResponsive
-              items={[
-                { label: "Inicio", href: "/homePage" },
-                { label: "Contabilidad", href: "/accounting" },
-                {
-                  label: "Realizar movimiento",
-                  href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
-                },
-                { label: "Realizar Pago" },
-              ]}
-            />
-            <CardTitle className="text-2xl font-bold mt-4">
-              Realizar Pago
-            </CardTitle>
-            {new Date(
-              selectedMonthlyRent?.alqm_fechainicio ?? ""
-            ).toLocaleDateString("es-CR")}{" "}
-            -{" "}
-            {new Date(
-              selectedMonthlyRent?.alqm_fechafin ?? ""
-            ).toLocaleDateString("es-CR")}
-          </div>
-          <ModeToggle />
-        </CardHeader>
-      </Card>
-
       {isLoading ? (
-        <Card className="bg-background">
-          <CardContent className="p-6">
-            <Skeleton className="h-[200px] w-full" />
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="bg-background">
-          <CardContent className="p-6 overflow-x-auto">
-            <PaymentTable
-              amountToPay={amountToPay}
-              setAmountToPay={setAmountToPay}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {isLoading ? (
-            <Card className="bg-background">
-              <CardContent className="p-6">
-                <Skeleton className="h-[300px] w-full" />
-              </CardContent>
-            </Card>
-          ) : (
-            <PaymentForm
-              amountToPay={amountToPay}
-              setAmountToPay={setAmountToPay}
-            />
-          )}
-        </div>
-
-        {selectedMonthlyRent && !isLoading && (
-          <Card className="bg-background">
+        <>
+          <div>
             <CardHeader>
-              <CardTitle className="text-xl font-semibold">
-                Resumen de Pago
-              </CardTitle>
+              <Skeleton className="h-6 w-[150px] mb-2" />
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-sm font-medium">Monto Total:</div>
-                  <div className="text-sm font-bold text-right">
-                    {formatCurrency(
-                      Number(selectedMonthlyRent.alqm_montototal)
-                    )}
-                  </div>
-                  <div className="text-sm font-medium">Abono Total:</div>
-                  <div className="text-sm font-bold text-right">
-                    {formatCurrency(
-                      Number(selectedMonthlyRent.alqm_montopagado)
-                    )}
-                  </div>
-                  <div className="text-sm font-medium">Saldo Pendiente:</div>
-                  <div className="text-sm font-bold text-right text-red-600">
-                    {formatCurrency(currentBalance)}
-                  </div>
-                  <div className="text-sm font-medium">Monto a Abonar:</div>
-                  <div className="text-sm font-bold text-right text-green-600">
-                    {formatCurrency(Number(amountToPay))}
-                  </div>
-                  <div className="col-span-2 border-t pt-2">
-                    <div className="flex justify-between items-center">
-                      <div className="text-base font-medium">Nuevo Saldo:</div>
-                      <div className="text-base font-bold text-blue-600">
-                        {formatCurrency(newBalance)}
+            <CardContent className="overflow-x-auto">
+              <div className="grid grid-cols-5 items-center gap-4 min-w-[600px]">
+                <Skeleton className="h-4 w-8" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="grid grid-cols-5 items-center gap-4 mt-4 min-w-[600px]">
+                <Skeleton className="h-4 w-8" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-8 w-24 rounded-md" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+            </CardContent>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>
+                  <Skeleton className="h-5 w-32" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Skeleton className="h-4 w-24 mb-2" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Skeleton className="h-9 w-36 rounded-md" />
+              </CardFooter>
+            </div>
+
+            <div>
+              <CardHeader>
+                <CardTitle>
+                  <Skeleton className="h-5 w-32" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-36" />
+              </CardContent>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <Card>
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
+              <div>
+                <BreadcrumbResponsive
+                  items={[
+                    { label: "Inicio", href: "/homePage" },
+                    { label: "Contabilidad", href: "/accounting" },
+                    {
+                      label: "Realizar movimiento",
+                      href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
+                    },
+                    { label: "Realizar Pago" },
+                  ]}
+                />
+                <CardTitle className="text-2xl text-primary font-bold mt-4">
+                  Realizar Pago
+                </CardTitle>
+                {new Date(
+                  selectedMonthlyRent?.alqm_fechainicio ?? ""
+                ).toLocaleDateString("es-CR")}{" "}
+                -{" "}
+                {new Date(
+                  selectedMonthlyRent?.alqm_fechafin ?? ""
+                ).toLocaleDateString("es-CR")}
+              </div>
+              <ModeToggle />
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 overflow-x-auto">
+              <PaymentTable
+                amountToPay={amountToPay}
+                setAmountToPay={setAmountToPay}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <PaymentForm
+                amountToPay={amountToPay}
+                setAmountToPay={setAmountToPay}
+              />
+            </div>
+
+            {selectedMonthlyRent && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl text-primary font-semibold">
+                    Resumen de Pago
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-sm font-medium">Monto Total:</div>
+                      <div className="text-sm font-bold text-right">
+                        {formatCurrency(
+                          Number(selectedMonthlyRent.alqm_montototal)
+                        )}
+                      </div>
+                      <div className="text-sm font-medium">Abono Total:</div>
+                      <div className="text-sm font-bold text-right">
+                        {formatCurrency(
+                          Number(selectedMonthlyRent.alqm_montopagado)
+                        )}
+                      </div>
+                      <div className="text-sm font-medium">
+                        Saldo Pendiente:
+                      </div>
+                      <div className="text-sm font-bold text-right text-red-600">
+                        {formatCurrency(currentBalance)}
+                      </div>
+                      <div className="text-sm font-medium">Monto a Abonar:</div>
+                      <div className="text-sm font-bold text-right text-green-600">
+                        {formatCurrency(Number(amountToPay))}
+                      </div>
+                      <div className="col-span-2 border-t pt-2">
+                        <div className="flex justify-between items-center">
+                          <div className="text-base font-medium">
+                            Nuevo Saldo:
+                          </div>
+                          <div className="text-base font-bold text-blue-600">
+                            {formatCurrency(newBalance)}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

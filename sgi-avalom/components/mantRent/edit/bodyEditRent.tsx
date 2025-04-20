@@ -94,9 +94,9 @@ const BodyEditRent: React.FC = () => {
   }, [alqId, setSelectedRental, setLoadingState]);
 
   return (
-    <div className="mx-auto p-4 max-w-7xl space-y-8">
+    <div className="mx-auto p-4 space-y-8">
       {isLoading ? (
-        <div className="space-y-6 p-4 max-w-5xl mx-auto">
+        <>
           <div className="space-y-2">
             <Skeleton className="h-6 w-48" />
             <Skeleton className="h-10 w-40" />
@@ -163,7 +163,7 @@ const BodyEditRent: React.FC = () => {
               ))}
             </div>
           </div>
-        </div>
+        </>
       ) : (
         <>
           <Card className="flex flex-col sm:flex-row justify-between items-center">

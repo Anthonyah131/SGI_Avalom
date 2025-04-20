@@ -7,7 +7,7 @@ import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
 import useRentalStore from "@/lib/zustand/useRentalStore";
-import { Cliente, AvaAlquilerMensual } from "@/lib/types";
+import { Cliente } from "@/lib/types";
 import { format, toDate, toZonedTime } from "date-fns-tz";
 
 const rentalFormSchema = z.object({
@@ -41,42 +41,51 @@ export const useRentalForm = ({
   const [clientsInRental, setClientsInRental] = useState<Cliente[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const defaultValues: RentalFormInputs = useMemo(() => {
+    return selectedRental
+      ? {
+          alq_monto: selectedRental.alq_monto?.toString() || "0",
+          alq_fechapago: format(
+            toDate(
+              toZonedTime(
+                new Date(selectedRental.alq_fechapago),
+                "America/Costa_Rica"
+              )
+            ),
+            "yyyy-MM-dd"
+          ),
+          alq_estado: ["A", "F", "C"].includes(
+            selectedRental.alq_estado?.trim().toUpperCase()
+          )
+            ? (selectedRental.alq_estado.trim().toUpperCase() as
+                | "A"
+                | "F"
+                | "C")
+            : "A",
+        }
+      : {
+          alq_monto: "0",
+          alq_fechapago: "",
+          alq_estado: "A",
+        };
+  }, [selectedRental]);
+
   const form = useForm<RentalFormInputs>({
     resolver: zodResolver(rentalFormSchema),
-    defaultValues: {
-      alq_monto: "0",
-      alq_fechapago: "",
-      alq_estado: "A",
-    },
+    defaultValues,
   });
 
   const { handleSubmit, reset } = form;
 
   useEffect(() => {
     if (selectedRental) {
-      const formattedValues = {
-        alq_monto: selectedRental.alq_monto?.toString() || "0",
-        alq_fechapago: format(
-          toDate(
-            toZonedTime(
-              new Date(selectedRental.alq_fechapago),
-              "America/Costa_Rica"
-            )
-          ),
-          "yyyy-MM-dd"
-        ),
-        alq_estado: ["A", "F", "C"].includes(selectedRental.alq_estado)
-          ? (selectedRental.alq_estado as "A" | "F" | "C")
-          : "A",
-      };
-
-      reset(formattedValues);
+      reset(defaultValues);
       setClientsInRental(
         selectedRental.ava_clientexalquiler?.map((rel) => rel.ava_cliente) || []
       );
       setRents("monthlyRents", selectedRental.ava_alquilermensual || []);
     }
-  }, [selectedRental, reset, setRents]);
+  }, [selectedRental, reset, defaultValues, setRents]);
 
   const fetchClients = async () => {
     try {
