@@ -100,6 +100,7 @@ const MonthlyRentsView: React.FC = () => {
 
         <div className="w-full sm:w-auto">
           <StatusFilter
+            filterName="Estado"
             selectedStatuses={selectedStatuses}
             onStatusChange={setSelectedStatuses}
             statuses={[
