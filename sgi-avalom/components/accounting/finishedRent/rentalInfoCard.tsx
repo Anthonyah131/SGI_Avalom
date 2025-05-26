@@ -93,7 +93,11 @@ export const RentalInfoCard = () => {
         <InfoItem
           icon={<BadgeDollarSign className="w-4 h-4 text-blue-800" />}
           label="Depósito Actual"
-          value={`₡${deposito?.depo_montoactual}`}
+          value={
+            deposito && deposito.depo_montoactual
+              ? `₡${deposito.depo_montoactual}`
+              : "N/A"
+          }
         />
         <InfoItem
           icon={<AlertTriangle className="w-4 h-4 text-orange-500" />}
