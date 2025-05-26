@@ -18,7 +18,7 @@ export const RentalInfoCard = () => {
   const { selectedRental, deposito, propiedad, clientes, hayPagosPendientes } =
     useFinishedRentalStore();
 
-  if (!selectedRental || !deposito) return null;
+  if (!selectedRental) return null;
 
   const clienteNombre = clientes
     .map((c) => `${c.cli_nombre} ${c.cli_papellido}`)
@@ -93,7 +93,7 @@ export const RentalInfoCard = () => {
         <InfoItem
           icon={<BadgeDollarSign className="w-4 h-4 text-blue-800" />}
           label="Depósito Actual"
-          value={`₡${deposito.depo_montoactual}`}
+          value={`₡${deposito?.depo_montoactual}`}
         />
         <InfoItem
           icon={<AlertTriangle className="w-4 h-4 text-orange-500" />}
