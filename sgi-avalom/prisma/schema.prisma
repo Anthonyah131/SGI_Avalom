@@ -17,6 +17,7 @@ model ava_alquiler {
   alq_estado            String                  @db.String(1)
   alq_fechacreacion     DateTime                @default(now()) @db.Timestamp(6)
   prop_id               BigInt?
+  rowid                 BigInt                  @default(autoincrement())
   ava_propiedad         ava_propiedad?          @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship34")
   ava_alquilercancelado ava_alquilercancelado[]
   ava_alquilermensual   ava_alquilermensual[]
@@ -39,10 +40,9 @@ model ava_alquilermensual {
   alqm_estado        String        @db.String(1)
   alqm_fechacreacion DateTime      @default(now()) @db.Timestamp(6)
   alq_id             BigInt?
+  rowid              BigInt        @default(autoincrement())
   ava_alquiler       ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship19")
   ava_pago           ava_pago[]
-
-  @@index([alq_id], map: "ava_alquilermensual_fk01")
 }
 
 model ava_cliente {
@@ -56,12 +56,14 @@ model ava_cliente {
   cli_fechacreacion    DateTime               @default(now()) @db.Timestamp(6)
   cli_direccion        String?                @db.String(200)
   cli_estadocivil      String?                @db.String(20)
+  rowid                BigInt                 @default(autoincrement())
   ava_clientexalquiler ava_clientexalquiler[]
 }
 
 model ava_clientexalquiler {
   alq_id       BigInt
   cli_id       BigInt
+  rowid        BigInt       @default(autoincrement())
   ava_alquiler ava_alquiler @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship30")
   ava_cliente  ava_cliente  @relation(fields: [cli_id], references: [cli_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship31")
 
@@ -79,6 +81,7 @@ model ava_deposito {
   depo_fechadevolucion   DateTime?     @db.Timestamp(6)
   depo_fechacreacion     DateTime      @default(now()) @db.Timestamp(6)
   alq_id                 BigInt?
+  rowid                  BigInt        @default(autoincrement())
   ava_alquiler           ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship23")
   ava_pago               ava_pago[]
 
@@ -91,6 +94,7 @@ model ava_edificio {
   edi_descripcion   String?         @db.String(50)
   edi_direccion     String?         @db.String(200)
   edi_codigopostal  String?         @db.String(10)
+  rowid             BigInt          @default(autoincrement())
   ava_propiedad     ava_propiedad[]
 }
 
@@ -101,20 +105,17 @@ model ava_pago {
   pag_cuenta          String?              @db.String(50)
   pag_estado          String               @db.String(1)
   pag_fechapago       DateTime             @db.Timestamp(6)
-  res_id              BigInt?
-  alqm_id             BigInt?
-  depo_id             BigInt?
   pag_metodopago      String?              @db.String(30)
   pag_banco           String?              @db.String(50)
   pag_referencia      String?              @db.String(100)
+  rowid               BigInt               @default(autoincrement())
+  res_id              BigInt?
+  alqm_id             BigInt?
+  depo_id             BigInt?
   ava_anulacionpago   ava_anulacionpago[]
   ava_alquilermensual ava_alquilermensual? @relation(fields: [alqm_id], references: [alqm_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship22")
   ava_deposito        ava_deposito?        @relation(fields: [depo_id], references: [depo_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship24")
   ava_reservacion     ava_reservacion?     @relation(fields: [res_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship21")
-
-  @@index([depo_id], map: "ava_pago_fk01")
-  @@index([alqm_id], map: "ava_pago_fk02")
-  @@index([res_id], map: "ava_pago_fk03")
 }
 
 model ava_pagoservicio {
@@ -124,6 +125,7 @@ model ava_pagoservicio {
   pser_descripcion String?        @db.String(50)
   ser_id           BigInt?
   prop_id          BigInt?
+  rowid            BigInt         @default(autoincrement())
   ava_propiedad    ava_propiedad? @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship35")
   ava_servicio     ava_servicio?  @relation(fields: [ser_id], references: [ser_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship27")
 
@@ -137,6 +139,7 @@ model ava_propiedad {
   prop_descripcion   String?            @db.String(50)
   edi_id             BigInt?
   tipp_id            BigInt?
+  rowid              BigInt             @default(autoincrement())
   ava_alquiler       ava_alquiler[]
   ava_pagoservicio   ava_pagoservicio[]
   ava_edificio       ava_edificio?      @relation(fields: [edi_id], references: [edi_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship32")
@@ -161,6 +164,7 @@ model ava_reservacion {
   res_estado          String         @db.String(1)
   res_fechacreacion   DateTime       @default(now()) @db.Timestamp(6)
   prop_id             BigInt?
+  rowid               BigInt         @default(autoincrement())
   ava_pago            ava_pago[]
   ava_propiedad       ava_propiedad? @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship33")
 
@@ -172,12 +176,14 @@ model ava_servicio {
   ser_nombre       String             @db.String(30)
   ser_servicio     String?            @db.String(40)
   ser_mediopago    String?            @db.String(30)
+  rowid            BigInt             @default(autoincrement())
   ava_pagoservicio ava_pagoservicio[]
 }
 
 model ava_tipopropiedad {
   tipp_id       BigInt          @id(map: "ava_tipopropiedad_pk") @default(sequence(minValue: 0))
   tipp_nombre   String          @db.String(30)
+  rowid         BigInt          @default(autoincrement())
   ava_propiedad ava_propiedad[]
 }
 
@@ -195,6 +201,7 @@ model ava_usuario {
   usu_fechacreacion DateTime            @default(now()) @db.Timestamp(6)
   usu_estado        String              @db.String(1)
   usu_rol           String              @db.String(1)
+  rowid             BigInt              @default(autoincrement())
   ava_anulacionpago ava_anulacionpago[]
 }
 
@@ -204,6 +211,7 @@ model parametros {
   par_logo        String? @db.String(500)
   par_correo      String? @db.String(50)
   par_descripcion String? @db.String(200)
+  rowid           BigInt  @id @default(autoincrement())
 
   @@ignore
 }
@@ -219,6 +227,7 @@ model ava_alquilercancelado {
   alqc_fecha_cancelacion   DateTime      @db.Timestamp(6)
   alqc_fechacreacion       DateTime      @default(now()) @db.Timestamp(6)
   alq_id                   BigInt?
+  rowid                    BigInt        @default(autoincrement())
   ava_alquiler             ava_alquiler? @relation(fields: [alq_id], references: [alq_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_alquiler_x_ava_alquilercancelado")
 
   @@index([alq_id], map: "ava_alquilercancelado_fk01")
@@ -234,6 +243,7 @@ model ava_anulacionpago {
   anp_fechaanulacion DateTime     @default(now()) @db.Timestamp(6)
   pag_id             BigInt?
   usu_id             BigInt?
+  rowid              BigInt       @default(autoincrement())
   ava_pago           ava_pago?    @relation(fields: [pag_id], references: [pag_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_pago_x_ava_anulacionpago")
   ava_usuario        ava_usuario? @relation(fields: [usu_id], references: [usu_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_usuario_x_ava_anulacionpago")
 
