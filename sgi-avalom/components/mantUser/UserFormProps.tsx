@@ -38,7 +38,6 @@ const UserForm: React.FC<UserFormProps> = ({ action, entity, onSuccess }) => {
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
-
     try {
       await onSubmit(data);
 

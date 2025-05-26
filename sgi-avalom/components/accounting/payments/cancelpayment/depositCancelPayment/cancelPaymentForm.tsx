@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   Card,
   CardHeader,
@@ -18,29 +20,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCancelPaymentForm } from "@/hooks/accounting/depositPayment/useCancelPaymentForm";
 import { formatCurrency } from "@/utils/currencyConverter";
 import { convertToCostaRicaTime } from "@/utils/dateUtils";
-import { AvaPago } from "@/lib/types";
 import { useUser } from "@/lib/UserContext";
-import { toast } from "sonner";
-
-interface CancelPaymentFormProps {
-  payment: AvaPago;
-  onClose: () => void;
-}
+import { useCancelPaymentForm } from "@/hooks/accounting/depositPayment/useCancelPaymentForm";
+import { CancelPaymentFormProps } from "@/lib/typesForm";
+import { Loader2Icon } from "lucide-react";
 
 export function CancelPaymentForm({
   payment,
-  onClose,
+  onSuccess,
 }: CancelPaymentFormProps) {
   const { user } = useUser();
   const { form, onSubmit, handleSubmit } = useCancelPaymentForm({
     payment,
-    onSuccess: onClose,
+    onSuccess,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFormSubmit = async (data: any) => {
+    setIsLoading(true);
     try {
       await onSubmit({ ...data, usu_id: user?.usu_id });
       toast.success("Pago anulado correctamente");
@@ -49,7 +48,7 @@ export function CancelPaymentForm({
         description: error.message ? error.message : error.message,
       });
     } finally {
-      onClose?.();
+      setIsLoading(false);
     }
   };
 
@@ -95,7 +94,7 @@ export function CancelPaymentForm({
               name="anp_motivo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Motivo de Anulación *</FormLabel>
+                  <FormLabel>Motivo de Anulación</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -111,7 +110,7 @@ export function CancelPaymentForm({
               name="anp_descripcion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción de Anulación *</FormLabel>
+                  <FormLabel>Descripción de Anulación</FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
@@ -127,10 +126,8 @@ export function CancelPaymentForm({
         </Card>
 
         <CardFooter className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" variant="destructive">
+          <Button type="submit" disabled={isLoading} variant="destructive">
+            {isLoading && <Loader2Icon className="h-4 w-4 animate-spin" />}
             Anular Pago
           </Button>
         </CardFooter>

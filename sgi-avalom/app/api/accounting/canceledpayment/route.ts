@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
       const data = await req.json();
 
       const {
-        anp_montofinal,
-        anp_montooriginal,
         anp_descripcion,
         anp_motivo,
         anp_fechaanulacion,
@@ -30,12 +28,23 @@ export async function POST(request: NextRequest) {
       const alquilerMensualId = pago.ava_alquilermensual.alqm_id;
       const montoAnulado = pago.pag_monto;
 
-      const [anulacionPago, updatedAlquilerMensual] = await prisma.$transaction(
-        async (tx) => {
+      const [anulacionPago, updatedAlquilerMensual, montoAntes, montoDespues] =
+        await prisma.$transaction(async (tx) => {
+          const alquilerMensualAntes = await tx.ava_alquilermensual.findUnique({
+            where: { alqm_id: alquilerMensualId },
+            select: {
+              alqm_montopagado: true,
+              alqm_montototal: true,
+            },
+          });
+
+          const montoAntes =
+            alquilerMensualAntes?.alqm_montopagado ?? BigInt(0);
+
           const anulacionPago = await tx.ava_anulacionpago.create({
             data: {
-              anp_montofinal: BigInt(anp_montofinal),
-              anp_montooriginal: BigInt(anp_montooriginal),
+              anp_montofinal: BigInt(0),
+              anp_montooriginal: BigInt(0),
               anp_descripcion,
               anp_motivo,
               anp_fechaanulacion: new Date(anp_fechaanulacion),
@@ -57,11 +66,12 @@ export async function POST(request: NextRequest) {
             },
           });
 
+          const montoDespues = alquilerMensual.alqm_montopagado;
+
           const nuevoEstado =
-            alquilerMensual.alqm_montopagado === BigInt(0)
+            montoDespues === BigInt(0)
               ? "I"
-              : alquilerMensual.alqm_montopagado <
-                alquilerMensual.alqm_montototal
+              : montoDespues < alquilerMensual.alqm_montototal
               ? "I"
               : "P";
 
@@ -75,9 +85,21 @@ export async function POST(request: NextRequest) {
             data: { pag_estado: "D" },
           });
 
-          return [anulacionPago, updatedAlquilerMensual];
-        }
-      );
+          await tx.ava_anulacionpago.update({
+            where: { anp_id: anulacionPago.anp_id },
+            data: {
+              anp_montofinal: montoDespues,
+              anp_montooriginal: montoAntes,
+            },
+          });
+
+          return [
+            anulacionPago,
+            updatedAlquilerMensual,
+            montoAntes,
+            montoDespues,
+          ];
+        });
 
       return NextResponse.json(
         {

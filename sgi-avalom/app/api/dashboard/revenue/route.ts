@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
                 gte: start,
                 lte: end,
               },
+              pag_estado: "A",
             },
           })
         )

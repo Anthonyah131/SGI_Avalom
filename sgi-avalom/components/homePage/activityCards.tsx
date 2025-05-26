@@ -33,9 +33,15 @@ interface PaymentItem {
   pag_metodopago: string;
   pag_banco: string;
   pag_referencia: string;
+  pag_estado: string;
   alqm_identificador: string;
   alqm_fechainicio: string;
   alqm_fechafin: string;
+  alq_id: string;
+  title?: string;
+  type?: string; // "Depósito" o "Mensualidad"
+  description?: string; // Descripción del pago
+  dateRange?: string; // Rango de fechas de la mensualidad
 }
 
 interface CancellationItem {
@@ -88,10 +94,13 @@ export function ActivityCards({
   const processedPayments: ActivityItem[] = payments.map((payment, index) => ({
     id: `payment-${index}`,
     date: payment.pag_fechapago,
-    title: `Alquiler ${payment.alqm_identificador}`,
+    title: payment.title,
+    status: payment.pag_estado,
     amount: payment.pag_monto,
-    description: `${payment.pag_metodopago} - ${payment.pag_banco || "N/A"}`,
-    ...payment,
+    description: payment.description,
+    type: payment.type,
+    dateRange: payment.dateRange,
+    alq_id: payment.alq_id,
   }));
 
   const processedCancellations: ActivityItem[] = cancellations.map(
@@ -124,20 +133,37 @@ export function ActivityCards({
       ringColor: "ring-emerald-500/30",
       data: processedPayments,
       renderItem: (item: ActivityItem) => (
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">{item.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(item.date || ""), "d MMM yyyy", { locale: es })}
-            </p>
-            {item.description && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {item.description}
+        <Link href={`/accounting/payments/${item.alq_id}`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">{item.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {format(new Date(item.date || ""), "d MMM yyyy", {
+                  locale: es,
+                })}
               </p>
-            )}
+              {item.description && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {item.description}
+                </p>
+              )}
+              {item.dateRange && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {item.dateRange}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <Badge variant={item.status === "A" ? "outline" : "destructive"}>
+                {item.status === "A" ? "Activo" : "Anulado"}
+              </Badge>
+              <Badge variant="secondary">{item.type}</Badge>
+              <Badge variant="outline">
+                {formatCurrency(item.amount || 0)}
+              </Badge>
+            </div>
           </div>
-          <Badge variant="outline">{formatCurrency(item.amount || 0)}</Badge>
-        </div>
+        </Link>
       ),
     },
     {

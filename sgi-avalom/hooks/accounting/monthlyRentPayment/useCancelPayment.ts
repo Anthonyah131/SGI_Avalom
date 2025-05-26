@@ -5,8 +5,9 @@ import usePaymentStore from "@/lib/zustand/monthlyPaymentStore";
 import { AvaPago } from "@/lib/types";
 
 export function useCancelPayment(alqmId: string | undefined) {
-  const { selectedMonthlyRent, selectMonthlyRent, setPayments } =
+  const { selectedMonthlyRent, selectMonthlyRent, setPayments, payments } =
     usePaymentStore();
+
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<AvaPago | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<{
@@ -73,12 +74,16 @@ export function useCancelPayment(alqmId: string | undefined) {
   };
 
   const sortedPayments = useMemo(() => {
-    return [...(selectedMonthlyRent?.ava_pago || [])].sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
-      if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [selectedMonthlyRent, sortField, sortDirection]);
+    return payments
+      .filter((p) => p.alqm_id === alqmId)
+      .sort((a, b) => {
+        if (a[sortField] < b[sortField])
+          return sortDirection === "asc" ? -1 : 1;
+        if (a[sortField] > b[sortField])
+          return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+  }, [payments, alqmId, sortField, sortDirection]);
 
   const filteredPayments = useMemo(() => {
     if (selectedStatuses.length === 0) return sortedPayments;

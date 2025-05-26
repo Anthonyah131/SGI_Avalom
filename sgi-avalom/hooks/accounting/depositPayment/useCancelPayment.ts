@@ -5,7 +5,7 @@ import usePaymentStore from "@/lib/zustand/useDepositStore";
 import { AvaPago } from "@/lib/types";
 
 export function useCancelPayment(depoId: string | undefined) {
-  const { selectedDeposit, setSelectedDeposit, setPayments } =
+  const { selectedDeposit, setSelectedDeposit, setPayments, payments } =
     usePaymentStore();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<AvaPago | null>(null);
@@ -24,10 +24,9 @@ export function useCancelPayment(depoId: string | undefined) {
       const token = cookie.get("token");
       if (!token) throw new Error("Token no disponible");
 
-      const response = await axios.get(
-        `/api/accounting/deposit/${depoId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.get(`/api/accounting/deposit/${depoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response?.data?.success) {
         setSelectedDeposit(response.data.data);
@@ -73,12 +72,12 @@ export function useCancelPayment(depoId: string | undefined) {
   };
 
   const sortedPayments = useMemo(() => {
-    return [...(selectedDeposit?.ava_pago || [])].sort((a, b) => {
+    return payments.sort((a, b) => {
       if (a[sortField] < b[sortField]) return sortDirection === "asc" ? -1 : 1;
       if (a[sortField] > b[sortField]) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [selectedDeposit, sortField, sortDirection]);
+  }, [payments, depoId, sortField, sortDirection]);
 
   const filteredPayments = useMemo(() => {
     if (selectedStatuses.length === 0) return sortedPayments;

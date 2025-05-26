@@ -1,20 +1,22 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import cookie from "js-cookie";
-import { AvaPago } from "@/lib/types";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CancelPaymentFormProps } from "@/lib/typesForm";
+import usePaymentStore from "@/lib/zustand/monthlyPaymentStore";
 
 const cancelPaymentFormSchema = z.object({
   anp_motivo: z
     .string()
-    .min(1, { message: "El motivo debe tener al menos 1 caracteres." }),
+    .min(1, "Debes ingresar un motivo.")
+    .max(50, "El motivo no puede tener más de 50 caracteres."),
   anp_descripcion: z
     .string()
-    .min(1, { message: "La descripción debe tener al menos 1 caracteres." }),
+    .max(50, "La descripción no puede tener más de 50 caracteres.")
+    .optional(),
 });
 
 type CancelPaymentFormInputs = z.infer<typeof cancelPaymentFormSchema>;
@@ -22,10 +24,7 @@ type CancelPaymentFormInputs = z.infer<typeof cancelPaymentFormSchema>;
 export const useCancelPaymentForm = ({
   payment,
   onSuccess,
-}: {
-  payment: AvaPago;
-  onSuccess: () => void;
-}) => {
+}: CancelPaymentFormProps) => {
   const form = useForm<CancelPaymentFormInputs>({
     resolver: zodResolver(cancelPaymentFormSchema),
     defaultValues: {
@@ -33,7 +32,7 @@ export const useCancelPaymentForm = ({
       anp_descripcion: "",
     },
   });
-
+  const { updateAnulacionPago, updatePayment } = usePaymentStore();
   const { reset, handleSubmit } = form;
 
   const onSubmit: SubmitHandler<CancelPaymentFormInputs> = async (data) => {
@@ -56,6 +55,11 @@ export const useCancelPaymentForm = ({
       );
 
       if (response?.data?.success) {
+        updatePayment({
+          ...payment,
+          pag_estado: "D",
+        });
+        updateAnulacionPago(response.data.data);
         onSuccess();
         reset();
       } else {

@@ -17,13 +17,21 @@ export async function GET(request: NextRequest) {
               pag_metodopago: true,
               pag_banco: true,
               pag_referencia: true,
+              pag_estado: true,
               ava_alquilermensual: {
                 select: {
                   alqm_identificador: true,
                   alqm_fechainicio: true,
                   alqm_fechafin: true,
+                  alq_id: true,
                 },
-              }
+              },
+              ava_deposito: {
+                select: {
+                  alq_id: true,
+                  depo_id: true,
+                },
+              },
             },
           }),
           prisma.ava_alquilercancelado.findMany({

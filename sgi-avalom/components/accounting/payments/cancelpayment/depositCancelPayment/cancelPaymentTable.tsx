@@ -1,5 +1,7 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -18,15 +20,15 @@ import {
   ArrowUpDown,
   Eye,
 } from "lucide-react";
-import { formatCurrency } from "@/utils/currencyConverter";
-import { convertToCostaRicaTime } from "@/utils/dateUtils";
 import { StatusFilter } from "@/components/dataTable/status-filter";
 import ManageActions from "@/components/dataTable/manageActions";
 import { CancelPaymentForm } from "./cancelPaymentForm";
-import { useParams } from "next/navigation";
+import { formatCurrency } from "@/utils/currencyConverter";
+import { convertToCostaRicaTime } from "@/utils/dateUtils";
 import { useCancelPayment } from "@/hooks/accounting/depositPayment/useCancelPayment";
 
 export function CancelPaymentTable() {
+  const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
   const { depoId } = useParams<{ depoId: string }>();
   const {
     filteredPayments,
@@ -35,20 +37,7 @@ export function CancelPaymentTable() {
     handleSort,
     selectedStatuses,
     setSelectedStatuses,
-    fetchPayments,
   } = useCancelPayment(depoId);
-
-  const handleModalClose = async () => {
-    await fetchPayments();
-  };
-
-  if (!filteredPayments.length) {
-    return (
-      <div className="text-center text-sm text-gray-500">
-        No hay pagos disponibles.
-      </div>
-    );
-  }
 
   const renderMobileView = () => (
     <div className="space-y-4">
@@ -132,16 +121,23 @@ export function CancelPaymentTable() {
               </div>
               <div className="flex justify-between gap-2">
                 <ManageActions
+                  open={activePaymentId === payment.pag_id}
+                  onOpenChange={(open) =>
+                    setActivePaymentId(open ? payment.pag_id : null)
+                  }
                   titleButton="Anular"
                   title="Anular Pago"
                   description="Complete el formulario para anular el pago"
                   variant="destructive"
                   classn="w-full"
                   icon={<AlertTriangle className="w-4 h-4" />}
+                  disabled={payment.pag_estado === "D"}
                   FormComponent={
                     <CancelPaymentForm
                       payment={payment}
-                      onClose={handleModalClose}
+                      onSuccess={() => {
+                        setActivePaymentId(null);
+                      }}
                     />
                   }
                 />
@@ -219,15 +215,22 @@ export function CancelPaymentTable() {
             </TableCell>
             <TableCell>
               <ManageActions
+                open={activePaymentId === payment.pag_id}
+                onOpenChange={(open) =>
+                  setActivePaymentId(open ? payment.pag_id : null)
+                }
                 titleButton="Anular"
                 title="Anular Pago"
                 description="Complete el formulario para anular el pago"
                 variant="destructive"
                 icon={<AlertTriangle className="w-4 h-4" />}
+                disabled={payment.pag_estado === "D"}
                 FormComponent={
                   <CancelPaymentForm
                     payment={payment}
-                    onClose={handleModalClose}
+                    onSuccess={() => {
+                      setActivePaymentId(null);
+                    }}
                   />
                 }
               />
@@ -255,10 +258,24 @@ export function CancelPaymentTable() {
             onStatusChange={setSelectedStatuses}
           />
         </div>
-        <div className="lg:hidden">{renderMobileView()}</div>
-        <div className="hidden lg:block overflow-x-auto">
-          {renderDesktopView()}
-        </div>
+        {filteredPayments.length > 0 ? (
+          <>
+            <div className="lg:hidden">{renderMobileView()}</div>
+            <div className="hidden lg:block overflow-x-auto">
+              {renderDesktopView()}
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground space-y-4">
+            <AlertTriangle className="w-10 h-10 text-orange-500" />
+            <p className="text-sm font-medium">
+              No hay pagos asociados con el estado seleccionado.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Cambia los filtros o registra un nuevo pago para comenzar.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

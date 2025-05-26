@@ -84,9 +84,14 @@ export const CanceledRentForm = () => {
                   name="depo_montodevuelto"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monto devuelto *</FormLabel>
+                      <FormLabel>Monto devuelto</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" />
+                        <Input
+                          {...field}
+                          type="number"
+                          disabled={isSubmitting}
+                          placeholder="₡"
+                        />
                       </FormControl>
                       <FormDescription>Ej: 100000</FormDescription>
                       <FormMessage />
@@ -101,7 +106,11 @@ export const CanceledRentForm = () => {
                     <FormItem>
                       <FormLabel>Descripción monto devuelto</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          disabled={isSubmitting}
+                          placeholder=" Ej: devolución por meses adelantados"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -115,7 +124,12 @@ export const CanceledRentForm = () => {
                     <FormItem>
                       <FormLabel>Monto castigo</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" />
+                        <Input
+                          {...field}
+                          type="number"
+                          disabled={isSubmitting}
+                          placeholder="₡"
+                        />
                       </FormControl>
                       <FormDescription>
                         Solo si aplica una penalización
@@ -132,7 +146,11 @@ export const CanceledRentForm = () => {
                     <FormItem>
                       <FormLabel>Descripción castigo</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          disabled={isSubmitting}
+                          placeholder="Ej: penalización por daños"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -144,7 +162,7 @@ export const CanceledRentForm = () => {
                   name="depo_fechadevolucion"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Fecha de devolución del depósito *</FormLabel>
+                      <FormLabel>Fecha de devolución del depósito</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -154,6 +172,7 @@ export const CanceledRentForm = () => {
                                 "w-full justify-start",
                                 !field.value && "text-muted-foreground"
                               )}
+                              disabled={isSubmitting}
                             >
                               {field.value
                                 ? format(parseISO(field.value), "PPP", {
@@ -205,9 +224,13 @@ export const CanceledRentForm = () => {
                   name="alqc_motivo"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Motivo de cancelación *</FormLabel>
+                      <FormLabel>Motivo de cancelación</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          disabled={isSubmitting}
+                          placeholder="Ej: cliente no pagó"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -219,9 +242,14 @@ export const CanceledRentForm = () => {
                   name="alqc_montodevuelto"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monto devuelto registrado *</FormLabel>
+                      <FormLabel>Monto devuelto registrado</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" />
+                        <Input
+                          {...field}
+                          type="number"
+                          disabled={isSubmitting}
+                          placeholder="₡"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -235,7 +263,11 @@ export const CanceledRentForm = () => {
                     <FormItem>
                       <FormLabel>Motivo monto devuelto</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          disabled={isSubmitting}
+                          placeholder="Ej: devolución por meses adelantados"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -247,9 +279,14 @@ export const CanceledRentForm = () => {
                   name="alqc_castigo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monto castigo registrado *</FormLabel>
+                      <FormLabel>Monto castigo registrado</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" />
+                        <Input
+                          {...field}
+                          type="number"
+                          disabled={isSubmitting}
+                          placeholder="₡"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -263,7 +300,11 @@ export const CanceledRentForm = () => {
                     <FormItem>
                       <FormLabel>Motivo castigo</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          disabled={isSubmitting}
+                          placeholder="Ej: penalización por daños"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -275,7 +316,7 @@ export const CanceledRentForm = () => {
                   name="alqc_fecha_cancelacion"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Fecha de cancelación *</FormLabel>
+                      <FormLabel>Fecha de cancelación</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -285,6 +326,7 @@ export const CanceledRentForm = () => {
                                 "w-full justify-start",
                                 !field.value && "text-muted-foreground"
                               )}
+                              disabled={isSubmitting}
                             >
                               {field.value
                                 ? format(parseISO(field.value), "PPP", {

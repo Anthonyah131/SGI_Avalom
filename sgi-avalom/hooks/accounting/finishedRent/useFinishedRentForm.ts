@@ -1,12 +1,10 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import cookie from "js-cookie";
 import { useParams } from "next/navigation";
-import useRentalStore from "@/lib/zustand/useRentalStore";
+import useFinishedRentalStore from "@/lib/zustand/useFinishedRentalStore";
 
 const finishedRentSchema = z.object({
   depo_montodevuelto: z
@@ -15,14 +13,18 @@ const finishedRentSchema = z.object({
     .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
       message: "El monto debe ser un número y mayor o igual a 0",
     }),
-  depo_descmontodevuelto: z.string().optional(),
+  depo_descmontodevuelto: z.string()
+  .max(50, "La descripción no puede exceder los 50 caracteres")
+  .optional(),
   depo_montocastigo: z
     .string()
-    .optional()
+    .min(1, "El monto de castigo es requerido, puede ser 0 si no aplica")
     .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
       message: "El monto debe ser un número y mayor o igual a 0",
     }),
-  depo_descrmontocastigo: z.string().optional(),
+  depo_descrmontocastigo: z.string()
+    .max(50, "La descripción no puede exceder los 50 caracteres")
+    .optional(),
   depo_fechadevolucion: z.string().optional(),
 });
 
@@ -30,7 +32,7 @@ type FinishedRentFormData = z.infer<typeof finishedRentSchema>;
 
 export const useFinishedRentForm = () => {
   const { alqId } = useParams();
-  const { deposit, selectedRental } = useRentalStore();
+  const { deposito, selectedRental } = useFinishedRentalStore();
   const form = useForm<FinishedRentFormData>({
     resolver: zodResolver(finishedRentSchema),
     defaultValues: {
@@ -47,7 +49,7 @@ export const useFinishedRentForm = () => {
   const handleFinishSubmit = async (data: FinishedRentFormData) => {
     const montoDevuelto = Number(data.depo_montodevuelto);
     const montoCastigo = Number(data.depo_montocastigo || 0);
-    const montoDisponible = Number(deposit?.depo_montoactual || 0);
+    const montoDisponible = Number(deposito?.depo_montoactual || 0);
 
     if (montoDevuelto > montoDisponible) {
       throw new Error(

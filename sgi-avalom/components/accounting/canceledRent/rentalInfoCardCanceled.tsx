@@ -1,35 +1,38 @@
 "use client";
 
 import {
-  Building,
-  User,
+  Banknote,
   CalendarDays,
-  BadgeDollarSign,
-  AlertTriangle,
-  FileSignature,
+  FileWarning,
+  HomeIcon,
   Users,
+  BadgeDollarSign,
+  AlertCircle,
+  AlertTriangle,
+  Building,
+  FileSignature,
   Link,
+  User,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import useFinishedRentalStore from "@/lib/zustand/useFinishedRentalStore";
+import useCanceledRentalStore from "@/lib/zustand/useCanceledRentalStore";
 import { format } from "date-fns";
 
-export const RentalInfoCard = () => {
+export const RentalInfoCardCanceled = () => {
   const { selectedRental, deposito, propiedad, clientes, hayPagosPendientes } =
-    useFinishedRentalStore();
+    useCanceledRentalStore();
 
-  if (!selectedRental || !deposito) return null;
+  if (!selectedRental || !deposito || !propiedad) return null;
 
   const clienteNombre = clientes
     .map((c) => `${c.cli_nombre} ${c.cli_papellido}`)
     .join(", ");
 
   return (
-    <Card className="bg-muted/40 border shadow-md">
+    <Card className="bg-muted/40 border shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-          <FileSignature className="w-5 h-5 text-primary" />
-          Información del Alquiler
+        <CardTitle className="text-lg sm:text-xl font-semibold text-primary">
+          Información del Alquiler Cancelado
         </CardTitle>
       </CardHeader>
 

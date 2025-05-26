@@ -1,4 +1,4 @@
-import { AvaEdificio, AvaPropiedad, Cliente, User } from "@/lib/types";
+import { AvaEdificio, AvaPago, AvaPropiedad, Cliente, User } from "@/lib/types";
 
 // MantBuild
 export interface RentalFormProps {
@@ -30,5 +30,10 @@ export interface UserFormProps {
 export interface ClienteFormProps {
   action: "create" | "edit" | "view";
   entity?: Cliente;
+  onSuccess: () => void;
+}
+
+export interface CancelPaymentFormProps {
+  payment: AvaPago;
   onSuccess: () => void;
 }

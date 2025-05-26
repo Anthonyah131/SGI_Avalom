@@ -1,20 +1,8 @@
-// File: app/components/BodyHomePage.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import cookie from "js-cookie";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import { HomeIcon, UsersIcon, DollarSignIcon, XCircleIcon } from "lucide-react";
-import Link from "next/link";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import RevenueAreaChart, {
   MonthlyTotal,
 } from "@/components/homePage/revenueAreaChart";
@@ -95,17 +83,39 @@ const BodyHomePage: React.FC = () => {
       );
       setPending(p);
       setRecentPayments(
-        a.recentPayments.map((payment: any) => ({
-          pag_monto: payment.pag_monto,
-          pag_fechapago: payment.pag_fechapago,
-          pag_metodopago: payment.pag_metodopago,
-          pag_banco: payment.pag_banco,
-          pag_referencia: payment.pag_referencia,
-          alqm_identificador:
-            payment.ava_alquilermensual?.alqm_identificador ?? "—",
-          alqm_fechainicio: payment.ava_alquilermensual?.alqm_fechainicio,
-          alqm_fechafin: payment.ava_alquilermensual?.alqm_fechafin,
-        }))
+        a.recentPayments.map((payment: any) => {
+          const isDeposit = !!payment.ava_deposito;
+          return {
+            pag_monto: payment.pag_monto,
+            pag_fechapago: payment.pag_fechapago,
+            pag_metodopago: payment.pag_metodopago,
+            pag_banco: payment.pag_banco,
+            pag_referencia: payment.pag_referencia,
+            pag_estado: payment.pag_estado,
+            alq_id: isDeposit
+              ? payment.ava_deposito.depo_id
+              : payment.ava_alquilermensual?.alq_id,
+            type: isDeposit ? "Depósito" : "Mensualidad",
+            title: isDeposit
+              ? `Depósito ${payment.ava_deposito.depo_id}`
+              : `Alquiler ${
+                  payment.ava_alquilermensual?.alqm_identificador ?? "—"
+                }`,
+            description: isDeposit
+              ? `Pago realizado mediante ${payment.pag_metodopago}`
+              : `${payment.pag_metodopago} - ${payment.pag_banco || "N/A"}`,
+            dateRange:
+              !isDeposit &&
+              payment.ava_alquilermensual?.alqm_fechainicio &&
+              payment.ava_alquilermensual?.alqm_fechafin
+                ? `Del ${new Date(
+                    payment.ava_alquilermensual.alqm_fechainicio
+                  ).toLocaleDateString("es-CR")} al ${new Date(
+                    payment.ava_alquilermensual.alqm_fechafin
+                  ).toLocaleDateString("es-CR")}`
+                : "",
+          };
+        })
       );
 
       setRecentCancels(

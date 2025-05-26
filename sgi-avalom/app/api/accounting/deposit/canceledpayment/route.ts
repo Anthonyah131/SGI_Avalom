@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
       const data = await req.json();
 
       const {
-        anp_montofinal,
-        anp_montooriginal,
         anp_descripcion,
         anp_motivo,
         anp_fechaanulacion,
@@ -24,18 +22,25 @@ export async function POST(request: NextRequest) {
       });
 
       if (!pago || !pago.ava_deposito) {
-        throw new Error("El pago o el deposito relacionado no existe.");
+        throw new Error("El pago o el depósito relacionado no existe.");
       }
 
       const depositoId = pago.ava_deposito.depo_id;
       const montoAnulado = pago.pag_monto;
 
-      const [anulacionPago, updatedDeposito] = await prisma.$transaction(
-        async (tx) => {
+      const [anulacionPago, updatedDeposito, montoAntes, montoDespues] =
+        await prisma.$transaction(async (tx) => {
+          const depositoAntes = await tx.ava_deposito.findUnique({
+            where: { depo_id: depositoId },
+            select: { depo_montoactual: true },
+          });
+
+          const montoAntes = depositoAntes?.depo_montoactual ?? BigInt(0);
+
           const anulacionPago = await tx.ava_anulacionpago.create({
             data: {
-              anp_montofinal: BigInt(anp_montofinal),
-              anp_montooriginal: BigInt(anp_montooriginal),
+              anp_montofinal: BigInt(0),
+              anp_montooriginal: BigInt(0),
               anp_descripcion,
               anp_motivo,
               anp_fechaanulacion: new Date(anp_fechaanulacion),
@@ -51,16 +56,28 @@ export async function POST(request: NextRequest) {
                 decrement: montoAnulado,
               },
             },
+            select: {
+              depo_montoactual: true,
+            },
           });
+
+          const montoDespues = updatedDeposito.depo_montoactual;
 
           await tx.ava_pago.update({
             where: { pag_id: BigInt(pag_id) },
             data: { pag_estado: "D" },
           });
 
-          return [anulacionPago, updatedDeposito];
-        }
-      );
+          await tx.ava_anulacionpago.update({
+            where: { anp_id: anulacionPago.anp_id },
+            data: {
+              anp_montooriginal: montoAntes,
+              anp_montofinal: montoDespues,
+            },
+          });
+
+          return [anulacionPago, updatedDeposito, montoAntes, montoDespues];
+        });
 
       return NextResponse.json(
         {

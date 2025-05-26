@@ -77,7 +77,7 @@ export const FinishedRentForm = () => {
                 name="depo_montodevuelto"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Monto devuelto *</FormLabel>
+                    <FormLabel>Monto devuelto</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -151,7 +151,7 @@ export const FinishedRentForm = () => {
                 name="depo_fechadevolucion"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Pago</FormLabel>
+                    <FormLabel>Fecha de devolución</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>

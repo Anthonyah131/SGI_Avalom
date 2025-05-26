@@ -6,43 +6,57 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import cookie from "js-cookie";
 import { useParams } from "next/navigation";
-import useRentalStore from "@/lib/zustand/useRentalStore";
+import useCanceledRentalStore from "@/lib/zustand/useCanceledRentalStore";
 
 const schema = z.object({
   depo_montodevuelto: z
     .string()
-    .min(1, "Campo requerido")
+    .min(1, "El monto devuelto es requerido, puede ser 0 si no hay devolución")
     .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
       message: "Debe ser un número mayor o igual a 0",
     }),
-  depo_descmontodevuelto: z.string().optional(),
+  depo_descmontodevuelto: z
+    .string()
+    .max(50, "Descripción no puede exceder 50 caracteres")
+    .optional(),
   depo_montocastigo: z
     .string()
-    .min(1, "Campo requerido")
+    .min(1, "El monto de castigo es requerido, puede ser 0 si no hay castigo")
     .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
       message: "Debe ser un número mayor o igual a 0",
     }),
-  depo_descrmontocastigo: z.string().optional(),
-
-  depo_fechadevolucion: z
+  depo_descrmontocastigo: z
     .string()
-    .min(1, "La fecha de devolución es obligatoria")
-    .refine((val) => !isNaN(Date.parse(val)), { message: "Fecha inválida" }),
-
-  alqc_motivo: z.string().min(1, "El motivo es requerido"),
+    .max(50, "Descripción no puede exceder 50 caracteres")
+    .optional(),
+  depo_fechadevolucion: z.string().optional(),
+  alqc_motivo: z
+    .string()
+    .min(1, "El motivo es requerido")
+    .max(50, "El motivo no puede exceder 50 caracteres"),
   alqc_montodevuelto: z
     .string()
-    .min(1)
-    .refine((val) => Number(val) >= 0),
+    .min(1, "El monto devuelto es requerido, puede ser 0 si no hay devolución")
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Debe ser un número mayor o igual a 0",
+    }),
   alqc_castigo: z
     .string()
-    .min(1)
-    .refine((val) => Number(val) >= 0),
-  alqc_motivomontodevuelto: z.string().optional(),
-  alqc_motivocastigo: z.string().optional(),
+    .min(1, "El monto de castigo es requerido, puede ser 0 si no hay castigo")
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Debe ser un número mayor o igual a 0",
+    }),
+  alqc_motivomontodevuelto: z
+    .string()
+    .max(50, "Motivo de monto devuelto no puede exceder 50 caracteres")
+    .optional(),
+  alqc_motivocastigo: z
+    .string()
+    .max(50, "Motivo de castigo no puede exceder 50 caracteres")
+    .optional(),
   alqc_fecha_cancelacion: z
     .string()
-    .min(1)
+    .min(1, "La fecha de cancelación es requerida")
     .refine((val) => !isNaN(Date.parse(val)), { message: "Fecha inválida" }),
 });
 
@@ -50,7 +64,7 @@ type FormData = z.infer<typeof schema>;
 
 export const useCanceledRentForm = () => {
   const { alqId } = useParams();
-  const { deposit } = useRentalStore();
+  const { deposito, selectedRental } = useCanceledRentalStore();
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -72,7 +86,7 @@ export const useCanceledRentForm = () => {
   const isSubmitting = form.formState.isSubmitting;
 
   const handleCancelSubmit = async (data: FormData) => {
-    const montoActual = Number(deposit?.depo_montoactual || 0);
+    const montoActual = Number(deposito?.depo_montoactual || 0);
     const montoDevuelto = Number(data.depo_montodevuelto);
     const montoCastigo = Number(data.depo_montocastigo);
     const totalDevuelto = montoDevuelto + montoCastigo;
@@ -83,9 +97,9 @@ export const useCanceledRentForm = () => {
       );
     }
 
-    if (data.alqc_fecha_cancelacion && deposit?.ava_alquiler?.alq_fechapago) {
+    if (data.alqc_fecha_cancelacion && selectedRental?.alq_fechapago) {
       const cancelDate = new Date(data.alqc_fecha_cancelacion);
-      const rentStart = new Date(deposit.ava_alquiler.alq_fechapago);
+      const rentStart = new Date(selectedRental.alq_fechapago);
       if (cancelDate < rentStart) {
         throw new Error(
           "La fecha de cancelación no puede ser anterior al inicio del alquiler."
