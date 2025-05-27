@@ -120,7 +120,7 @@ const BodyMantUser: React.FC = () => {
 
               {/* Exportar, importar y toggle */}
               <ExportUsers />
-              <Button variant="outline">Descargar Plantilla</Button>
+              {/* <Button variant="outline">Descargar Plantilla</Button> */}
               <Button variant="outline">Importar</Button>
               <ModeToggle />
             </div>

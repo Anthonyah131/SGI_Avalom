@@ -1,31 +1,34 @@
-// app/api/users/list/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const users = await prisma.ava_usuario.findMany({
-      where: { usu_estado: "A" },
+    const clients = await prisma.ava_cliente.findMany({
+      orderBy: { cli_nombre: "asc" },
       select: {
-        usu_id: true,
-        usu_nombre: true,
-        usu_papellido: true,
-        usu_sapellido: true,
-        usu_cedula: true,
+        cli_id: true,
+        cli_nombre: true,
+        cli_papellido: true,
+        cli_sapellido: true,
+        cli_cedula: true,
+        cli_direccion: true,
+        cli_estadocivil: true,
       },
     });
 
-    const data = users.map((u) => ({
-      id: u.usu_id.toString(),
-      nombre: `${u.usu_nombre} ${u.usu_papellido}${u.usu_sapellido ? ` ${u.usu_sapellido}` : ""}`,
-      cedula: u.usu_cedula,
+    const data = clients.map((c) => ({
+      id: c.cli_id.toString(),
+      nombre: `${c.cli_nombre} ${c.cli_papellido}${c.cli_sapellido ? ` ${c.cli_sapellido}` : ""}`,
+      cedula: c.cli_cedula,
+      direccion: c.cli_direccion ?? "",
+      estadoCivil: c.cli_estadocivil ?? "",
     }));
 
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
-    console.error("Error fetching users:", err);
+    console.error("Error fetching clients:", err);
     return NextResponse.json(
-      { error: "Error fetching users" },
+      { error: "Error fetching clients" },
       { status: 500 }
     );
   }

@@ -117,7 +117,7 @@ const BodyMantClient: React.FC = () => {
               <ExportButton />
 
               {/* Descargar plantilla */}
-              <Button variant="outline">Descargar Plantilla</Button>
+              {/* <Button variant="outline">Descargar Plantilla</Button> */}
 
               {/* Importar y refrescar */}
               <ImportClients onSuccess={fetchClients} />

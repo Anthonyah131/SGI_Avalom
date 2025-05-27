@@ -57,7 +57,6 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     selectedRental,
     disableEstadoField,
   } = useRentalForm({ action, onSuccess });
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFormSubmit = async (data: any) => {
@@ -82,8 +81,10 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
       setIsLoading(false);
     }
   };
+  
 
   return (
+    
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         {disableEstadoField && (
@@ -246,10 +247,74 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
         </Card>
         {action !== "create" && (
           <Card>
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold">Contrato</CardTitle>
-              <CardDescription>Adjuntar contrato del alquiler</CardDescription>
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-xl font-semibold">
+                  Contrato
+                </CardTitle>
+                <CardDescription>
+                  Adjuntar contrato del alquiler
+                </CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    const values = form.getValues();
+                    const client = clientsInRental[0];
+
+                    if (!client) {
+                      toast.warning("Debe seleccionar un cliente primero.");
+                      return;
+                    }
+
+                    const payload = {
+                      arrendante: "Cesar Avila Prado",
+                      cedulaArrendante: "1-0938-0196",
+                      arrendatario: `${client.cli_nombre} ${client.cli_papellido}`,
+                      cedulaArrendatario: client.cli_cedula,
+                      estadoCivil: client.cli_estadocivil ?? "Desconocido",
+                      direccion: client.cli_direccion ?? "Desconocida",
+                      aptoNumero:
+                        selectedRental?.ava_propiedad?.prop_identificador ??
+                        "n/a",
+                      contratoDesde: values.alq_fechapago,
+                      contratoHasta: "",
+                      montoTotal: Number(values.alq_monto),
+                      diaPago: new Date(values.alq_fechapago).getDate(),
+                      duracionAnios: 3,
+                    };
+
+                    const res = await fetch("/api/generate-contract", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+
+                    if (!res.ok)
+                      throw new Error("No se pudo generar el contrato");
+
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `contrato_${payload.aptoNumero}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    toast.success("Contrato generado correctamente.");
+                  } catch (err) {
+                    console.error(err);
+                    toast.error("Ocurrió un error al generar el contrato.");
+                  }
+                }}
+              >
+                Generar Contrato
+              </Button>
             </CardHeader>
+
             <CardContent>
               <FormItem className="col-span-full">
                 <FormLabel>Contrato</FormLabel>

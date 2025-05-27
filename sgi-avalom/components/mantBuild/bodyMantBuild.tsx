@@ -157,7 +157,7 @@ const BodyMantBuild: React.FC = () => {
               />
               <GenerateContractModal />
               <ExportBuildings />
-              <Button variant="outline">Importar</Button>
+              {/* <Button variant="outline">Importar</Button> */}
               <ModeToggle />
             </div>
           </Card>
