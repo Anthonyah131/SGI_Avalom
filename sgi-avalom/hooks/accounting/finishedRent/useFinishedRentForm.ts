@@ -13,16 +13,18 @@ const finishedRentSchema = z.object({
     .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
       message: "El monto debe ser un número y mayor o igual a 0",
     }),
-  depo_descmontodevuelto: z.string()
-  .max(50, "La descripción no puede exceder los 50 caracteres")
-  .optional(),
+  depo_descmontodevuelto: z
+    .string()
+    .max(50, "La descripción no puede exceder los 50 caracteres")
+    .optional(),
   depo_montocastigo: z
     .string()
     .min(1, "El monto de castigo es requerido, puede ser 0 si no aplica")
     .refine((value) => !isNaN(Number(value)) && Number(value) >= 0, {
       message: "El monto debe ser un número y mayor o igual a 0",
     }),
-  depo_descrmontocastigo: z.string()
+  depo_descrmontocastigo: z
+    .string()
     .max(50, "La descripción no puede exceder los 50 caracteres")
     .optional(),
   depo_fechadevolucion: z.string().optional(),
@@ -50,6 +52,10 @@ export const useFinishedRentForm = () => {
     const montoDevuelto = Number(data.depo_montodevuelto);
     const montoCastigo = Number(data.depo_montocastigo || 0);
     const montoDisponible = Number(deposito?.depo_montoactual || 0);
+
+    if (deposito?.depo_id === undefined || deposito?.depo_id === null) {
+      throw new Error("No hay un depósito asociado a este alquiler.");
+    }
 
     if (montoDevuelto > montoDisponible) {
       throw new Error(

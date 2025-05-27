@@ -91,6 +91,10 @@ export const useCanceledRentForm = () => {
     const montoCastigo = Number(data.depo_montocastigo);
     const totalDevuelto = montoDevuelto + montoCastigo;
 
+    if (deposito?.depo_id === undefined || deposito?.depo_id === null) {
+      throw new Error("No hay un depósito asociado a este alquiler.");
+    }
+
     if (totalDevuelto > montoActual) {
       throw new Error(
         "La suma del monto devuelto y castigo no puede superar el depósito actual."
