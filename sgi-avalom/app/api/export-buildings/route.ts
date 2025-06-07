@@ -120,7 +120,8 @@ export async function GET(req: NextRequest) {
     for (const prop of ed.ava_propiedad) {
       for (const alq of prop.ava_alquiler) {
         const mensualidades = alq.ava_alquilermensual.filter((m) => {
-          const fecha = new Date(m.alqm_fechapago ?? m.alqm_fechainicio);
+          const fecha = new Date(m.alqm_fechainicio);
+
           return (
             (!fromDate || fecha >= fromDate) && (!toDate || fecha <= toDate)
           );
@@ -133,7 +134,7 @@ export async function GET(req: NextRequest) {
           }
 
           const fecha = new Date(
-            mens.alqm_fechapago ?? mens.alqm_fechainicio
+            mens.alqm_fechainicio
           ).toLocaleDateString("es-CR");
 
           const edificioLabel = ed.edi_identificador;
