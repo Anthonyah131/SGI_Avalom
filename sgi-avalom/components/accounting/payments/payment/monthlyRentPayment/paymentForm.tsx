@@ -1,5 +1,9 @@
 "use client";
 
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { CalendarIcon, Loader2Icon } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -18,10 +22,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2Icon } from "lucide-react";
-import { z } from "zod";
-import { toast } from "sonner";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { usePaymentForm } from "@/hooks/accounting/monthlyRentPayment/usePaymentForm";
+import { toast } from "sonner";
 
 type PaymentFormProps = {};
 
@@ -133,6 +141,58 @@ export function PaymentForm({
                       className="w-full"
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="pag_fechapago"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Fecha de pago</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          disabled={isSubmitting}
+                        >
+                          {field.value ? (
+                            format(parseISO(field.value), "PPP", {
+                              locale: es,
+                            })
+                          ) : (
+                            <span>Seleccione una fecha</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? parseISO(field.value) : undefined
+                        }
+                        onSelect={(date) =>
+                          field.onChange(
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        disabled={(date) => date < new Date("1900-01-01")}
+                        initialFocus
+                        defaultMonth={
+                          field.value ? parseISO(field.value) : new Date()
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

@@ -25,6 +25,7 @@ const paymentFormSchema = z.object({
     .string()
     .max(50, "El banco debe tener como máximo 50 caracteres.")
     .optional(),
+  pag_fechapago: z.string().min(1, "La fecha de pago es obligatoria."),
   pag_referencia: z
     .string()
     .max(100, "La referencia debe tener como máximo 100 caracteres.")
@@ -46,6 +47,7 @@ export const usePaymentForm = () => {
       pag_cuenta: "",
       pag_metodopago: "",
       pag_banco: "",
+      pag_fechapago: "",
       pag_referencia: "",
     },
   });
@@ -60,6 +62,7 @@ export const usePaymentForm = () => {
         amountToPay,
         pag_metodopago,
         pag_banco,
+        pag_fechapago,
         pag_referencia,
       } = formData;
 
@@ -69,7 +72,7 @@ export const usePaymentForm = () => {
 
       const paymentData = {
         pag_monto: amountToPay,
-        pag_fechapago: new Date().toISOString(),
+        pag_fechapago,
         pag_estado: "A",
         pag_descripcion,
         pag_cuenta,

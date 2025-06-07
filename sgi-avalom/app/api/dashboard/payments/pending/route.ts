@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         prisma.ava_alquilermensual.findMany({
           where: { alqm_estado: { not: "P" } },
           take: 10,
-          orderBy: { alqm_fechainicio: "desc" },
+          orderBy: { alqm_fechainicio: "asc" },
           select: {
             alqm_id: true,
             alqm_identificador: true,
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
             depo_fechadevolucion: null,
           },
           take: 10,
-          orderBy: { depo_fechacreacion: "desc" },
+          orderBy: { depo_fechacreacion: "asc" },
           select: {
             depo_id: true,
             depo_montoactual: true,
