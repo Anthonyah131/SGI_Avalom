@@ -1,11 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -34,7 +27,7 @@ import { Loader2Icon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, convertToUTC, formatToCR } from "@/utils/dateUtils";
 
 const MonthlyRentForm: React.FC<{
   action: "create" | "edit";
@@ -118,7 +111,7 @@ const MonthlyRentForm: React.FC<{
                         disabled={isLoading}
                       >
                         {field.value
-                          ? convertToCostaRicaTime(field.value)
+                          ? formatToCR(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
@@ -133,7 +126,7 @@ const MonthlyRentForm: React.FC<{
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
                         field.onChange(
-                          date ? convertToUTC(date.toISOString()) : ""
+                          date ? date.toISOString().split("T")[0] : ""
                         )
                       }
                       disabled={(date) =>
@@ -169,7 +162,7 @@ const MonthlyRentForm: React.FC<{
                         disabled={isLoading}
                       >
                         {field.value
-                          ? convertToCostaRicaTime(field.value)
+                          ? formatToCR(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
@@ -184,7 +177,7 @@ const MonthlyRentForm: React.FC<{
                       selected={field.value ? parseISO(field.value) : undefined}
                       onSelect={(date) =>
                         field.onChange(
-                          date ? convertToUTC(date.toISOString()) : ""
+                          date ? date.toISOString().split("T")[0] : ""
                         )
                       }
                       disabled={(date) =>
@@ -220,7 +213,7 @@ const MonthlyRentForm: React.FC<{
                         disabled={isLoading}
                       >
                         {field.value
-                          ? convertToCostaRicaTime(field.value)
+                          ? formatToCR(field.value)
                           : "Seleccione una fecha"}
                       </Button>
                     </FormControl>
@@ -268,6 +261,7 @@ const MonthlyRentForm: React.FC<{
                       <SelectItem value="A">Atrasado</SelectItem>
                       <SelectItem value="P">Pagado</SelectItem>
                       <SelectItem value="I">Incompleto</SelectItem>
+                      <SelectItem value="R">Cortesía</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>

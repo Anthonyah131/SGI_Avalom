@@ -7,6 +7,7 @@ import cookie from "js-cookie";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import usePaymentStore from "@/lib/zustand/monthlyPaymentStore";
+import { convertToUTC, convertToUTCSV } from "@/utils/dateUtils";
 
 const paymentFormSchema = z.object({
   pag_descripcion: z
@@ -73,7 +74,7 @@ export const usePaymentForm = () => {
 
       const paymentData = {
         pag_monto: amountToPay,
-        pag_fechapago,
+        pag_fechapago: convertToUTCSV(pag_fechapago),
         pag_estado: "A",
         pag_descripcion,
         pag_cuenta,

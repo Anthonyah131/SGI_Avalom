@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { AvaAlquiler, AvaAlquilerMensual, AvaDeposito } from "@/lib/types";
 import { addMonths, endOfMonth, format, parseISO } from "date-fns";
-import { convertToUTC, safeParseISO } from "@/utils/dateUtils";
+import { convertToUTC, convertToUTCSV, safeParseISO } from "@/utils/dateUtils";
 import { toDate } from "date-fns-tz";
 
 interface RentalState {
@@ -24,6 +24,11 @@ interface RentalState {
   updateRent: (
     type: "monthlyRents" | "createMonthlyRents",
     updatedRent: AvaAlquilerMensual
+  ) => void;
+  setRentStatus: (
+    type: "monthlyRents" | "createMonthlyRents",
+    alqm_id: string,
+    nuevoEstado: string
   ) => void;
   deleteRent: (
     type: "monthlyRents" | "createMonthlyRents",
@@ -79,6 +84,15 @@ const useRentalStore = create<RentalState>((set, get) => ({
       ),
     })),
 
+  setRentStatus: (type, alqm_id, nuevoEstado) =>
+    set((state) => ({
+      [type]: state[type].map((r) =>
+        r.alqm_id.toString() === alqm_id.toString()
+          ? { ...r, alqm_estado: nuevoEstado }
+          : r
+      ),
+    })),
+
   deleteRent: (type, alqm_id) => {
     const state = get();
     const rentToDelete = state[type].find((rent) => rent.alqm_id === alqm_id);
@@ -108,8 +122,8 @@ const useRentalStore = create<RentalState>((set, get) => ({
       return false;
     }
 
-    const newStartDate = safeParseISO(convertToUTC(startDate));
-    const newEndDate = safeParseISO(convertToUTC(endDate));
+    const newStartDate = convertToUTC(startDate.split("T")[0]);
+    const newEndDate = convertToUTC(endDate.split("T")[0]);
 
     if (!newStartDate || !newEndDate) {
       console.error("Fechas inválidas:", { newStartDate, newEndDate });
@@ -119,8 +133,8 @@ const useRentalStore = create<RentalState>((set, get) => ({
     for (const rent of rents) {
       if (rent.alqm_identificador === alqm_identificador) continue;
 
-      const rentStartDate = safeParseISO(rent.alqm_fechainicio);
-      const rentEndDate = safeParseISO(rent.alqm_fechafin);
+      const rentStartDate = convertToUTC(rent.alqm_fechainicio.split("T")[0]);
+      const rentEndDate = convertToUTC(rent.alqm_fechafin.split("T")[0]);
 
       if (!rentStartDate || !rentEndDate) {
         console.error(
@@ -148,6 +162,7 @@ const useRentalStore = create<RentalState>((set, get) => ({
   calculateNextDates: (type) => {
     const rents = get()[type];
 
+    // Si no hay ninguno, arrancamos hoy en CR y fin de siguiente mes en CR
     if (rents.length === 0) {
       const todayUTC = new Date();
       const todayCR = toDate(todayUTC, { timeZone: "America/Costa_Rica" });
@@ -156,63 +171,50 @@ const useRentalStore = create<RentalState>((set, get) => ({
       });
 
       return {
-        startDate: format(todayCR, "yyyy-MM-dd"),
-        endDate: format(endOfNextMonthCR, "yyyy-MM-dd"),
+        startDate: convertToUTCSV(format(todayCR, "yyyy-MM-dd")),
+        endDate: convertToUTCSV(format(endOfNextMonthCR, "yyyy-MM-dd")),
       };
     }
 
+    // Si ya hay, sacamos el último fin y calculamos siguiente
     const lastRent = rents[rents.length - 1];
-    const lastEndDateUTC = safeParseISO(lastRent.alqm_fechafin);
-
-    if (!lastEndDateUTC) {
-      console.error(
-        `Error al procesar la última fecha de fin del alquiler (${lastRent.alqm_fechafin}).`
-      );
-      const todayUTC = new Date();
-      return {
-        startDate: format(todayUTC, "yyyy-MM-dd"),
-        endDate: format(endOfMonth(addMonths(todayUTC, 1)), "yyyy-MM-dd"),
-      };
-    }
-
+    const lastEndDateUTC = safeParseISO(lastRent.alqm_fechafin)!;
     const lastEndDateCR = toDate(lastEndDateUTC, {
       timeZone: "America/Costa_Rica",
     });
 
+    // Para mantener el día de mes original
     const firstRent = rents[0];
-    const firstStartDateUTC = safeParseISO(firstRent.alqm_fechainicio);
-    const firstStartDateCR = firstStartDateUTC
-      ? toDate(firstStartDateUTC, { timeZone: "America/Costa_Rica" })
-      : new Date();
-    const dayOfMonth = firstStartDateCR.getDate();
+    const firstStartUTC = safeParseISO(firstRent.alqm_fechainicio)!;
+    const firstStartCR = toDate(firstStartUTC, {
+      timeZone: "America/Costa_Rica",
+    });
+    const dayOfMonth = firstStartCR.getDate();
 
-    const nextStartDateCR = lastEndDateCR;
-
-    const potentialEndDateCR = addMonths(nextStartDateCR, 1);
-
+    // Calculamos rango siguiente mes
+    const nextStartCR = lastEndDateCR;
+    const potentialEndCR = addMonths(nextStartCR, 1);
     const daysInMonth = new Date(
-      potentialEndDateCR.getFullYear(),
-      potentialEndDateCR.getMonth() + 1,
+      potentialEndCR.getFullYear(),
+      potentialEndCR.getMonth() + 1,
       0
     ).getDate();
     const adjustedDay = Math.min(dayOfMonth, daysInMonth);
-
-    const nextEndDateCR = new Date(
-      potentialEndDateCR.getFullYear(),
-      potentialEndDateCR.getMonth(),
+    const nextEndCR = new Date(
+      potentialEndCR.getFullYear(),
+      potentialEndCR.getMonth(),
       adjustedDay
     );
 
     return {
-      startDate: convertToUTC(nextStartDateCR.toISOString()),
-      endDate: convertToUTC(nextEndDateCR.toISOString()),
+      startDate: convertToUTCSV(format(nextStartCR, "yyyy-MM-dd")),
+      endDate: convertToUTCSV(format(nextEndCR, "yyyy-MM-dd")),
     };
   },
 
   setDeposit: (deposit) => set({ deposit }),
 
-  addDeposit: (newDeposit) =>
-    set({ deposit: newDeposit }),
+  addDeposit: (newDeposit) => set({ deposit: newDeposit }),
 
   updateDeposit: (updatedDeposit) => {
     const state = get();
@@ -220,7 +222,8 @@ const useRentalStore = create<RentalState>((set, get) => ({
     if (state.deposit?.ava_pago?.length) {
       return {
         success: false,
-        message: "No se puede editar el depósito porque tiene pagos relacionados.",
+        message:
+          "No se puede editar el depósito porque tiene pagos relacionados.",
       };
     }
 

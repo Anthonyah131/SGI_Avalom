@@ -124,7 +124,7 @@ export interface AvaAlquilerMensual {
   alqm_montototal: string;
   alqm_montopagado: string;
   alqm_fechapago?: string;
-  alqm_estado: "A" | "P" | "I";
+  alqm_estado: "A" | "P" | "I" | "R";
   alqm_fechacreacion?: string;
   alq_id?: string;
   ava_alquiler?: AvaAlquiler;

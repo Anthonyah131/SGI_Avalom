@@ -12,6 +12,7 @@ import usePropertyStore from "@/lib/zustand/propertyStore";
 import useClientStore from "@/lib/zustand/clientStore";
 import { Cliente } from "@/lib/types";
 import { RentalFormProps } from "@/lib/typesForm";
+import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
 
 const rentalFormSchema = z.object({
   alq_monto: z
@@ -87,15 +88,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
       : {
           alq_monto: selectedRental?.alq_monto || "0",
           alq_fechapago: selectedRental?.alq_fechapago
-            ? format(
-                toDate(
-                  toZonedTime(
-                    new Date(selectedRental.alq_fechapago),
-                    "America/Costa_Rica"
-                  )
-                ),
-                "yyyy-MM-dd"
-              )
+            ? convertToCostaRicaTime(selectedRental.alq_fechapago)
             : "",
           alq_estado: getAlqEstado(selectedRental?.alq_estado),
         };
@@ -148,7 +141,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         const newRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
-            ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
+            ? convertToUTC(formData.alq_fechapago)
             : null,
           alq_monto: Number(formData.alq_monto),
           prop_id: selectedProperty?.prop_id,
@@ -159,7 +152,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         const updatedRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
-            ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
+            ? convertToUTC(formData.alq_fechapago)
             : null,
           ava_clientexalquiler: clientsInRental.map((c) => ({
             cli_id: c.cli_id,

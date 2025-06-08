@@ -12,7 +12,13 @@ export async function GET(request: NextRequest) {
             include: {
               ava_tipopropiedad: true,
             },
+            orderBy: {
+              prop_identificador: "asc",
+            },
           },
+        },
+        orderBy: {
+          edi_identificador: "asc",
         },
       });
       return NextResponse.json(

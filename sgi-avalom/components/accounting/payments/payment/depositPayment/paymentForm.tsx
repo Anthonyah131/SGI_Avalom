@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { usePaymentForm } from "@/hooks/accounting/depositPayment/usePaymentForm";
+import { formatToCR } from "@/utils/dateUtils";
 
 export function PaymentForm({
   amountToPay,
@@ -161,13 +162,9 @@ export function PaymentForm({
                           )}
                           disabled={isSubmitting}
                         >
-                          {field.value ? (
-                            format(parseISO(field.value), "PPP", {
-                              locale: es,
-                            })
-                          ) : (
-                            <span>Seleccione una fecha</span>
-                          )}
+                          {field.value
+                            ? formatToCR(field.value)
+                            : "Seleccione una fecha"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>

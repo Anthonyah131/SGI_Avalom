@@ -33,6 +33,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { useCanceledRentForm } from "@/hooks/accounting/canceledRent/useCanceledRentForm";
+import { formatToCR } from "@/utils/dateUtils";
 
 export const CanceledRentForm = () => {
   const { form, handleCancelSubmit, isSubmitting } = useCanceledRentForm();
@@ -175,9 +176,7 @@ export const CanceledRentForm = () => {
                               disabled={isSubmitting}
                             >
                               {field.value
-                                ? format(parseISO(field.value), "PPP", {
-                                    locale: es,
-                                  })
+                                ? formatToCR(field.value)
                                 : "Seleccionar fecha"}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
@@ -329,9 +328,7 @@ export const CanceledRentForm = () => {
                               disabled={isSubmitting}
                             >
                               {field.value
-                                ? format(parseISO(field.value), "PPP", {
-                                    locale: es,
-                                  })
+                                ? formatToCR(field.value)
                                 : "Seleccionar fecha"}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>

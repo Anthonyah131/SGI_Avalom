@@ -58,8 +58,7 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
       if (!value) return "Sin fecha";
 
       try {
-        const zonedDate = toZonedTime(parseISO(value), "America/Costa_Rica");
-        return format(zonedDate, "PPP", { locale: es });
+        return format(value, "PPP", { locale: es });
       } catch {
         return "Formato inválido";
       }

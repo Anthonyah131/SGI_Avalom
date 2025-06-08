@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/utils/currencyConverter";
-import { convertToCostaRicaTime } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, formatToCR } from "@/utils/dateUtils";
 import { useUser } from "@/lib/UserContext";
 import { useCancelPaymentForm } from "@/hooks/accounting/monthlyRentPayment/useCancelPaymentForm";
 import { CancelPaymentFormProps } from "@/lib/typesForm";
@@ -73,7 +73,7 @@ export function CancelPaymentForm({
               </div>
               <div>
                 <span className="font-semibold">Fecha de Pago:</span>{" "}
-                {convertToCostaRicaTime(payment.pag_fechapago)}
+                {formatToCR(payment.pag_fechapago)}
               </div>
               <div>
                 <span className="font-semibold">Estado:</span>{" "}

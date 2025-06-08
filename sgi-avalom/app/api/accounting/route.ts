@@ -15,6 +15,11 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        orderBy: {
+          ava_propiedad: {
+            prop_identificador: "asc",
+          },
+        },
       });
       return NextResponse.json(
         { success: true, data: stringifyWithBigInt(rentals) },

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 import { AvaAlquilerMensual } from "@/lib/types";
-import { convertToUTC } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, convertToUTC, convertToUTCSV } from "@/utils/dateUtils";
 import axios from "axios";
 import cookie from "js-cookie";
 
@@ -24,7 +24,7 @@ const monthlyRentSchema = z.object({
     message: "Fecha de fin requerida",
   }),
   alqm_fechapago: z.string().optional(),
-  alqm_estado: z.enum(["A", "P", "I"]),
+  alqm_estado: z.enum(["A", "P", "I", "R"]),
 });
 
 export type MonthlyRentFormInputs = z.infer<typeof monthlyRentSchema>;
@@ -64,14 +64,15 @@ export const useMonthlyRentForm = ({
     } else {
       ({ startDate, endDate } = calculateNextDates("createMonthlyRents"));
     }
+
     return rent
       ? {
           alqm_identificador: rent.alqm_identificador,
           alqm_montototal: rent.alqm_montototal.toString(),
-          alqm_fechainicio: rent.alqm_fechainicio,
-          alqm_fechafin: rent.alqm_fechafin,
+          alqm_fechainicio: convertToCostaRicaTime(rent.alqm_fechainicio),
+          alqm_fechafin: convertToCostaRicaTime(rent.alqm_fechafin),
           alqm_fechapago: rent.alqm_fechapago,
-          alqm_estado: rent.alqm_estado as "I" | "P" | "I",
+          alqm_estado: rent.alqm_estado as "I" | "P" | "I" | "R",
         }
       : {
           alqm_identificador: `Mes ${monthlyRents.length + 1}`,
@@ -79,7 +80,7 @@ export const useMonthlyRentForm = ({
           alqm_fechainicio: startDate,
           alqm_fechafin: endDate,
           alqm_fechapago: selectedRental?.alq_fechapago || "",
-          alqm_estado: "I" as "A" | "P" | "I",
+          alqm_estado: "I" as "A" | "P" | "I" | "R",
         };
   }, [calculateNextDates, monthlyRents.length, rent, rents]);
 
@@ -149,13 +150,16 @@ export const useMonthlyRentForm = ({
           ...rent,
           alqm_identificador: formData.alqm_identificador,
           alqm_montototal: formData.alqm_montototal,
-          alqm_fechainicio: convertToUTC(formData.alqm_fechainicio),
-          alqm_fechafin: convertToUTC(formData.alqm_fechafin),
+          alqm_fechainicio: convertToUTCSV(formData.alqm_fechainicio),
+          alqm_fechafin: convertToUTCSV(formData.alqm_fechafin),
           alqm_fechapago: formData.alqm_fechapago
             ? convertToUTC(formData.alqm_fechapago)
             : undefined,
           alqm_estado: formData.alqm_estado,
         };
+
+        console.log(rent.alqm_fechainicio, formData.alqm_fechainicio);
+        console.log(rent.alqm_fechafin, formData.alqm_fechafin);
 
         if (mode === "view") {
           const response = await axios.put(

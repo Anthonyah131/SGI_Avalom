@@ -1,3 +1,8 @@
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import React from "react";
+import { useState } from "react";
+import { Loader2Icon, AlertCircle, X, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -15,7 +20,6 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { RentalFormProps } from "@/lib/typesForm";
 import {
   Card,
   CardHeader,
@@ -23,7 +27,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { X, CalendarIcon } from "lucide-react";
 import { ClientComboBox } from "./ClientComboBox";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -31,17 +34,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
 import FileUploader from "@/components/ui/fileUploader";
-import React from "react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Loader2Icon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { RentalFormProps } from "@/lib/typesForm";
+import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
+import { formatToCR } from "@/utils/dateUtils";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
@@ -81,10 +80,8 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
       setIsLoading(false);
     }
   };
-  
 
   return (
-    
     <Form {...form}>
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         {disableEstadoField && (
@@ -148,9 +145,9 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                           disabled={isFormDisabled || action === "view"}
                         >
                           {field.value ? (
-                            format(parseISO(field.value), "PPP", { locale: es })
+                            formatToCR(field.value)
                           ) : (
-                            <span>Seleccione una fecha</span>
+                            "Seleccione una fecha"
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>

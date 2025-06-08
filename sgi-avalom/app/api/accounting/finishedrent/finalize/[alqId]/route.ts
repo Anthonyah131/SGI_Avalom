@@ -33,8 +33,8 @@ export async function GET(
       const pagoPendiente = await prisma.ava_alquilermensual.findFirst({
         where: {
           alq_id: alqId,
-          alqm_montopagado: {
-            lt: prisma.ava_alquilermensual.fields.alqm_montototal,
+          alqm_estado: {
+            notIn: ["P", "R"],
           },
         },
         select: { alqm_id: true },

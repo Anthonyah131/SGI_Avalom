@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         depositosPendientesList,
       ] = await Promise.all([
         prisma.ava_alquilermensual.count({
-          where: { alqm_estado: { not: "P" } },
+          where: { alqm_estado: { notIn: ["P", "R"] } },
         }),
         prisma.ava_deposito.count({
           where: {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
           },
         }),
         prisma.ava_alquilermensual.findMany({
-          where: { alqm_estado: { not: "P" } },
+          where: { alqm_estado: { notIn: ["P", "R"] } },
           take: 10,
           orderBy: { alqm_fechainicio: "asc" },
           select: {

@@ -7,7 +7,8 @@ import {
   isValid,
   endOfMonth,
 } from "date-fns";
-import { toDate } from "date-fns-tz";
+import { toDate, toZonedTime  } from "date-fns-tz";
+import { es } from "date-fns/locale";
 
 export function calculateMonthsBetween(
   startDate: Date,
@@ -61,6 +62,20 @@ export function formatDateRange(start: Date, end: Date): string {
   return `${format(start, "dd/MM/yyyy")} - ${format(end, "dd/MM/yyyy")}`;
 }
 
+export function formatLongDateEs(isoDate: string): string {
+  const date = parseISO(isoDate);
+  return format(date, "PPP", { locale: es });
+}
+
+export function formatToCR(date: string): string {
+  try {
+    const zoned = toZonedTime(parseISO(date), "America/Costa_Rica");
+    return format(toDate(zoned), "PPP", { locale: es });
+  } catch {
+    return "Fecha inválida";
+  }
+}
+
 // Convertir de UTC a Costa Rica
 export function convertToCostaRicaTime(isoDate: string): string {
   const costaRicaTime = toDate(new Date(isoDate), {
@@ -90,6 +105,24 @@ export function convertToUTC(localDate: string): string {
       localDate,
     });
     return ""; // Manejo de error
+  }
+}
+
+export function convertToUTCSV(localDate: string): string {
+  if (!localDate) {
+    console.error("La fecha local está vacía o nula:", localDate);
+    return "";
+  }
+
+  try {
+
+    const date = new Date(`${localDate}T00:00:00`);
+    return date.toISOString();
+  } catch (error) {
+    console.error("Error al convertir fecha local a UTC:", error, {
+      localDate,
+    });
+    return "";
   }
 }
 

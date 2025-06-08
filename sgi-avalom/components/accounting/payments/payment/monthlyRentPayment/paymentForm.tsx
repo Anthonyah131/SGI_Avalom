@@ -30,6 +30,11 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { usePaymentForm } from "@/hooks/accounting/monthlyRentPayment/usePaymentForm";
 import { toast } from "sonner";
+import {
+  convertToCostaRicaTime,
+  convertToUTC,
+  formatToCR,
+} from "@/utils/dateUtils";
 
 type PaymentFormProps = {};
 
@@ -163,13 +168,9 @@ export function PaymentForm({
                           )}
                           disabled={isSubmitting}
                         >
-                          {field.value ? (
-                            format(parseISO(field.value), "PPP", {
-                              locale: es,
-                            })
-                          ) : (
-                            <span>Seleccione una fecha</span>
-                          )}
+                          {field.value
+                            ? formatToCR(field.value)
+                            : "Seleccione una fecha"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>

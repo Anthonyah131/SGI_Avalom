@@ -133,9 +133,9 @@ export async function GET(req: NextRequest) {
             cursorY = marginTop;
           }
 
-          const fecha = new Date(
-            mens.alqm_fechainicio
-          ).toLocaleDateString("es-CR");
+          const fecha = new Date(mens.alqm_fechainicio).toLocaleDateString(
+            "es-CR"
+          );
 
           const edificioLabel = ed.edi_identificador;
           const propiedadLabel = prop.prop_identificador;
@@ -147,7 +147,16 @@ export async function GET(req: NextRequest) {
 
           const montoEsperado = Number(mens.alqm_montototal);
           const montoPagado = Number(mens.alqm_montopagado ?? 0);
-          const estadoPago = montoPagado >= montoEsperado ? "Completado" : "Incompleto";
+          const estadoPago =
+            mens.alqm_estado === "P"
+              ? "Pagado"
+              : mens.alqm_estado === "A"
+              ? "Atrasado"
+              : mens.alqm_estado === "I"
+              ? "Incompleto"
+              : mens.alqm_estado === "R"
+              ? "Cortesía"
+              : mens.alqm_estado;
 
           totalEsperado += montoEsperado;
           totalPagado += montoPagado;

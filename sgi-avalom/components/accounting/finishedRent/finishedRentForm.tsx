@@ -31,6 +31,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import { useFinishedRentForm } from "@/hooks/accounting/finishedRent/useFinishedRentForm";
+import { formatToCR } from "@/utils/dateUtils";
 
 export const FinishedRentForm = () => {
   const { form, handleFinishSubmit, isSubmitting } = useFinishedRentForm();
@@ -164,9 +165,7 @@ export const FinishedRentForm = () => {
                             disabled={isSubmitting}
                           >
                             {field.value ? (
-                              format(parseISO(field.value), "PPP", {
-                                locale: es,
-                              })
+                              formatToCR(field.value)
                             ) : (
                               <span>Seleccione una fecha</span>
                             )}

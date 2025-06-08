@@ -25,7 +25,7 @@ export async function PUT(
       }
 
       const allPaymentsCompleted = rental.ava_alquilermensual.every(
-        (rent) => rent.alqm_estado === "P"
+        (rent) => rent.alqm_estado === "P" || rent.alqm_estado === "R"
       );
 
       const isDepositPaid =

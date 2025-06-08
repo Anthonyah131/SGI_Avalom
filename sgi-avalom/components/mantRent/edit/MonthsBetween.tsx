@@ -5,7 +5,6 @@ import axios from "axios";
 import cookie from "js-cookie";
 import { PencilIcon, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Tooltip,
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import MonthlyRentForm from "./monthlyRentForm";
 import ManageActions from "@/components/dataTable/manageActions";
-import { convertToCostaRicaTime } from "@/utils/dateUtils";
+import { formatToCR } from "@/utils/dateUtils";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 import AlertDialog from "@/components/alertDialog";
 
@@ -26,7 +25,7 @@ interface MonthsBetweenProps {
 const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
   const { monthlyRents, deleteRent, createMonthlyRents } = useRentalStore();
   const [openNew, setOpenNew] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
+  const [openEditId, setOpenEditId] = useState<string | null>(null);
   const [rents, setRents] = useState(
     mode === "create" ? createMonthlyRents : monthlyRents
   );
@@ -104,6 +103,7 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
           )
           .map((rent) => {
             const hasPayments = rent.ava_pago && rent.ava_pago.length > 0;
+            const isThisOpen = openEditId === rent.alqm_id;
 
             return (
               <Card key={rent.alqm_id} className="relative">
@@ -113,8 +113,10 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
                       <TooltipTrigger asChild>
                         <div className="inline-block">
                           <ManageActions
-                            open={openEdit}
-                            onOpenChange={setOpenEdit}
+                            open={isThisOpen}
+                            onOpenChange={(open) =>
+                              setOpenEditId(open ? rent.alqm_id : null)
+                            }
                             titleButton=""
                             title="Editar Alquiler Mensual"
                             description="Modifique los datos del alquiler mensual."
@@ -129,9 +131,7 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
                                 action="edit"
                                 alqmId={rent.alqm_id}
                                 mode={mode}
-                                onSuccess={() => {
-                                  setOpenEdit(false);
-                                }}
+                                onSuccess={() => setOpenEditId(null)}
                               />
                             }
                           />
@@ -194,12 +194,10 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
                 </CardHeader>
                 <CardContent className="text-sm">
                   <p>
-                    <strong>Inicio:</strong>{" "}
-                    {convertToCostaRicaTime(rent.alqm_fechainicio)}
+                    <strong>Inicio:</strong> {formatToCR(rent.alqm_fechainicio)}
                   </p>
                   <p>
-                    <strong>Fin:</strong>{" "}
-                    {convertToCostaRicaTime(rent.alqm_fechafin)}
+                    <strong>Fin:</strong> {formatToCR(rent.alqm_fechafin)}
                   </p>
                   <p>
                     <strong>Total:</strong>{" "}
@@ -209,7 +207,16 @@ const MonthsBetween: React.FC<MonthsBetweenProps> = ({ mode }) => {
                     })}
                   </p>
                   <p>
-                    <strong>Estado:</strong> {rent.alqm_estado}
+                    <strong>Estado:</strong>{" "}
+                    {rent.alqm_estado === "P"
+                      ? "Pagado"
+                      : rent.alqm_estado === "A"
+                      ? "Atrasado"
+                      : rent.alqm_estado === "I"
+                      ? "Incompleto"
+                      : rent.alqm_estado === "R"
+                      ? "Cortesía"
+                      : rent.alqm_estado}
                   </p>
                 </CardContent>
               </Card>

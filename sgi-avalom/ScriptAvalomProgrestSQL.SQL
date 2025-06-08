@@ -189,7 +189,7 @@ CREATE TABLE AVA_ALQUILERMENSUAL (
   alqm_fechacreacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Fecha de creación
   alq_id BIGINT, -- ID del contrato de alquiler
   rowid BIGINT NOT NULL DEFAULT unique_rowid(), -- Identificador interno
-  CONSTRAINT ava_alquilermensual_ck01 CHECK (alqm_estado IN ('A', 'P', 'I')),
+  CONSTRAINT ava_alquilermensual_ck01 CHECK (alqm_estado IN ('A','P','I','R')),
   CONSTRAINT ava_alquilermensual_pk PRIMARY KEY (alqm_id)
 );
 
@@ -203,7 +203,7 @@ COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_fechafin IS 'Fecha en la que termina 
 COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_montototal IS 'Monto total a pagar del alquiler mensual';
 COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_montopagado IS 'Monto pagado actual del alquiler mensual';
 COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_fechapago IS 'Fecha en que se pagó el alquiler mensual';
-COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_estado IS 'Estado del alquiler mensual(''A'':atrasado,''P'':pagado,''I'':incompleto)';
+COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_estado IS 'Estado del alquiler mensual(''A'':atrasado,''P'':pagado,''I'':incompleto,''R'':cortesía)';
 COMMENT ON COLUMN AVA_ALQUILERMENSUAL.alqm_fechacreacion IS 'Fecha de creacion del alquiler mensual';
 COMMENT ON COLUMN AVA_ALQUILERMENSUAL.rowid IS 'Identificador único interno para sincronización';
 
