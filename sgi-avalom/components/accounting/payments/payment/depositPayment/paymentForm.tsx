@@ -71,6 +71,54 @@ export function PaymentForm({
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
+              name="pag_fechapago"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Fecha de pago</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          disabled={isSubmitting}
+                        >
+                          {field.value
+                            ? formatToCR(field.value)
+                            : "Seleccione una fecha"}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? parseISO(field.value) : undefined
+                        }
+                        onSelect={(date) =>
+                          field.onChange(
+                            date ? date.toISOString().split("T")[0] : ""
+                          )
+                        }
+                        disabled={(date) => date < new Date("1900-01-01")}
+                        initialFocus
+                        defaultMonth={
+                          field.value ? parseISO(field.value) : new Date()
+                        }
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="pag_cuenta"
               render={({ field }) => (
                 <FormItem className="w-full">
@@ -140,54 +188,6 @@ export function PaymentForm({
                       className="w-full"
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="pag_fechapago"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Fecha de pago</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                          disabled={isSubmitting}
-                        >
-                          {field.value
-                            ? formatToCR(field.value)
-                            : "Seleccione una fecha"}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? parseISO(field.value) : undefined
-                        }
-                        onSelect={(date) =>
-                          field.onChange(
-                            date ? date.toISOString().split("T")[0] : ""
-                          )
-                        }
-                        disabled={(date) => date < new Date("1900-01-01")}
-                        initialFocus
-                        defaultMonth={
-                          field.value ? parseISO(field.value) : new Date()
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

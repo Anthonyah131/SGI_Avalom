@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Cliente } from "@/lib/types";
+import type { Cliente } from "@/lib/types";
 
 interface ClientComboBoxProps {
   clients: Cliente[];
@@ -71,6 +71,13 @@ interface ClientListProps {
 }
 
 const ClientList: React.FC<ClientListProps> = ({ clients, onSelect }) => {
+  const getSearchValue = (client: Cliente) => {
+    const nombreCompleto = `${client.cli_nombre} ${client.cli_papellido} ${
+      client.cli_sapellido || ""
+    }`.trim();
+    return `${nombreCompleto} ${client.cli_cedula}`.toLowerCase();
+  };
+
   return (
     <Command>
       <CommandInput placeholder="Buscar cliente..." />
@@ -80,10 +87,11 @@ const ClientList: React.FC<ClientListProps> = ({ clients, onSelect }) => {
           {clients.map((client) => (
             <CommandItem
               key={client.cli_id}
-              value={String(client.cli_id)}
+              value={getSearchValue(client)}
               onSelect={() => onSelect(client)}
             >
-              {client.cli_nombre} {client.cli_papellido} - {client.cli_cedula}
+              {client.cli_nombre} {client.cli_papellido} {client.cli_sapellido}{" "}
+              - {client.cli_cedula}
             </CommandItem>
           ))}
         </CommandGroup>

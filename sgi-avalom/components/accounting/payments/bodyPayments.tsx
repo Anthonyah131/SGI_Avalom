@@ -1,4 +1,7 @@
 "use client";
+
+import type React from "react";
+
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
 import { ModeToggle } from "@/components/modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -11,10 +14,12 @@ import { toast } from "sonner";
 import MonthlyRentsView from "./monthlyRentsView";
 import { DepositView } from "./depositView";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClientInfoCard } from "./clientInfoCard";
 
 const BodyPayments: React.FC = () => {
   const {
     setSelectedRental,
+    selectedRental,
     monthlyRents,
     isLoading,
     setLoadingState,
@@ -138,7 +143,13 @@ const BodyPayments: React.FC = () => {
             </div>
           </Card>
 
-          <DepositView></DepositView>
+          {selectedRental?.ava_clientexalquiler[0]?.ava_cliente && (
+            <ClientInfoCard
+              cliente={selectedRental.ava_clientexalquiler[0].ava_cliente}
+            />
+          )}
+
+          <DepositView />
 
           <Card>
             <CardHeader>

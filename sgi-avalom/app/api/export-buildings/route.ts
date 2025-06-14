@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
+        orderBy: { prop_identificador: "asc" },
       },
     },
   });
@@ -38,7 +39,9 @@ export async function GET(req: NextRequest) {
   const marginTop = A4[1] - 50;
   const rowH = 18;
 
-  const colWidths = [70, 90, 90, 120, 80, 70, 90, 90];
+  const colWidths = [130, 80, 80, 110, 70, 70, 90, 90];
+  //            Fecha, Edi, Prop, Cliente, Estado, Monto, Pagado, Estado pago
+
   const colXs = colWidths.reduce<number[]>(
     (acc, w, i) =>
       i === 0 ? [marginX] : [...acc, acc[i - 1] + colWidths[i - 1]],
@@ -118,10 +121,38 @@ export async function GET(req: NextRequest) {
 
   for (const ed of edificios) {
     for (const prop of ed.ava_propiedad) {
+      let subtotalEsperado = 0;
+      let subtotalPagado = 0;
+
+      // ... título sección ...
+      if (cursorY < 80) {
+        page = pdf.addPage(A4);
+        cursorY = marginTop;
+      }
+      page.drawText(`Departamento: ${prop.prop_identificador}`, {
+        x: marginX,
+        y: cursorY,
+        size: 13,
+        font: helveticaBold,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      cursorY -= rowH;
+
+      // Cabecera tabla por sección
+      headers.forEach((h, i) => {
+        page.drawText(h, {
+          x: colXs[i],
+          y: cursorY + 7,
+          size: 11,
+          font: helveticaBold,
+          color: rgb(0, 0, 0),
+        });
+      });
+      cursorY -= rowH;
+
       for (const alq of prop.ava_alquiler) {
         const mensualidades = alq.ava_alquilermensual.filter((m) => {
           const fecha = new Date(m.alqm_fechainicio);
-
           return (
             (!fromDate || fecha >= fromDate) && (!toDate || fecha <= toDate)
           );
@@ -133,9 +164,13 @@ export async function GET(req: NextRequest) {
             cursorY = marginTop;
           }
 
-          const fecha = new Date(mens.alqm_fechainicio).toLocaleDateString(
-            "es-CR"
-          );
+          const fechaInicio = new Date(
+            mens.alqm_fechainicio
+          ).toLocaleDateString("es-CR");
+          const fechaFin = mens.alqm_fechafin
+            ? new Date(mens.alqm_fechafin).toLocaleDateString("es-CR")
+            : "";
+          const fecha = fechaFin ? `${fechaInicio} a ${fechaFin}` : fechaInicio;
 
           const edificioLabel = ed.edi_identificador;
           const propiedadLabel = prop.prop_identificador;
@@ -158,6 +193,10 @@ export async function GET(req: NextRequest) {
               ? "Cortesía"
               : mens.alqm_estado;
 
+          // Sumar a los subtotales
+          subtotalEsperado += montoEsperado;
+          subtotalPagado += montoPagado;
+          // Sumar a los totales generales
           totalEsperado += montoEsperado;
           totalPagado += montoPagado;
 
@@ -173,13 +212,14 @@ export async function GET(req: NextRequest) {
           ];
 
           row.forEach((text, i) => {
+            const fontSize = i === 0 ? 9.5 : 10;
             page.drawText(text, {
               x: colXs[i],
               y: cursorY,
-              size: 10,
+              size: fontSize,
               font: helvetica,
               color: rgb(0, 0, 0),
-              maxWidth: colWidths[i] - 5,
+              maxWidth: colWidths[i] - 6,
             });
           });
 
@@ -193,6 +233,48 @@ export async function GET(req: NextRequest) {
           cursorY -= rowH;
         }
       }
+
+      // --- Imprimir subtotales de la sección ---
+      if (cursorY < 80) {
+        page = pdf.addPage(A4);
+        cursorY = marginTop;
+      }
+      page.drawText(
+        `Subtotal esperado (${
+          prop.prop_identificador
+        }): CRC ${subtotalEsperado.toLocaleString("es-CR")}`,
+        {
+          x: marginX,
+          y: cursorY - 8,
+          size: 11,
+          font: helveticaBold,
+          color: rgb(0.2, 0.2, 0.2),
+        }
+      );
+      page.drawText(
+        `Subtotal pagado (${
+          prop.prop_identificador
+        }): CRC ${subtotalPagado.toLocaleString("es-CR")}`,
+        {
+          x: marginX,
+          y: cursorY - 28,
+          size: 11,
+          font: helveticaBold,
+          color: rgb(0.2, 0.2, 0.2),
+        }
+      );
+
+      // Ajustar cursorY para dibujar la línea bien separada de los textos
+      cursorY -= 38;
+
+      // Línea divisoria negra/gris después de los subtotales (¡ahora está bien posicionada!)
+      page.drawLine({
+        start: { x: marginX - 10, y: cursorY - 6 },
+        end: { x: marginX - 10 + tableWidth + 10, y: cursorY - 6 },
+        thickness: 2,
+        color: rgb(0.1, 0.1, 0.1), // negro/gris oscuro
+      });
+      cursorY -= 18; // Más espacio tras la línea (ajusta si quieres más o menos separación)
     }
   }
 

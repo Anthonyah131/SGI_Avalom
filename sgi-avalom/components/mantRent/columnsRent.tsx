@@ -14,6 +14,7 @@ import {
 import { format } from "date-fns";
 import { AvaAlquiler } from "@/lib/types";
 import Link from "next/link";
+import { es } from "date-fns/locale";
 
 export const columns: ColumnDef<AvaAlquiler>[] = [
   {
@@ -86,6 +87,30 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
         currency: "CRC",
       }).format(amount);
       return <div className="font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "alq_fechapago",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="table"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fecha Pago
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue<string | null>("alq_fechapago");
+      if (!value) return "Sin fecha";
+
+      try {
+        return format(new Date(value), "PPP", { locale: es });
+      } catch {
+        return "Formato inválido";
+      }
     },
   },
   {

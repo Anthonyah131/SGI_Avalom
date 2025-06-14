@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "./scroll-area";
-import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, convertToUTC, convertToUTCSV } from "@/utils/dateUtils";
 
 const COSTA_RICA_TZ = "America/Costa_Rica";
 
@@ -42,7 +42,7 @@ export function DatePickerWithRange({
   // 2) Al parsear el valor tecleado ("yyyy-MM-dd"), hago CR → ISO UTC → Date
   const parseFromTimeZone = (dateStr: string): Date | undefined => {
     if (!dateStr) return undefined;
-    const iso = convertToUTC(dateStr); // "2023-06-02" → "2023-06-02T00:00:00.000Z"
+    const iso = convertToUTCSV(dateStr); // "2023-06-02" → "2023-06-02T00:00:00.000Z"
     return parseISO(iso); // ISO → Date
   };
 

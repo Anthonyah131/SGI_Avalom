@@ -14,6 +14,7 @@ import {
 import { format } from "date-fns";
 import { AvaAlquiler } from "@/lib/types";
 import Link from "next/link";
+import { es } from "date-fns/locale";
 
 export const columns: ColumnDef<AvaAlquiler>[] = [
   {
@@ -31,14 +32,6 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
     },
   },
   {
-    accessorKey: "ava_propiedad.ava_edificio.edi_direccion",
-    header: "Dirección",
-    cell: ({ row }) => {
-      const address = row.original.ava_propiedad?.ava_edificio?.edi_direccion;
-      return <div className="font-medium text-wrap">{address}</div>;
-    },
-  },
-  {
     accessorKey: "ava_propiedad.prop_identificador",
     header: ({ column }) => {
       return (
@@ -50,14 +43,6 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
           <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
         </Button>
       );
-    },
-  },
-  {
-    accessorKey: "ava_propiedad.prop_descripcion",
-    header: "Info Propiedad",
-    cell: ({ row }) => {
-      const info = row.original.ava_propiedad?.prop_descripcion as string;
-      return <div className="font-medium text-wrap">{info}</div>;
     },
   },
   {
@@ -94,6 +79,30 @@ export const columns: ColumnDef<AvaAlquiler>[] = [
         currency: "CRC",
       }).format(amount);
       return <div className="font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "alq_fechapago",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="table"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fecha Pago
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const value = row.getValue<string | null>("alq_fechapago");
+      if (!value) return "Sin fecha";
+
+      try {
+        return format(new Date(value), "PPP", { locale: es });
+      } catch {
+        return "Formato inválido";
+      }
     },
   },
   {

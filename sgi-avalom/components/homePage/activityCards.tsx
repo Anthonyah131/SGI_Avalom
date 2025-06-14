@@ -16,7 +16,7 @@ import {
   DollarSignIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { convertToCostaRicaTime } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, formatToCR } from "@/utils/dateUtils";
 
 export interface ActivityItem {
   id?: string;
@@ -139,7 +139,7 @@ export function ActivityCards({
             <div>
               <p className="font-medium">{item.title}</p>
               <p className="text-xs text-muted-foreground">
-                {convertToCostaRicaTime(item.date || "")}
+                {formatToCR(item.date || "")}
               </p>
               {item.description && (
                 <p className="text-xs text-muted-foreground mt-1">

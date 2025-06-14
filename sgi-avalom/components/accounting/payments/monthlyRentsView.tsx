@@ -192,6 +192,17 @@ const MonthlyRentsView: React.FC = () => {
                       : "₡0"}
                   </span>
                 </p>
+                <p className="flex justify-between">
+                  <span className="font-medium">Pendiente</span>
+                  <span>
+                    {rent.alqm_montototal
+                      ? formatCurrency(
+                          Number(rent.alqm_montototal) -
+                            Number(rent.alqm_montopagado)
+                        )
+                      : "₡0"}
+                  </span>
+                </p>
               </CardContent>
               <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
                 <Button

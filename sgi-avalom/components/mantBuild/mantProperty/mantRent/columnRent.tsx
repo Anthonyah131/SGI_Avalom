@@ -22,20 +22,6 @@ import { toast } from "sonner";
 
 export const columnsRent: ColumnDef<AvaAlquiler>[] = [
   {
-    accessorKey: "alq_id",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="table"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Identificador
-          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
     accessorKey: "alq_monto",
     header: "Monto",
     cell: ({ getValue }) => {
@@ -52,7 +38,17 @@ export const columnsRent: ColumnDef<AvaAlquiler>[] = [
   },
   {
     accessorKey: "alq_fechapago",
-    header: "Fecha de Pago",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="table"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Fecha de Pago
+          <ArrowUpDown className="text-orange ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ getValue }) => {
       const value = getValue<string | null>();
       if (!value) return "Sin fecha";

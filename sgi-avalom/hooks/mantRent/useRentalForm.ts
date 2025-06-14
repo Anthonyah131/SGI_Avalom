@@ -9,6 +9,7 @@ import cookie from "js-cookie";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 import { Cliente } from "@/lib/types";
 import { format, toDate, toZonedTime } from "date-fns-tz";
+import { convertToCostaRicaTime, convertToUTCSV } from "@/utils/dateUtils";
 
 const rentalFormSchema = z.object({
   alq_monto: z.string().refine((value) => !isNaN(Number(value)), {
@@ -72,15 +73,9 @@ export const useRentalForm = ({
     return selectedRental
       ? {
           alq_monto: selectedRental.alq_monto?.toString() || "0",
-          alq_fechapago: format(
-            toDate(
-              toZonedTime(
-                new Date(selectedRental.alq_fechapago),
-                "America/Costa_Rica"
-              )
-            ),
-            "yyyy-MM-dd"
-          ),
+          alq_fechapago: selectedRental?.alq_fechapago
+            ? convertToCostaRicaTime(selectedRental.alq_fechapago)
+            : "",
           alq_estado: getAlqEstado(selectedRental?.alq_estado),
         }
       : {
@@ -142,7 +137,7 @@ export const useRentalForm = ({
           {
             ...formData,
             alq_fechapago: formData.alq_fechapago
-              ? new Date(`${formData.alq_fechapago}T00:00:00`).toISOString()
+              ? convertToUTCSV(formData.alq_fechapago)
               : null,
             ava_clientexalquiler: clientsInRental.map((c) => ({
               cli_id: c.cli_id,

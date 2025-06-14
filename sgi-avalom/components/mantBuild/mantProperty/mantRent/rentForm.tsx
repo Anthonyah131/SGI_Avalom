@@ -2,7 +2,14 @@ import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import React from "react";
 import { useState } from "react";
-import { Loader2Icon, AlertCircle, X, CalendarIcon } from "lucide-react";
+import {
+  Loader2Icon,
+  AlertCircle,
+  X,
+  CalendarIcon,
+  CreditCard,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -41,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { RentalFormProps } from "@/lib/typesForm";
 import { useRentalForm } from "@/hooks/mantBuild/useRentalForm";
 import { formatToCR } from "@/utils/dateUtils";
+import { Badge } from "@/components/ui/badge";
 
 const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
   const {
@@ -57,6 +65,17 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
     disableEstadoField,
   } = useRentalForm({ action, onSuccess });
   const [isLoading, setIsLoading] = useState(false);
+  const getFullName = (client: any) => {
+    return `${client.cli_nombre} ${client.cli_papellido} ${
+      client.cli_sapellido || ""
+    }`.trim();
+  };
+
+  const getInitials = (client: any) => {
+    const nombre = client.cli_nombre.charAt(0).toUpperCase();
+    const apellido = client.cli_papellido.charAt(0).toUpperCase();
+    return `${nombre}${apellido}`;
+  };
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
@@ -144,11 +163,9 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                           )}
                           disabled={isFormDisabled || action === "view"}
                         >
-                          {field.value ? (
-                            formatToCR(field.value)
-                          ) : (
-                            "Seleccione una fecha"
-                          )}
+                          {field.value
+                            ? formatToCR(field.value)
+                            : "Seleccione una fecha"}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -216,26 +233,49 @@ const RentalForm: React.FC<RentalFormProps> = ({ action, onSuccess }) => {
                 onClientSelect={handleClientSelect}
                 disabled={isFormDisabled}
               />
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="flex flex-wrap gap-4">
                 {clientsInRental.map((client) => (
-                  <Card key={client.cli_id} className="relative p-3">
-                    <CardHeader className="p-0 mb-2">
-                      <CardTitle className="text-sm font-medium">
-                        {client.cli_nombre} {client.cli_papellido}
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        {client.cli_cedula}
-                      </CardDescription>
+                  <Card
+                    key={client.cli_id}
+                    className="group relative w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.5rem)] lg:w-[calc(25%-0.5rem)] min-w-[220px] transition-all duration-200 hover:shadow-md hover:shadow-primary/5 border-border/50 hover:border-primary/20 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+
+                    <CardHeader className="relative p-4 pb-3">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                          <span className="text-sm font-semibold text-primary">
+                            {getInitials(client)}
+                          </span>
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <CardTitle className="text-sm font-semibold text-foreground leading-tight group-hover:text-primary transition-colors duration-200 break-words line-clamp-3">
+                            {getFullName(client)}
+                          </CardTitle>
+
+                          <div className="flex items-center gap-1.5">
+                            <CreditCard className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                            <CardDescription className="text-xs font-medium break-all text-muted-foreground">
+                              {client.cli_cedula}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-end justify-end mt-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+                          onClick={() => handleClientRemove(client.cli_id)}
+                          disabled={isFormDisabled}
+                        >
+                          <X className="w-4 h-4" />
+                          <span className="sr-only">Remover cliente</span>
+                        </Button>
+                      </div>
                     </CardHeader>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-1 right-1 p-0 m-0"
-                      onClick={() => handleClientRemove(client.cli_id)}
-                      disabled={isFormDisabled}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
                   </Card>
                 ))}
               </div>

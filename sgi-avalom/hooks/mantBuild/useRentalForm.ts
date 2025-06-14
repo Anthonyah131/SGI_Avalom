@@ -12,7 +12,7 @@ import usePropertyStore from "@/lib/zustand/propertyStore";
 import useClientStore from "@/lib/zustand/clientStore";
 import { Cliente } from "@/lib/types";
 import { RentalFormProps } from "@/lib/typesForm";
-import { convertToCostaRicaTime, convertToUTC } from "@/utils/dateUtils";
+import { convertToCostaRicaTime, convertToUTC, convertToUTCSV } from "@/utils/dateUtils";
 
 const rentalFormSchema = z.object({
   alq_monto: z
@@ -141,7 +141,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         const newRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
-            ? convertToUTC(formData.alq_fechapago)
+            ? convertToUTCSV(formData.alq_fechapago)
             : null,
           alq_monto: Number(formData.alq_monto),
           prop_id: selectedProperty?.prop_id,
@@ -152,7 +152,7 @@ export const useRentalForm = ({ action, onSuccess }: RentalFormProps) => {
         const updatedRental = {
           ...formData,
           alq_fechapago: formData.alq_fechapago
-            ? convertToUTC(formData.alq_fechapago)
+            ? convertToUTCSV(formData.alq_fechapago)
             : null,
           ava_clientexalquiler: clientsInRental.map((c) => ({
             cli_id: c.cli_id,

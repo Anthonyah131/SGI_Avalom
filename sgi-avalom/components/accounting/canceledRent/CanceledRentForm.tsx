@@ -193,7 +193,13 @@ export const CanceledRentForm = () => {
                                 date?.toISOString().split("T")[0] ?? ""
                               )
                             }
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
                             initialFocus
+                            defaultMonth={
+                              field.value ? parseISO(field.value) : new Date()
+                            }
                           />
                         </PopoverContent>
                       </Popover>
@@ -342,10 +348,16 @@ export const CanceledRentForm = () => {
                             }
                             onSelect={(date) =>
                               field.onChange(
-                                date?.toISOString().split("T")[0] ?? ""
+                                date ? date.toISOString().split("T")[0] : ""
                               )
                             }
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
                             initialFocus
+                            defaultMonth={
+                              field.value ? parseISO(field.value) : new Date()
+                            }
                           />
                         </PopoverContent>
                       </Popover>

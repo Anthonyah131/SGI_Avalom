@@ -15,13 +15,16 @@ export async function GET(
         where: { prop_id: BigInt(params.propId) },
         include: {
           ava_alquiler: {
+        orderBy: {
+          alq_fechapago: "desc",
+        },
+        include: {
+          ava_clientexalquiler: {
             include: {
-              ava_clientexalquiler: {
-                include: {
-                  ava_cliente: true,
-                },
-              },
+          ava_cliente: true,
             },
+          },
+        },
           },
           ava_tipopropiedad: true,
           ava_edificio: true,

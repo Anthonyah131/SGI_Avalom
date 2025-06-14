@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
+import { useParams } from "next/navigation";
 import { ModeToggle } from "@/components/modeToggle";
 import {
   Card,
@@ -10,12 +12,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePayment } from "@/hooks/accounting/monthlyRentPayment/usePayment";
-import { formatCurrency } from "@/utils/currencyConverter";
-import { useParams } from "next/navigation";
 import { PaymentForm } from "./paymentForm";
 import { PaymentTable } from "./paymentTable";
-import { useState, useEffect } from "react";
+import { usePayment } from "@/hooks/accounting/monthlyRentPayment/usePayment";
+import { formatCurrency } from "@/utils/currencyConverter";
+import { formatToCR } from "@/utils/dateUtils";
 
 const BodyPayment: React.FC = () => {
   const { alqmId } = useParams<{ alqmId: string }>();
@@ -119,13 +120,8 @@ const BodyPayment: React.FC = () => {
                 <CardTitle className="text-2xl text-primary font-bold mt-4">
                   Realizar Pago
                 </CardTitle>
-                {new Date(
-                  selectedMonthlyRent?.alqm_fechainicio ?? ""
-                ).toLocaleDateString("es-CR")}{" "}
-                -{" "}
-                {new Date(
-                  selectedMonthlyRent?.alqm_fechafin ?? ""
-                ).toLocaleDateString("es-CR")}
+                {formatToCR(selectedMonthlyRent?.alqm_fechainicio ?? "")} -{" "}
+                {formatToCR(selectedMonthlyRent?.alqm_fechafin ?? "")}
               </div>
               <ModeToggle />
             </CardHeader>

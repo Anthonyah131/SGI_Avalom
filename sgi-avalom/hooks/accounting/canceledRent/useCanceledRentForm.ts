@@ -113,6 +113,7 @@ export const useCanceledRentForm = () => {
 
     try {
       const token = cookie.get("token");
+      console.log("alqc_fecha_cancelacion", data.alqc_fecha_cancelacion);
       const response = await axios.put(
         `/api/accounting/canceledrent/${alqId}`,
         {
