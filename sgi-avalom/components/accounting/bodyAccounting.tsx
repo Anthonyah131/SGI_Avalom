@@ -10,6 +10,7 @@ import { DataTable } from "./data_table_filter";
 import { columns } from "./columnsAccounting";
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
 import { Skeleton } from "../ui/skeleton";
+import { ExportBuildings } from "../mantBuild/exportBuildings";
 
 const BodyAccounting: React.FC = () => {
   const { rentals, setRentals } = useRentalStore();
@@ -89,6 +90,7 @@ const BodyAccounting: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <div className="flex flex-wrap justify-center gap-2 p-4">
+              <ExportBuildings />
               <ModeToggle />
             </div>
           </Card>

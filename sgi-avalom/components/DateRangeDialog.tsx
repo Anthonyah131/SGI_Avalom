@@ -13,15 +13,13 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onGenerate: (from: string, to: string) => void;
-  onGenerateTotal: () => void;
-  title?: string; // título dinámico
+  title?: string;
 }
 
 export default function DateRangeDialog({
   open,
   onOpenChange,
   onGenerate,
-  onGenerateTotal,
   title = "Generar Reporte",
 }: Props) {
   const [from, setFrom] = useState("");
@@ -33,7 +31,6 @@ export default function DateRangeDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-
         <div className="space-y-2">
           <label className="text-sm font-medium">Desde</label>
           <input
@@ -43,7 +40,6 @@ export default function DateRangeDialog({
             className="w-full border rounded p-2"
           />
         </div>
-
         <div className="space-y-2">
           <label className="text-sm font-medium">Hasta</label>
           <input
@@ -53,13 +49,9 @@ export default function DateRangeDialog({
             className="w-full border rounded p-2"
           />
         </div>
-
         <div className="flex flex-col gap-2">
           <Button disabled={!from || !to} onClick={() => onGenerate(from, to)}>
             Generar por Rango
-          </Button>
-          <Button variant="outline" onClick={onGenerateTotal}>
-            Generar Reporte Total
           </Button>
         </div>
       </DialogContent>
