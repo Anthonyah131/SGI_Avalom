@@ -190,37 +190,6 @@ export const columnsProperty: ColumnDef<AvaPropiedad>[] = [
                 console.error(error);
               }
             }}
-            onGenerateTotal={async () => {
-              try {
-                const token = cookie.get("token");
-                const response = await axios.get(
-                  `/api/propertytypes/report/${property.prop_id}`,
-                  {
-                    responseType: "blob",
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                  }
-                );
-
-                const url = window.URL.createObjectURL(
-                  new Blob([response.data])
-                );
-                const link = document.createElement("a");
-                link.href = url;
-                link.setAttribute(
-                  "download",
-                  `reporte_propiedad_${property.prop_id}_total.pdf`
-                );
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                setOpenDateDialog(false);
-              } catch (error) {
-                toast.error("Error al generar el reporte total");
-                console.error(error);
-              }
-            }}
           />
         </>
       );
