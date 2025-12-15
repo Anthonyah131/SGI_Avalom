@@ -95,7 +95,6 @@ model ava_edificio {
   edi_direccion     String?         @db.String(200)
   edi_codigopostal  String?         @db.String(10)
   rowid             BigInt          @default(autoincrement())
-  ava_gasto         ava_gasto[]
   ava_propiedad     ava_propiedad[]
 }
 
@@ -119,6 +118,21 @@ model ava_pago {
   ava_reservacion     ava_reservacion?     @relation(fields: [res_id], references: [res_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship21")
 }
 
+model ava_pagoservicio {
+  pser_id          BigInt         @id(map: "ava_pagoservicio_pk") @default(sequence(minValue: 0))
+  pser_monto       BigInt
+  pser_fecha       DateTime       @db.Timestamp(6)
+  pser_descripcion String?        @db.String(50)
+  ser_id           BigInt?
+  prop_id          BigInt?
+  rowid            BigInt         @default(autoincrement())
+  ava_propiedad    ava_propiedad? @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship35")
+  ava_servicio     ava_servicio?  @relation(fields: [ser_id], references: [ser_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship27")
+
+  @@index([ser_id], map: "ava_pagoservicio_fk01")
+  @@index([prop_id], map: "ava_pagoservicio_fk02")
+}
+
 model ava_propiedad {
   prop_id            BigInt             @id(map: "ava_propiedad_pk") @default(sequence(minValue: 0))
   prop_identificador String             @db.String(15)
@@ -127,7 +141,7 @@ model ava_propiedad {
   tipp_id            BigInt?
   rowid              BigInt             @default(autoincrement())
   ava_alquiler       ava_alquiler[]
-  ava_gasto          ava_gasto[]
+  ava_pagoservicio   ava_pagoservicio[]
   ava_edificio       ava_edificio?      @relation(fields: [edi_id], references: [edi_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship32")
   ava_tipopropiedad  ava_tipopropiedad? @relation(fields: [tipp_id], references: [tipp_id], onDelete: NoAction, onUpdate: NoAction, map: "relationship36")
   ava_reservacion    ava_reservacion[]
@@ -157,66 +171,13 @@ model ava_reservacion {
   @@index([prop_id], map: "ava_reservacion_fk01")
 }
 
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ava_servicio {
-  ser_id        BigInt      @id(map: "ava_servicio_pk") @default(sequence(minValue: 0))
-  ser_codigo    String      @unique(map: "ava_servicio_unq01") @db.String(30)
-  ser_nombre    String      @db.String(30)
-  ser_servicio  String?     @db.String(40)
-  ser_negocio   String?     @db.String(80)
-  ser_mediopago String?     @db.String(30)
-  rowid         BigInt      @default(autoincrement())
-  ava_gasto     ava_gasto[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model ava_gasto {
-  gas_id             BigInt               @id(map: "ava_gasto_pk") @default(sequence(minValue: 0))
-  gas_tipo           String               @db.String(1)
-  gas_concepto       String               @db.String(60)
-  gas_descripcion    String?              @db.String(200)
-  gas_monto          BigInt
-  gas_fecha          DateTime             @default(now()) @db.Timestamp(6)
-  gas_estado         String               @default("A") @db.String(1)
-  gas_metodopago     String?              @db.String(30)
-  gas_cuenta         String?              @db.String(50)
-  gas_banco          String?              @db.String(50)
-  gas_referencia     String?              @db.String(100)
-  gas_comprobante    String?              @db.String(500)
-  edi_id             BigInt
-  prop_id            BigInt?
-  ser_id             BigInt?
-  usu_id             BigInt?
-  rowid              BigInt               @default(autoincrement())
-  ava_anulaciongasto ava_anulaciongasto[]
-  ava_edificio       ava_edificio         @relation(fields: [edi_id], references: [edi_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_edificio_x_ava_gasto")
-  ava_propiedad      ava_propiedad?       @relation(fields: [prop_id], references: [prop_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_propiedad_x_ava_gasto")
-  ava_servicio       ava_servicio?        @relation(fields: [ser_id], references: [ser_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_servicio_x_ava_gasto")
-  ava_usuario        ava_usuario?         @relation(fields: [usu_id], references: [usu_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_usuario_x_ava_gasto")
-
-  @@index([edi_id], map: "ava_gasto_fk01")
-  @@index([prop_id], map: "ava_gasto_fk02")
-  @@index([ser_id], map: "ava_gasto_fk03")
-  @@index([gas_tipo, gas_fecha], map: "ava_gasto_idx01")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model ava_anulaciongasto {
-  ang_id             BigInt      @id(map: "pk_ava_anulaciongasto") @default(sequence(minValue: 0))
-  ang_motivo         String      @db.String(50)
-  ang_descripcion    String?     @db.String(200)
-  ang_montooriginal  BigInt
-  ang_montofinal     BigInt
-  ang_fechaanulacion DateTime    @default(now()) @db.Timestamp(6)
-  gas_id             BigInt
-  usu_id             BigInt
-  rowid              BigInt      @default(autoincrement())
-  ava_gasto          ava_gasto   @relation(fields: [gas_id], references: [gas_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_gasto_x_ava_anulaciongasto")
-  ava_usuario        ava_usuario @relation(fields: [usu_id], references: [usu_id], onDelete: NoAction, onUpdate: NoAction, map: "ava_usuario_x_ava_anulaciongasto")
-
-  @@index([gas_id], map: "ava_anulaciongasto_fk01")
-  @@index([usu_id], map: "ava_anulaciongasto_fk02")
+  ser_id           BigInt             @id(map: "ava_servicio_pk") @default(sequence(minValue: 0))
+  ser_nombre       String             @db.String(30)
+  ser_servicio     String?            @db.String(40)
+  ser_mediopago    String?            @db.String(30)
+  rowid            BigInt             @default(autoincrement())
+  ava_pagoservicio ava_pagoservicio[]
 }
 
 model ava_tipopropiedad {
@@ -229,21 +190,19 @@ model ava_tipopropiedad {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model ava_usuario {
-  usu_id             BigInt               @id(map: "ava_usuario_pk") @default(sequence(minValue: 0))
-  usu_nombre         String               @db.String(30)
-  usu_papellido      String               @db.String(30)
-  usu_sapellido      String?              @db.String(30)
-  usu_cedula         String               @unique(map: "ava_usuario_unq01") @db.String(15)
-  usu_correo         String               @unique(map: "ava_usuario_unq02") @db.String(50)
-  usu_contrasena     String               @db.String(500)
-  usu_telefono       String?              @db.String(15)
-  usu_fechacreacion  DateTime             @default(now()) @db.Timestamp(6)
-  usu_estado         String               @db.String(1)
-  usu_rol            String               @db.String(1)
-  rowid              BigInt               @default(autoincrement())
-  ava_anulaciongasto ava_anulaciongasto[]
-  ava_anulacionpago  ava_anulacionpago[]
-  ava_gasto          ava_gasto[]
+  usu_id            BigInt              @id(map: "ava_usuario_pk") @default(sequence(minValue: 0))
+  usu_nombre        String              @db.String(30)
+  usu_papellido     String              @db.String(30)
+  usu_sapellido     String?             @db.String(30)
+  usu_cedula        String              @unique(map: "ava_usuario_unq01") @db.String(15)
+  usu_correo        String              @unique(map: "ava_usuario_unq02") @db.String(50)
+  usu_contrasena    String              @db.String(500)
+  usu_telefono      String?             @db.String(15)
+  usu_fechacreacion DateTime            @default(now()) @db.Timestamp(6)
+  usu_estado        String              @db.String(1)
+  usu_rol           String              @db.String(1)
+  rowid             BigInt              @default(autoincrement())
+  ava_anulacionpago ava_anulacionpago[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.

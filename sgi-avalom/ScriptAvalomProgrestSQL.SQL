@@ -1,7 +1,4 @@
-/*
-Moved from ScriptAvalomProgrestSQL.SQL
-*/
-/*
+﻿/*
 Created: 1/8/2024
 Modified: 27/11/2024
 Model: PostgreSQL 12
@@ -602,3 +599,4 @@ ALTER TABLE AVA_ALQUILERCANCELADO
       ON DELETE NO ACTION
       ON UPDATE NO ACTION
 ;
+
