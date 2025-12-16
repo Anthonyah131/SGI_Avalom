@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { UserProvider } from "../lib/UserContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeInitializer } from "@/components/theme-initializer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
@@ -24,10 +25,11 @@ export default function RootLayout({
         <body className={inter.className}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="dark"
+            enableSystem={false}
             disableTransitionOnChange
           >
+            <ThemeInitializer />
             <TooltipProvider>
               <Toaster />
               {children}

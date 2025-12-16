@@ -64,17 +64,9 @@ export async function GET(req: NextRequest) {
       // Manejar fechas correctamente (asegurar que sean en UTC)
       // Si la fecha viene como "YYYY-MM-DD", agregar la hora para evitar problemas de zona horaria
       const fromDateStr = fechaDesde.includes("T") ? fechaDesde : fechaDesde + "T00:00:00.000Z";
-      // Para la fecha final, usar el inicio del día siguiente y restar 1ms para incluir todo el día
-      const toDateTemp = fechaHasta.includes("T") 
-        ? new Date(fechaHasta) 
-        : new Date(fechaHasta + "T00:00:00.000Z");
-      // Agregar 1 día y restar 1ms para incluir todo el día final
-      toDateTemp.setUTCDate(toDateTemp.getUTCDate() + 1);
-      toDateTemp.setUTCHours(0, 0, 0, 0);
-      toDateTemp.setTime(toDateTemp.getTime() - 1); // Restar 1ms para incluir hasta 23:59:59.999
-      
+      const toDateStr = fechaHasta.includes("T") ? fechaHasta : fechaHasta + "T23:59:59.999Z";
       const fromDate = new Date(fromDateStr);
-      const toDate = toDateTemp;
+      const toDate = new Date(toDateStr);
 
       // Debug: Verificar cuántos gastos hay en total y en el rango
       const totalGastos = await prisma.ava_gasto.count({
@@ -1018,7 +1010,7 @@ export async function GET(req: NextRequest) {
       // Alertas
       if (mesesConPerdida.length > 0) {
         drawText(
-          `ALERTA: Meses con Pérdida: ${mesesConPerdida.map((m) => formatInTimeZone(new Date(m.mes + "-01"), "UTC", "MMM yyyy", { locale: es })).join(", ")}`,
+          `⚠ Meses con Pérdida: ${mesesConPerdida.map((m) => formatInTimeZone(new Date(m.mes + "-01"), "UTC", "MMM yyyy", { locale: es })).join(", ")}`,
           marginX,
           cursorY,
           10,
@@ -1031,7 +1023,7 @@ export async function GET(req: NextRequest) {
 
       if (edificiosConMargenNegativo.length > 0) {
         drawText(
-          `ALERTA: Edificios con Margen Negativo: ${edificiosConMargenNegativo.map((e) => e.edi_identificador).join(", ")}`,
+          `⚠ Edificios con Margen Negativo: ${edificiosConMargenNegativo.map((e) => e.edi_identificador).join(", ")}`,
           marginX,
           cursorY,
           10,
@@ -1044,7 +1036,7 @@ export async function GET(req: NextRequest) {
 
       if (mesesGastosMayorIngresos.length > 0) {
         drawText(
-          `ALERTA: Meses donde Gastos > Ingresos: ${mesesGastosMayorIngresos.map((m) => formatInTimeZone(new Date(m.mes + "-01"), "UTC", "MMM yyyy", { locale: es })).join(", ")}`,
+          `⚠ Meses donde Gastos > Ingresos: ${mesesGastosMayorIngresos.map((m) => formatInTimeZone(new Date(m.mes + "-01"), "UTC", "MMM yyyy", { locale: es })).join(", ")}`,
           marginX,
           cursorY,
           10,
@@ -1056,7 +1048,7 @@ export async function GET(req: NextRequest) {
       }
 
       if (gastosAltos.length > 0) {
-        drawText("ALERTA: Gastos Altos Detectados:", marginX, cursorY, 10, helvetica, true, rgb(0.8, 0, 0));
+        drawText("⚠ Gastos Altos Detectados:", marginX, cursorY, 10, helvetica, true, rgb(0.8, 0, 0));
         cursorY -= 18;
         gastosAltos.slice(0, 5).forEach((g) => {
           if (cursorY < 60) {

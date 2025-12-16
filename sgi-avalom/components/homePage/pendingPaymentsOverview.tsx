@@ -164,101 +164,117 @@ export function PendingPaymentsOverview({
       </div>
 
       {/* Tabs para las listas de pendientes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pagos Pendientes</CardTitle>
+      <Card className="border shadow-lg">
+        <CardHeader className="border-b">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-bold text-foreground">
+              Pagos Pendientes
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <AlertCircleIcon className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-muted-foreground">
+                Requieren atención
+              </span>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="mensualidades">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="mensualidades">Mensualidades</TabsTrigger>
-              <TabsTrigger value="depositos">Depósitos</TabsTrigger>
+        <CardContent className="p-4">
+          <Tabs defaultValue="mensualidades" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger 
+                value="mensualidades" 
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Mensualidades
+              </TabsTrigger>
+              <TabsTrigger 
+                value="depositos"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Depósitos
+              </TabsTrigger>
             </TabsList>
 
             {/* Tab de Mensualidades Pendientes */}
             <TabsContent value="mensualidades" className="mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
+              <ScrollArea className="h-[500px] pr-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-5 w-full" />
-                        <Skeleton className="h-4 w-2/3" />
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="p-4 rounded-lg border space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-2 w-full" />
                         <Skeleton className="h-3 w-full" />
                       </div>
                     ))
                   ) : data?.mensualidadesPendientes &&
                     data.mensualidadesPendientes.length > 0 ? (
-                    data.mensualidadesPendientes.map((item) => (
+                    data.mensualidadesPendientes.map((item) => {
+                      const progress = (item.alqm_montopagado / item.alqm_montototal) * 100;
+                      const remaining = item.alqm_montototal - item.alqm_montopagado;
+                      
+                      return (
                       <Link
                         href={`${mensualidadDetailRoute}/${item.alqm_id}`}
                         key={item.alqm_id}
+                        className="block group"
                       >
-                        <div className="m-2 p-4 rounded-lg border border-border/50 hover:border-amber-300 hover:bg-amber-50/30 transition-colors duration-200">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <h4 className="font-medium">
-                                {item.alqm_identificador}
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                Propiedad:{" "}
-                                {
-                                  item.ava_alquiler.ava_propiedad
-                                    .prop_identificador
-                                }
+                        <div className="p-4 rounded-lg border hover:border-amber-400 hover:shadow-md transition-all duration-200">
+                          <div className="flex items-start justify-between mb-2 gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-sm text-foreground">
+                                  {item.alqm_identificador}
+                                </h4>
+                                <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">
+                                  Pendiente
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mb-1">
+                                {item.ava_alquiler.ava_propiedad.prop_identificador}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(item.alqm_fechainicio), "d MMM", { locale: es })} - {format(new Date(item.alqm_fechafin), "d MMM yyyy", { locale: es })}
                               </p>
                             </div>
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                            >
-                              Pagado: {formatCurrency(item.alqm_montopagado)}
-                            </Badge>
-                            <ArrowRightIcon className="ml-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 " />
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                            >
-                              Total: {formatCurrency(item.alqm_montototal)}
-                            </Badge>
+                            <ArrowRightIcon className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
                           </div>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span>
-                                Período:{" "}
-                                {format(
-                                  new Date(item.alqm_fechainicio),
-                                  "d MMM",
-                                  { locale: es }
-                                )}{" "}
-                                -{" "}
-                                {format(
-                                  new Date(item.alqm_fechafin),
-                                  "d MMM yyyy",
-                                  { locale: es }
-                                )}
-                              </span>
-                              <span>
-                                {Math.round(
-                                  (item.alqm_montopagado /
-                                    item.alqm_montototal) *
-                                    100
-                                )}
-                                % pagado
-                              </span>
+                          <div className="space-y-2 mt-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-muted-foreground">Progreso</span>
+                              <span className="text-xs font-semibold text-foreground">{Math.round(progress)}%</span>
                             </div>
                             <Progress
-                              value={
-                                (item.alqm_montopagado / item.alqm_montototal) *
-                                100
-                              }
-                              className="h-2 bg-amber-100"
+                              value={progress}
+                              className="h-1.5"
                               indicatorClassName="bg-amber-500"
                             />
+                            <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                              <div>
+                                <p className="text-xs text-muted-foreground">Pagado</p>
+                                <p className="text-xs font-semibold text-emerald-600">
+                                  {formatCurrency(item.alqm_montopagado)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Pendiente</p>
+                                <p className="text-xs font-semibold text-amber-600">
+                                  {formatCurrency(remaining)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Total</p>
+                                <p className="text-xs font-bold text-foreground">
+                                  {formatCurrency(item.alqm_montototal)}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </Link>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="flex items-center justify-center h-40">
                       <p className="text-muted-foreground">
@@ -272,80 +288,84 @@ export function PendingPaymentsOverview({
 
             {/* Tab de Depósitos Pendientes */}
             <TabsContent value="depositos" className="mt-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
+              <ScrollArea className="h-[500px] pr-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <Skeleton className="h-5 w-full" />
-                        <Skeleton className="h-4 w-2/3" />
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="p-4 rounded-lg border space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-2 w-full" />
                         <Skeleton className="h-3 w-full" />
                       </div>
                     ))
                   ) : data?.depositosPendientesList &&
                     data.depositosPendientesList.length > 0 ? (
-                    data.depositosPendientesList.map((item) => (
+                    data.depositosPendientesList.map((item) => {
+                      const progress = (item.depo_montoactual / item.depo_total) * 100;
+                      const remaining = item.depo_total - item.depo_montoactual;
+                      
+                      return (
                       <Link
                         href={`${depositoDetailRoute}/${item.depo_id}`}
                         key={item.depo_id}
+                        className="block group"
                       >
-                        <div className="m-2 p-4 rounded-lg border border-border/50 hover:border-emerald-300 hover:bg-emerald-50/30 transition-colors duration-200">
-                          <div className="flex items-center justify-between mb-2">
-                            <div>
-                              <h4 className="font-medium">
-                                Depósito #{item.depo_id}
-                              </h4>
-                              <p className="text-sm text-muted-foreground">
-                                Propiedad:{" "}
-                                {
-                                  item.ava_alquiler.ava_propiedad
-                                    .prop_identificador
-                                }
+                        <div className="p-4 rounded-lg border hover:border-emerald-400 hover:shadow-md transition-all duration-200">
+                          <div className="flex items-start justify-between mb-2 gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-semibold text-sm text-foreground">
+                                  Depósito #{item.depo_id}
+                                </h4>
+                                <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                                  En proceso
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mb-1">
+                                {item.ava_alquiler.ava_propiedad.prop_identificador}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(item.depo_fechacreacion), "d MMM yyyy", { locale: es })}
                               </p>
                             </div>
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                            >
-                              Pagado: {formatCurrency(item.depo_montoactual)}
-                            </Badge>
-                            <ArrowRightIcon className="ml-2 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 " />
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-50 text-emerald-700 border-emerald-200"
-                            >
-                              Total: {formatCurrency(item.depo_total)}
-                            </Badge>
+                            <ArrowRightIcon className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
                           </div>
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs">
-                              <span>
-                                Creado:{" "}
-                                {format(
-                                  new Date(item.depo_fechacreacion),
-                                  "d MMM yyyy",
-                                  { locale: es }
-                                )}
-                              </span>
-                              <span>
-                                {Math.round(
-                                  (item.depo_montoactual / item.depo_total) *
-                                    100
-                                )}
-                                % completado
-                              </span>
+                          <div className="space-y-2 mt-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs text-muted-foreground">Progreso</span>
+                              <span className="text-xs font-semibold text-foreground">{Math.round(progress)}%</span>
                             </div>
                             <Progress
-                              value={
-                                (item.depo_montoactual / item.depo_total) * 100
-                              }
-                              className="h-2 bg-emerald-100"
+                              value={progress}
+                              className="h-1.5"
                               indicatorClassName="bg-emerald-500"
                             />
+                            <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                              <div>
+                                <p className="text-xs text-muted-foreground">Pagado</p>
+                                <p className="text-xs font-semibold text-emerald-600">
+                                  {formatCurrency(item.depo_montoactual)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Pendiente</p>
+                                <p className="text-xs font-semibold text-amber-600">
+                                  {formatCurrency(remaining)}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground">Total</p>
+                                <p className="text-xs font-bold text-foreground">
+                                  {formatCurrency(item.depo_total)}
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </Link>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="flex items-center justify-center h-40">
                       <p className="text-muted-foreground">

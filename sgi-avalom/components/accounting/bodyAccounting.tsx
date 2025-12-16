@@ -45,7 +45,7 @@ const BodyAccounting: React.FC = () => {
   }, [setRentals]);
 
   return (
-    <div className="mx-auto p-4 space-y-8">
+    <div className="mx-auto p-4 space-y-8 max-w-7xl">
       {isLoading ? (
         <>
           <div className="space-y-4 mb-3">

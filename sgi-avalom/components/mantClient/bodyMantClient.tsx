@@ -48,7 +48,7 @@ const BodyMantClient: React.FC = () => {
   }, []);
 
   return (
-    <div className="mx-auto p-4 space-y-8">
+    <div className="mx-auto p-4 space-y-8 max-w-7xl">
       {isLoading ? (
         <>
           {/* Skeletons */}

@@ -20,20 +20,20 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrencyNoDecimals } from "@/utils/currencyConverter";
 
-export interface MonthlyTotal {
+export interface MonthlyExpense {
   month: string;
   total: number;
 }
 
-interface RevenueAreaChartProps {
-  data: MonthlyTotal[];
+interface ExpensesAreaChartProps {
+  data: MonthlyExpense[];
   loading?: boolean;
 }
 
-export function RevenueAreaChart({
+export function ExpensesAreaChart({
   data,
   loading = false,
-}: RevenueAreaChartProps) {
+}: ExpensesAreaChartProps) {
   const hasData = data.length > 0;
 
   const formattedData = hasData
@@ -46,24 +46,25 @@ export function RevenueAreaChart({
   const maxValue =
     formattedData.reduce((max, item) => Math.max(max, item.total), 0) * 1.2;
 
+
   const CustomTooltip = ({ active, payload, label }: any) =>
     active && payload && payload.length ? (
-      <div className="bg-background border rounded-md shadow-md p-3">
-        <p className="font-medium">{`Mes: ${label}`}</p>
-        <p className="text-blue-500">{`Total: ${formatCurrencyNoDecimals(
+      <div className="bg-background border rounded-md shadow-lg p-3">
+        <p className="font-medium text-foreground">{`Mes: ${label}`}</p>
+        <p className="text-red-500 font-semibold">{`Gastos: ${formatCurrencyNoDecimals(
           payload[0].value
         )}`}</p>
       </div>
     ) : null;
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="p-4 sm:p-6">
-        <CardTitle className="text-lg sm:text-xl">
-          Ingresos Últimos 12 Meses
+    <Card className="overflow-hidden border shadow-lg">
+      <CardHeader className="p-4 sm:p-6 border-b">
+        <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
+          Gastos Últimos 12 Meses
         </CardTitle>
         <CardDescription className="text-xs sm:text-sm">
-          Muestra los ingresos totales por mes.
+          Evolución de los gastos mensuales del sistema
         </CardDescription>
       </CardHeader>
       <CardContent className="relative p-2 sm:p-6">
@@ -77,9 +78,9 @@ export function RevenueAreaChart({
                 margin={{ top: 16, right: 16, left: 35, bottom: 8 }}
               >
                 <defs>
-                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.1} />
+                  <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -104,8 +105,8 @@ export function RevenueAreaChart({
                 <Area
                   type="monotone"
                   dataKey="total"
-                  stroke="#0ea5e9"
-                  fill="url(#colorTotal)"
+                  stroke="#ef4444"
+                  fill="url(#colorExpenses)"
                   fillOpacity={1}
                   strokeWidth={2}
                 />
@@ -116,11 +117,12 @@ export function RevenueAreaChart({
       </CardContent>
       <CardFooter className="flex justify-between items-center p-4 sm:p-6">
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Últimos 12 meses de ingresos
+          Últimos 12 meses de gastos registrados
         </p>
       </CardFooter>
     </Card>
   );
 }
 
-export default RevenueAreaChart;
+export default ExpensesAreaChart;
+

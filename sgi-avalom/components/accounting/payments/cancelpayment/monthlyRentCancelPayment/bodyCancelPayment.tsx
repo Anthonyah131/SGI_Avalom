@@ -13,7 +13,7 @@ const BodyCancelPayment: React.FC = () => {
   const { isLoading, selectedMonthlyRent } = useCancelPayment(alqmId);
 
   return (
-    <div className="mx-auto p-4 space-y-8">
+    <div className="mx-auto p-4 space-y-8 max-w-7xl">
       {isLoading ? (
         <>
           <div className="flex justify-between items-center">
