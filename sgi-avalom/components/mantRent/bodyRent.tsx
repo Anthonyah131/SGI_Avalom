@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import cookie from "js-cookie";
-import { ModeToggle } from "../modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { DataTable } from "./data_table_filter";
 import { columns } from "./columnsRent";
@@ -43,14 +42,18 @@ const BodyRent: React.FC = () => {
     fetchRentals();
   }, [setRentals]);
 
+  const activeCount = rentals.filter((r) => r.alq_estado === "A").length;
+  const finishedCount = rentals.filter((r) => r.alq_estado === "F").length;
+  const canceledCount = rentals.filter((r) => r.alq_estado === "C").length;
+
   return (
-    <div className="mx-auto p-4 space-y-8 max-w-7xl">
+    <div className="mx-auto p-4 space-y-6 max-w-7xl">
       {isLoading ? (
         <>
           <div className="space-y-4 mb-3">
-            <div className="h-4 w-40 sm:w-56 rounded-md bg-muted animate-pulse" />{" "}
+            <div className="h-4 w-40 sm:w-56 rounded-md bg-muted animate-pulse" />
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-              <div className="w-60 h-8 rounded-md bg-muted animate-pulse" />{" "}
+              <div className="w-60 h-8 rounded-md bg-muted animate-pulse" />
               <div className="flex flex-wrap gap-2">
                 {[...Array(4)].map((_, i) => (
                   <Skeleton
@@ -76,7 +79,7 @@ const BodyRent: React.FC = () => {
         </>
       ) : (
         <>
-          <Card className="flex flex-col sm:flex-row justify-between items-center">
+          <Card className="border shadow-lg">
             <CardHeader>
               <BreadcrumbResponsive
                 items={[
@@ -84,17 +87,71 @@ const BodyRent: React.FC = () => {
                   { label: "Gestión de alquileres" },
                 ]}
               />
-              <CardTitle className="text-2xl text-primary font-bold mb-4 sm:mb-0">
+              <CardTitle className="text-2xl text-primary font-bold">
                 Gestión de Alquileres
               </CardTitle>
             </CardHeader>
-            <div className="flex flex-wrap justify-center gap-2 p-4">
-              <ModeToggle />
-            </div>
           </Card>
 
-          <Card>
-            <CardContent>
+          {/* Tarjetas de resumen */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="border shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Activos
+                    </p>
+                    <p className="text-3xl font-bold text-emerald-600">
+                      {activeCount}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-emerald-500/10">
+                    <div className="h-6 w-6 rounded-full bg-emerald-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Finalizados
+                    </p>
+                    <p className="text-3xl font-bold text-blue-600">
+                      {finishedCount}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-blue-500/10">
+                    <div className="h-6 w-6 rounded-full bg-blue-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Cancelados
+                    </p>
+                    <p className="text-3xl font-bold text-red-600">
+                      {canceledCount}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-full bg-red-500/10">
+                    <div className="h-6 w-6 rounded-full bg-red-500" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border shadow-lg">
+            <CardContent className="p-6">
               <DataTable
                 columns={columns}
                 data={rentals}

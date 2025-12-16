@@ -34,70 +34,71 @@ export const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
   };
 
   return (
-    <Card className={`w-full ${className}`}>
-      <CardHeader className="pb-3">
+    <Card className={`w-full border shadow-md ${className}`}>
+      <CardHeader className="pb-3 border-b">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold text-primary flex items-center gap-2">
-            <User className="h-5 w-5" />
+          <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <User className="h-4 w-4 text-primary" />
+            </div>
             Información del Cliente
           </CardTitle>
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="outline" className="text-xs font-medium">
             ID: {cliente.cli_id}
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="pt-4 space-y-3">
         {/* Nombre completo */}
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-foreground">
+        <div>
+          <h3 className="text-xl font-bold text-foreground mb-3">
             {getFullName()}
           </h3>
-          <Separator />
         </div>
 
-        {/* Grid de información */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Grid de información compacto */}
+        <div className="space-y-2">
           {/* Cédula */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div className="flex-shrink-0">
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-3 p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+            <div className="flex-shrink-0 p-1.5 rounded-md bg-primary/10">
+              <CreditCard className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground mb-0.5">
                 Cédula
               </p>
-              <p className="text-base font-semibold text-foreground truncate">
+              <p className="text-sm font-semibold text-foreground">
                 {cliente.cli_cedula}
               </p>
             </div>
           </div>
 
           {/* Teléfono */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div className="flex-shrink-0">
-              <Phone className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-3 p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+            <div className="flex-shrink-0 p-1.5 rounded-md bg-primary/10">
+              <Phone className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground mb-0.5">
                 Teléfono
               </p>
-              <p className="text-base font-semibold text-foreground">
+              <p className="text-sm font-semibold text-foreground">
                 {getFormattedPhone()}
               </p>
             </div>
           </div>
 
           {/* Correo */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 md:col-span-2">
-            <div className="flex-shrink-0">
-              <Mail className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-3 p-2.5 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+            <div className="flex-shrink-0 p-1.5 rounded-md bg-primary/10">
+              <Mail className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground mb-0.5">
                 Correo Electrónico
               </p>
-              <p className="text-base font-semibold text-foreground truncate">
+              <p className="text-sm font-semibold text-foreground truncate">
                 {cliente.cli_correo}
               </p>
             </div>
@@ -108,24 +109,24 @@ export const ClientInfoCard: React.FC<ClientInfoCardProps> = ({
         {(cliente.cli_direccion && cliente.cli_direccion !== "n/a") ||
         (cliente.cli_estadocivil && cliente.cli_estadocivil !== "n/a") ? (
           <>
-            <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Separator className="my-3" />
+            <div className="space-y-2">
               {cliente.cli_direccion && cliente.cli_direccion !== "n/a" && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
+                <div className="p-2 rounded-lg border bg-muted/30">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
                     Dirección
                   </p>
-                  <p className="text-sm text-foreground">
+                  <p className="text-xs text-foreground">
                     {cliente.cli_direccion}
                   </p>
                 </div>
               )}
               {cliente.cli_estadocivil && cliente.cli_estadocivil !== "n/a" && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
+                <div className="p-2 rounded-lg border bg-muted/30">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
                     Estado Civil
                   </p>
-                  <p className="text-sm text-foreground">
+                  <p className="text-xs text-foreground">
                     {cliente.cli_estadocivil}
                   </p>
                 </div>

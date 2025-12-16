@@ -1,7 +1,6 @@
 "use client";
 
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FinishedRentForm } from "./finishedRentForm";
 import { RentalInfoCard } from "./rentalInfoCard";
@@ -79,9 +78,6 @@ const BodyFinishedRent: React.FC = () => {
             Finalizar Alquiler
           </CardTitle>
         </CardHeader>
-        <div className="flex flex-wrap justify-center gap-2 p-4">
-          <ModeToggle />
-        </div>
       </Card>
 
       <Card>

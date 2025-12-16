@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
 import { useParams } from "next/navigation";
-import { ModeToggle } from "@/components/modeToggle";
 import {
   Card,
   CardHeader,
@@ -123,7 +122,6 @@ const BodyPayment: React.FC = () => {
                 {formatToCR(selectedMonthlyRent?.alqm_fechainicio ?? "")} -{" "}
                 {formatToCR(selectedMonthlyRent?.alqm_fechafin ?? "")}
               </div>
-              <ModeToggle />
             </CardHeader>
           </Card>
 

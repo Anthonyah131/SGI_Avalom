@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import cookie from "js-cookie";
 import axios from "axios";
 import { Plus } from "lucide-react";
-import { ModeToggle } from "@/components/modeToggle";
 import { columns } from "./columnBuild";
 import { DataTable } from "@/components/dataTable/data-table";
 import ManageActions from "@/components/dataTable/manageActions";
@@ -158,7 +157,6 @@ const BodyMantBuild: React.FC = () => {
               <GenerateContractModal />
               <ExportBuildings />
               {/* <Button variant="outline">Importar</Button> */}
-              <ModeToggle />
             </div>
           </Card>
 

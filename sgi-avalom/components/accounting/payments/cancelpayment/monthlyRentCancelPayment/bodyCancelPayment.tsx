@@ -2,7 +2,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import { CancelPaymentTable } from "./cancelPaymentTable";
 import { useParams } from "next/navigation";
 import { useCancelPayment } from "@/hooks/accounting/monthlyRentPayment/useCancelPayment";
@@ -57,25 +56,22 @@ const BodyCancelPayment: React.FC = () => {
         </>
       ) : (
         <>
-          <Card>
-            <CardHeader className="flex flex-col sm:flex-row justify-between items-center">
-              <div>
-                <BreadcrumbResponsive
-                  items={[
-                    { label: "Inicio", href: "/homePage" },
-                    { label: "Contabilidad", href: "/accounting" },
-                    {
-                      label: "Realizar movimiento",
-                      href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
-                    },
-                    { label: "Anular pago" },
-                  ]}
-                />
-                <CardTitle className="text-2xl text-primary font-bold mt-4">
-                  Anular Pago
-                </CardTitle>
-              </div>
-              <ModeToggle />
+          <Card className="border shadow-lg">
+            <CardHeader>
+              <BreadcrumbResponsive
+                items={[
+                  { label: "Inicio", href: "/homePage" },
+                  { label: "Contabilidad", href: "/accounting" },
+                  {
+                    label: "Realizar movimiento",
+                    href: `/accounting/payments/${selectedMonthlyRent?.alq_id}`,
+                  },
+                  { label: "Anular pago" },
+                ]}
+              />
+              <CardTitle className="text-2xl text-primary font-bold mt-4">
+                Anular Pago
+              </CardTitle>
             </CardHeader>
           </Card>
 

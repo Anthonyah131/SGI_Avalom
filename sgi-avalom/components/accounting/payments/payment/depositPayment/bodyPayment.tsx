@@ -1,7 +1,6 @@
 "use client";
 
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import {
   Card,
   CardHeader,
@@ -120,7 +119,6 @@ const BodyPayment: React.FC = () => {
                   Realizar Pago
                 </CardTitle>
               </div>
-              <ModeToggle />
             </CardHeader>
           </Card>
 

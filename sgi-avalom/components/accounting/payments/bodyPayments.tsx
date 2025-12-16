@@ -3,7 +3,6 @@
 import type React from "react";
 
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 import axios from "axios";
@@ -125,7 +124,7 @@ const BodyPayments: React.FC = () => {
         </>
       ) : (
         <>
-          <Card className="flex flex-col sm:flex-row justify-between items-center">
+          <Card className="border shadow-lg">
             <CardHeader>
               <BreadcrumbResponsive
                 items={[
@@ -134,36 +133,37 @@ const BodyPayments: React.FC = () => {
                   { label: "Realizar movimiento" },
                 ]}
               />
-              <CardTitle className="text-2xl text-primary font-bold mb-4 sm:mb-0">
+              <CardTitle className="text-2xl text-primary font-bold">
                 Realizar movimiento
               </CardTitle>
             </CardHeader>
-            <div className="flex flex-wrap justify-center gap-2 p-4">
-              <ModeToggle />
-            </div>
           </Card>
 
-          {selectedRental?.ava_clientexalquiler[0]?.ava_cliente && (
-            <ClientInfoCard
-              cliente={selectedRental.ava_clientexalquiler[0].ava_cliente}
-            />
-          )}
+          {/* Cliente y Depósito en una fila */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {selectedRental?.ava_clientexalquiler[0]?.ava_cliente && (
+              <ClientInfoCard
+                cliente={selectedRental.ava_clientexalquiler[0].ava_cliente}
+              />
+            )}
+            <DepositView />
+          </div>
 
-          <DepositView />
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl text-primary font-semibold">
+          <Card className="border shadow-lg">
+            <CardHeader className="border-b">
+              <CardTitle className="text-xl font-bold text-foreground">
                 Alquileres Mensuales
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {monthlyRents.length > 0 ? (
                 <MonthlyRentsView />
               ) : (
-                <p className="text-center text-muted-foreground">
-                  No hay alquileres mensuales registrados.
-                </p>
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    No hay alquileres mensuales registrados.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>

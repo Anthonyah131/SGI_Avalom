@@ -1,7 +1,6 @@
 "use client";
 
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CanceledRentForm } from "./CanceledRentForm";
 import { RentalInfoCardCanceled } from "./rentalInfoCardCanceled";
@@ -85,9 +84,6 @@ const BodyCanceledRent: React.FC = () => {
             Cancelar Alquiler
           </CardTitle>
         </CardHeader>
-        <div className="flex flex-wrap justify-center gap-2 p-4">
-          <ModeToggle />
-        </div>
       </Card>
 
       <Card className="bg-background">

@@ -15,7 +15,20 @@ export async function GET(
         where: { alqm_id: BigInt(alqmId) },
         include: {
           ava_pago: {
-            include: { ava_anulacionpago: true },
+            include: {
+              ava_anulacionpago: {
+                include: {
+                  ava_usuario: {
+                    select: {
+                      usu_id: true,
+                      usu_nombre: true,
+                      usu_papellido: true,
+                      usu_correo: true,
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       });

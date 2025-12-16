@@ -10,6 +10,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   HandCoins,
   BanIcon,
@@ -44,13 +45,13 @@ const MonthlyRentsView: React.FC = () => {
     const isIncomplete = rent.alqm_montopagado < rent.alqm_montototal;
 
     if (rent.alqm_estado === "P")
-      return "bg-green-50 border-green-200 text-green-800";
+      return "bg-emerald-500/10 border-emerald-500/30 hover:border-emerald-500/50";
     if (rent.alqm_estado === "R")
-      return "bg-pink-50 border-pink-200 text-pink-800";
-    if (isPastDue) return "bg-red-100 border-red-200 text-red-800";
+      return "bg-pink-500/10 border-pink-500/30 hover:border-pink-500/50";
+    if (isPastDue) return "bg-red-500/10 border-red-500/30 hover:border-red-500/50";
     if (isIncomplete && rent.alqm_estado !== "P")
-      return "bg-yellow-50 border-yellow-200 text-yellow-800";
-    return "bg-gray-50 border-gray-200 text-gray-800";
+      return "bg-amber-500/10 border-amber-500/30 hover:border-amber-500/50";
+    return "bg-muted/50 border-border hover:border-primary/30";
   };
 
   const getStatusIcon = (rent: any) => {
@@ -58,12 +59,12 @@ const MonthlyRentsView: React.FC = () => {
     const endDate = new Date(rent.alqm_fechafin);
 
     if (rent.alqm_estado === "P")
-      return <CheckCircle className="h-5 w-5 text-green-600" />;
+      return <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />;
     if (rent.alqm_estado === "R")
-      return <Gift className="h-5 w-5 text-pink-600" />;
+      return <Gift className="h-4 w-4 text-pink-600 dark:text-pink-400" />;
     if (rent.alqm_estado === "A" || (endDate < now && rent.alqm_estado !== "P"))
-      return <AlertCircle className="h-5 w-5 text-red-600" />;
-    return <Clock className="h-5 w-5 text-yellow-600" />;
+      return <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />;
+    return <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
   };
 
   const getRentStatus = (rent: any) => {
@@ -123,10 +124,11 @@ const MonthlyRentsView: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button
           onClick={toggleSort}
-          variant="borderOrange"
+          variant="outline"
+          size="sm"
           className="flex items-center"
         >
           <ArrowUpDown className="h-4 w-4 mr-2" />
@@ -148,113 +150,115 @@ const MonthlyRentsView: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredAndSortedRents.map((rent) => {
           const isPaid = rent.alqm_estado === "P";
           const isGifted = rent.alqm_estado === "R";
+
+          const progress = Number(rent.alqm_montototal) > 0
+            ? (Number(rent.alqm_montopagado) / Number(rent.alqm_montototal)) * 100
+            : 0;
+          const pendingAmount = Number(rent.alqm_montototal) - Number(rent.alqm_montopagado);
 
           return (
             <Card
               key={rent.alqm_id}
               className={cn(
-                "transition-all duration-300 ease-in-out hover:shadow-lg",
+                "transition-all duration-200 ease-in-out hover:shadow-md border-2",
                 getStatusColor(rent)
               )}
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-primary font-semibold truncate flex items-center justify-between">
-                  {rent.alqm_identificador}
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <CardTitle className="text-base font-bold text-foreground">
+                    {rent.alqm_identificador}
+                  </CardTitle>
                   {getStatusIcon(rent)}
-                </CardTitle>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {formatToCR(rent.alqm_fechainicio)} - {formatToCR(rent.alqm_fechafin)}
+                </div>
               </CardHeader>
-              <CardContent className="text-xs sm:text-sm space-y-2">
-                <p className="flex justify-between">
-                  <span className="font-medium">Inicio:</span>
-                  <span>{formatToCR(rent.alqm_fechainicio)}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Fin:</span>
-                  <span>{formatToCR(rent.alqm_fechafin)}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Total:</span>
-                  <span>
-                    {rent.alqm_montototal
-                      ? formatCurrency(Number(rent.alqm_montototal))
-                      : "₡0"}
-                  </span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Pagado:</span>
-                  <span>
-                    {rent.alqm_montopagado
-                      ? formatCurrency(Number(rent.alqm_montopagado))
-                      : "₡0"}
-                  </span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Pendiente</span>
-                  <span>
-                    {rent.alqm_montototal
-                      ? formatCurrency(
-                          Number(rent.alqm_montototal) -
-                            Number(rent.alqm_montopagado)
-                        )
-                      : "₡0"}
-                  </span>
-                </p>
+              <CardContent className="space-y-3">
+                {/* Progreso */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-muted-foreground">Progreso</span>
+                    <span className="font-bold text-foreground">{Math.round(progress)}%</span>
+                  </div>
+                  <Progress value={progress} className="h-1.5" indicatorClassName="bg-primary" />
+                </div>
+
+                {/* Montos */}
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Total</p>
+                    <p className="text-xs font-bold text-foreground">
+                      {rent.alqm_montototal
+                        ? formatCurrency(Number(rent.alqm_montototal))
+                        : "₡0"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Pagado</p>
+                    <p className="text-xs font-semibold text-emerald-600">
+                      {rent.alqm_montopagado
+                        ? formatCurrency(Number(rent.alqm_montopagado))
+                        : "₡0"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Pendiente</p>
+                    <p className="text-xs font-semibold text-amber-600">
+                      {formatCurrency(pendingAmount)}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
-              <CardFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 pt-2">
+              <CardFooter className="flex flex-col gap-2 pt-3 border-t">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex items-center bg-white hover:bg-gray-100 hover:text-green-700 w-full sm:w-auto"
+                  className="w-full text-xs"
                   disabled={isPaid || isGifted}
+                  asChild
                 >
-                  <Link
-                    href={`/accounting/payments/payment/${rent.alqm_id}`}
-                    className="flex items-center"
-                  >
-                    <HandCoins className="h-4 w-4 mr-1" />
+                  <Link href={`/accounting/payments/payment/${rent.alqm_id}`}>
+                    <HandCoins className="h-3.5 w-3.5 mr-1.5" />
                     Pagar
                   </Link>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center bg-white hover:bg-gray-100 hover:text-red-700 w-full sm:w-auto"
-                  disabled={isGifted}
-                >
-                  <Link
-                    href={`/accounting/payments/cancelpayment/${rent.alqm_id}`}
-                    className="flex items-center"
+                <div className="flex gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs"
+                    disabled={isGifted}
+                    asChild
                   >
-                    <BanIcon className="h-4 w-4 mr-1" />
-                    Anular
-                  </Link>
-                </Button>
-
-                {!isPaid && (
-                  <AlertDialog
-                    title={isGifted ? "¿Quitar regalo?" : "¿Regalar mes?"}
-                    description={
-                      isGifted
-                        ? "Este mes volverá a considerarse atrasado o incompleto según los pagos."
-                        : "Marcarás este mes como regalo, no contará como pago."
-                    }
-                    triggerText={""}
-                    cancelText="Cancelar"
-                    actionText={isGifted ? "Quitar regalo" : "Regalar mes"}
-                    variant="ghost"
-                    classn={
-                      isGifted
-                        ? "text-pink-600 hover:text-pink-800 hover:bg-gray-400 cursor-pointer"
-                        : "text-gray-600 hover:text-gray-800 hover:bg-gray-400 cursor-pointer"
-                    }
-                    icon={<Gift size={20} />}
-                    onAction={() => handleGiftToggle(rent)}
-                  />
-                )}
+                    <Link href={`/accounting/payments/cancelpayment/${rent.alqm_id}`}>
+                      <BanIcon className="h-3.5 w-3.5 mr-1.5" />
+                      Anular
+                    </Link>
+                  </Button>
+                  {!isPaid && (
+                    <AlertDialog
+                      title={isGifted ? "¿Quitar regalo?" : "¿Regalar mes?"}
+                      description={
+                        isGifted
+                          ? "Este mes volverá a considerarse atrasado o incompleto según los pagos."
+                          : "Marcarás este mes como regalo, no contará como pago."
+                      }
+                      triggerText={""}
+                      cancelText="Cancelar"
+                      actionText={isGifted ? "Quitar regalo" : "Regalar mes"}
+                      variant="ghost"
+                      classn="text-xs p-1.5 h-8 w-8"
+                      icon={<Gift size={14} />}
+                      onAction={() => handleGiftToggle(rent)}
+                    />
+                  )}
+                </div>
               </CardFooter>
             </Card>
           );

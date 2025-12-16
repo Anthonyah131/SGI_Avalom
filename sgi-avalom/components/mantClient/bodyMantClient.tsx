@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/dataTable/data-table";
 import { columnsClient } from "@/components/mantClient/columnsClient";
-import { ModeToggle } from "@/components/modeToggle";
 import ManageActions from "@/components/dataTable/manageActions";
 import ClienteForm from "@/components/mantClient/clienteFormProps";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -122,8 +121,6 @@ const BodyMantClient: React.FC = () => {
               {/* Importar y refrescar */}
               <ImportClients onSuccess={fetchClients} />
 
-              {/* Modo oscuro */}
-              <ModeToggle />
             </div>
           </Card>
 

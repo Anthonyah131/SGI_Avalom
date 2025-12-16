@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { prisma } from "@/lib/prisma";
 import { es } from "date-fns/locale";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, format } from "date-fns-tz";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -17,10 +17,9 @@ export async function GET(req: NextRequest) {
     nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
     toDate = new Date(nextMonth.getTime() - 1);
   }
-  console.log("From Date:", fromDate);
-  console.log("To Date:", toDate);
 
   const esRango = Boolean(fromDate || toDate);
+  const fechaGeneracion = new Date();
 
   const edificios = await prisma.ava_edificio.findMany({
     orderBy: { edi_identificador: "asc" },
@@ -28,6 +27,7 @@ export async function GET(req: NextRequest) {
       ava_propiedad: {
         orderBy: { prop_identificador: "asc" },
         include: {
+          ava_tipopropiedad: true,
           ava_alquiler: {
             include: {
               ava_clientexalquiler: { include: { ava_cliente: true } },
@@ -47,6 +47,41 @@ export async function GET(req: NextRequest) {
     },
   });
 
+  // Calcular estadísticas generales
+  const totalEdificios = edificios.length;
+  const totalPropiedades = edificios.reduce(
+    (sum, ed) => sum + ed.ava_propiedad.length,
+    0
+  );
+  const propiedadesOcupadas = edificios.reduce(
+    (sum, ed) =>
+      sum +
+      ed.ava_propiedad.filter((p) =>
+        p.ava_alquiler.some((a) => a.alq_estado === "A")
+      ).length,
+    0
+  );
+  const tasaOcupacion = totalPropiedades > 0
+    ? ((propiedadesOcupadas / totalPropiedades) * 100).toFixed(1)
+    : "0.0";
+
+  // Calcular morosidad
+  let pagosAtrasados = 0;
+  let totalPagos = 0;
+  edificios.forEach((ed) => {
+    ed.ava_propiedad.forEach((prop) => {
+      prop.ava_alquiler.forEach((alq) => {
+        alq.ava_alquilermensual.forEach((mens) => {
+          totalPagos++;
+          if (mens.alqm_estado === "A") pagosAtrasados++;
+        });
+      });
+    });
+  });
+  const tasaMorosidad = totalPagos > 0
+    ? ((pagosAtrasados / totalPagos) * 100).toFixed(1)
+    : "0.0";
+
   const pdf = await PDFDocument.create();
   const helvetica = await pdf.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -56,7 +91,8 @@ export async function GET(req: NextRequest) {
   const marginTop = A4[1] - 50;
   const rowH = 18;
 
-  const colWidths = [130, 80, 80, 110, 70, 70, 90, 90];
+  // Nueva estructura de columnas (sin Edificio y Propiedad repetidos)
+  const colWidths = [110, 150, 70, 70, 90, 80];
   const colXs = colWidths.reduce<number[]>(
     (acc, w, i) =>
       i === 0 ? [marginX] : [...acc, acc[i - 1] + colWidths[i - 1]],
@@ -70,8 +106,8 @@ export async function GET(req: NextRequest) {
   // Título principal
   page.drawText(
     esRango
-      ? "REPORTE DE EDIFICIOS - POR RANGO"
-      : "REPORTE DE EDIFICIOS - TOTAL",
+      ? "REPORTE CONTABLE DE EDIFICIOS - POR RANGO"
+      : "REPORTE CONTABLE DE EDIFICIOS - TOTAL",
     {
       x: marginX,
       y: cursorY + 20,
@@ -81,6 +117,23 @@ export async function GET(req: NextRequest) {
     }
   );
 
+  // Fecha de generación
+  const fechaGenStr = formatInTimeZone(
+    fechaGeneracion,
+    "America/Costa_Rica",
+    "PPpp",
+    { locale: es }
+  );
+  page.drawText(`Generado: ${fechaGenStr}`, {
+    x: marginX,
+    y: cursorY,
+    size: 9,
+    font: helvetica,
+    color: rgb(0.3, 0.3, 0.3),
+  });
+
+  cursorY -= 20;
+
   // Subtítulo de fechas si hay rango
   if (esRango && fromDate && toDate) {
     const fromLabel = fromDate
@@ -89,75 +142,125 @@ export async function GET(req: NextRequest) {
     const toLabel = toDate
       ? formatInTimeZone(toDate, "UTC", "MMMM yyyy", { locale: es })
       : "";
-    page.drawText(`Rango: ${fromLabel} a ${toLabel}`, {
+    page.drawText(`Período: ${fromLabel} a ${toLabel}`, {
       x: marginX,
       y: cursorY,
       size: 11,
       font: helvetica,
     });
+    cursorY -= 25;
+  } else {
+    cursorY -= 10;
   }
 
-  cursorY -= 50;
-
-  // Cabecera tabla
-  page.drawLine({
-    start: { x: marginX - 20, y: cursorY + 20 },
-    end: { x: marginX - 20 + tableWidth + 20, y: cursorY + 20 },
-    thickness: 1,
-    color: rgb(0, 0, 0),
-  });
-  page.drawLine({
-    start: { x: marginX - 20, y: cursorY - rowH + 20 },
-    end: { x: marginX - 20 + tableWidth + 20, y: cursorY - rowH + 20 },
-    thickness: 1,
-    color: rgb(0, 0, 0),
+  // Sección de estadísticas generales
+  page.drawRectangle({
+    x: marginX - 10,
+    y: cursorY - 80,
+    width: tableWidth + 20,
+    height: 85,
+    color: rgb(0.95, 0.95, 0.95),
+    borderColor: rgb(0.7, 0.7, 0.7),
+    borderWidth: 1,
   });
 
-  const headers = [
-    "Fecha",
-    "Edificio",
-    "Propiedad",
-    "Cliente",
-    "Estado/Al",
-    "Monto/mes",
-    "Pagado",
-    "Estado de pago",
+  page.drawText("RESUMEN EJECUTIVO", {
+    x: marginX,
+    y: cursorY - 15,
+    size: 13,
+    font: helveticaBold,
+    color: rgb(0, 0.3, 0.6),
+  });
+
+  cursorY -= 35;
+
+  const estadisticas = [
+    `Total de Edificios: ${totalEdificios}`,
+    `Total de Propiedades: ${totalPropiedades}`,
+    `Propiedades Ocupadas: ${propiedadesOcupadas}`,
+    `Tasa de Ocupación: ${tasaOcupacion}%`,
+    `Tasa de Morosidad: ${tasaMorosidad}%`,
   ];
-  headers.forEach((h, i) => {
-    page.drawText(h, {
-      x: colXs[i],
-      y: cursorY - rowH + 25,
-      size: 11,
-      font: helveticaBold,
+
+  const colGap = 200;
+  estadisticas.forEach((stat, i) => {
+    const x = marginX + (i % 3) * colGap;
+    const y = cursorY - Math.floor(i / 3) * 20;
+    page.drawText(stat, {
+      x,
+      y,
+      size: 10,
+      font: helvetica,
       color: rgb(0, 0, 0),
     });
   });
 
-  cursorY -= rowH;
+  cursorY -= 90; // Más espacio después del resumen ejecutivo
 
   let totalEsperado = 0;
   let totalPagado = 0;
 
+  // Iterar por edificios
   for (const ed of edificios) {
+    // Nueva página si es necesario
+    if (cursorY < 120) {
+      page = pdf.addPage(A4);
+      cursorY = marginTop;
+    }
+
+    // Encabezado del Edificio
+    page.drawRectangle({
+      x: marginX - 10,
+      y: cursorY - 5,
+      width: tableWidth + 20,
+      height: 25,
+      color: rgb(0, 0.3, 0.6),
+    });
+
+    page.drawText(`EDIFICIO: ${ed.edi_identificador}`, {
+      x: marginX,
+      y: cursorY + 5,
+      size: 14,
+      font: helveticaBold,
+      color: rgb(1, 1, 1),
+    });
+
+    cursorY -= 35;
+
+    // Iterar por propiedades del edificio
     for (const prop of ed.ava_propiedad) {
       let subtotalEsperado = 0;
       let subtotalPagado = 0;
 
-      // ... título sección ...
-      if (cursorY < 80) {
+      if (cursorY < 100) {
         page = pdf.addPage(A4);
         cursorY = marginTop;
       }
-      page.drawText(`Departamento: ${prop.prop_identificador}`, {
-        x: marginX,
-        y: cursorY,
-        size: 13,
-        font: helveticaBold,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-      cursorY -= rowH;
 
-      // 1. Unir todas las mensualidades de todos los alquileres
+      // Encabezado de la propiedad
+      page.drawRectangle({
+        x: marginX - 5,
+        y: cursorY - 5,
+        width: tableWidth + 10,
+        height: 20,
+        color: rgb(0.85, 0.85, 0.85),
+      });
+
+      const tipoPropiedad = prop.ava_tipopropiedad?.tipp_nombre || "—";
+      page.drawText(
+        `Propiedad: ${prop.prop_identificador} (${tipoPropiedad})`,
+        {
+          x: marginX,
+          y: cursorY,
+          size: 12,
+          font: helveticaBold,
+          color: rgb(0.1, 0.1, 0.1),
+        }
+      );
+
+      cursorY -= 25;
+
+      // Obtener todas las mensualidades de todos los alquileres
       const todasMensualidades = prop.ava_alquiler.flatMap((alq) =>
         alq.ava_alquilermensual.map((mens) => ({
           ...mens,
@@ -165,14 +268,62 @@ export async function GET(req: NextRequest) {
           _estadoAlquiler: alq.alq_estado,
         }))
       );
-      // 2. Ordenar por fecha de inicio
+
+      // Ordenar por fecha de inicio
       todasMensualidades.sort(
         (a, b) =>
           new Date(a.alqm_fechainicio).getTime() -
           new Date(b.alqm_fechainicio).getTime()
       );
 
-      // 3. Imprimir todos en orden
+      // Si no hay mensualidades, mostrar mensaje
+      if (todasMensualidades.length === 0) {
+        page.drawText(
+          esRango
+            ? "[!] Esta propiedad no genero ingresos en el periodo seleccionado"
+            : "[!] Esta propiedad no tiene registros de alquileres",
+          {
+            x: marginX + 20,
+            y: cursorY,
+            size: 10,
+            font: helvetica,
+            color: rgb(0.5, 0.5, 0.5),
+          }
+        );
+        cursorY -= 25;
+        continue;
+      }
+
+      // Cabecera de tabla para esta propiedad
+      const headers = [
+        "Período",
+        "Cliente",
+        "Estado Alq.",
+        "Monto",
+        "Pagado",
+        "Estado Pago",
+      ];
+
+      headers.forEach((h, i) => {
+        page.drawText(h, {
+          x: colXs[i],
+          y: cursorY,
+          size: 10,
+          font: helveticaBold,
+          color: rgb(0, 0, 0),
+        });
+      });
+
+      page.drawLine({
+        start: { x: marginX - 5, y: cursorY - 2 },
+        end: { x: marginX - 5 + tableWidth + 5, y: cursorY - 2 },
+        thickness: 0.5,
+        color: rgb(0, 0, 0),
+      });
+
+      cursorY -= rowH;
+
+      // Imprimir las filas de datos
       for (const mens of todasMensualidades) {
         if (cursorY < 60) {
           page = pdf.addPage(A4);
@@ -180,19 +331,22 @@ export async function GET(req: NextRequest) {
         }
 
         const fechaInicio = new Date(mens.alqm_fechainicio).toLocaleDateString(
-          "es-CR"
+          "es-CR",
+          { month: "short", year: "2-digit" }
         );
         const fechaFin = mens.alqm_fechafin
-          ? new Date(mens.alqm_fechafin).toLocaleDateString("es-CR")
+          ? new Date(mens.alqm_fechafin).toLocaleDateString("es-CR", {
+              month: "short",
+              year: "2-digit",
+            })
           : "";
-        const fecha = fechaFin ? `${fechaInicio} a ${fechaFin}` : fechaInicio;
+        const fecha = fechaFin ? `${fechaInicio}-${fechaFin}` : fechaInicio;
 
-        const edificioLabel = ed.edi_identificador;
-        const propiedadLabel = prop.prop_identificador;
         const cliente = mens._cliente;
         const clienteNombre = cliente
           ? `${cliente.cli_nombre} ${cliente.cli_papellido}`
           : "—";
+
         const estado =
           mens._estadoAlquiler === "A"
             ? "Activo"
@@ -222,8 +376,6 @@ export async function GET(req: NextRequest) {
 
         const row = [
           fecha,
-          edificioLabel,
-          propiedadLabel,
           clienteNombre,
           estado,
           `CRC ${montoEsperado.toLocaleString("es-CR")}`,
@@ -232,13 +384,20 @@ export async function GET(req: NextRequest) {
         ];
 
         row.forEach((text, i) => {
-          const fontSize = i === 0 ? 9.5 : 10;
+          const fontSize = 9;
+          const textColor =
+            i === 5 && estadoPago === "Atrasado"
+              ? rgb(0.8, 0, 0)
+              : i === 5 && estadoPago === "Pagado"
+              ? rgb(0, 0.5, 0)
+              : rgb(0, 0, 0);
+
           page.drawText(text, {
             x: colXs[i],
             y: cursorY,
             size: fontSize,
             font: helvetica,
-            color: rgb(0, 0, 0),
+            color: textColor,
             maxWidth: colWidths[i] - 6,
           });
         });
@@ -246,80 +405,126 @@ export async function GET(req: NextRequest) {
         page.drawLine({
           start: { x: marginX - 5, y: cursorY - 2 },
           end: { x: marginX - 5 + tableWidth + 5, y: cursorY - 2 },
-          thickness: 0.5,
-          color: rgb(0.5, 0.5, 0.5),
+          thickness: 0.3,
+          color: rgb(0.7, 0.7, 0.7),
         });
 
         cursorY -= rowH;
       }
 
-      // --- Imprimir subtotales de la sección ---
+      // Subtotales de la propiedad
       if (cursorY < 80) {
         page = pdf.addPage(A4);
         cursorY = marginTop;
       }
-      page.drawText(
-        `Subtotal esperado (${
-          prop.prop_identificador
-        }): CRC ${subtotalEsperado.toLocaleString("es-CR")}`,
-        {
-          x: marginX,
-          y: cursorY - 8,
-          size: 11,
-          font: helveticaBold,
-          color: rgb(0.2, 0.2, 0.2),
-        }
-      );
-      page.drawText(
-        `Subtotal pagado (${
-          prop.prop_identificador
-        }): CRC ${subtotalPagado.toLocaleString("es-CR")}`,
-        {
-          x: marginX,
-          y: cursorY - 28,
-          size: 11,
-          font: helveticaBold,
-          color: rgb(0.2, 0.2, 0.2),
-        }
-      );
 
-      // Ajustar cursorY para dibujar la línea bien separada de los textos
-      cursorY -= 38;
-
-      // Línea divisoria negra/gris después de los subtotales (¡ahora está bien posicionada!)
-      page.drawLine({
-        start: { x: marginX - 10, y: cursorY - 6 },
-        end: { x: marginX - 10 + tableWidth + 10, y: cursorY - 6 },
-        thickness: 2,
-        color: rgb(0.1, 0.1, 0.1), // negro/gris oscuro
+      page.drawRectangle({
+        x: marginX - 5,
+        y: cursorY - 5,
+        width: tableWidth + 10,
+        height: 35,
+        color: rgb(0.95, 0.95, 1),
       });
-      cursorY -= 18;
+
+      page.drawText(
+        `Subtotal ${prop.prop_identificador} - Esperado: CRC ${subtotalEsperado.toLocaleString(
+          "es-CR"
+        )} | Pagado: CRC ${subtotalPagado.toLocaleString("es-CR")}`,
+        {
+          x: marginX,
+          y: cursorY + 5,
+          size: 10,
+          font: helveticaBold,
+          color: rgb(0, 0.3, 0.6),
+        }
+      );
+
+      cursorY -= 45;
     }
+
+    // Espacio entre edificios
+    cursorY -= 10;
   }
 
-  // Totales al final
-  if (cursorY < 80) {
+  // Totales al final con estadísticas mejoradas
+  if (cursorY < 150) {
     page = pdf.addPage(A4);
     cursorY = marginTop;
   }
 
+  cursorY -= 30;
+
+  // Caja de resumen final
+  page.drawRectangle({
+    x: marginX - 10,
+    y: cursorY - 100,
+    width: tableWidth + 20,
+    height: 105,
+    color: rgb(0.98, 0.98, 1),
+    borderColor: rgb(0, 0.3, 0.6),
+    borderWidth: 2,
+  });
+
+  page.drawText("RESUMEN FINANCIERO", {
+    x: marginX,
+    y: cursorY - 15,
+    size: 14,
+    font: helveticaBold,
+    color: rgb(0, 0.3, 0.6),
+  });
+
+  cursorY -= 40;
+
+  const totalPendiente = totalEsperado - totalPagado;
+  const porcentajePagado = totalEsperado > 0
+    ? ((totalPagado / totalEsperado) * 100).toFixed(1)
+    : "0.0";
+
   page.drawText(
-    `Total esperado: CRC ${totalEsperado.toLocaleString("es-CR")}`,
+    `Total Esperado: CRC ${totalEsperado.toLocaleString("es-CR")}`,
     {
       x: marginX,
-      y: cursorY - 20,
-      size: 12,
+      y: cursorY,
+      size: 11,
       font: helveticaBold,
+      color: rgb(0, 0, 0),
+    }
+  );
+
+  cursorY -= 20;
+
+  page.drawText(
+    `Total Pagado: CRC ${totalPagado.toLocaleString("es-CR")}`,
+    {
+      x: marginX,
+      y: cursorY,
+      size: 11,
+      font: helveticaBold,
+      color: rgb(0, 0.5, 0),
+    }
+  );
+
+  cursorY -= 20;
+
+  page.drawText(
+    `Total Pendiente: CRC ${totalPendiente.toLocaleString("es-CR")}`,
+    {
+      x: marginX,
+      y: cursorY,
+      size: 11,
+      font: helveticaBold,
+      color: totalPendiente > 0 ? rgb(0.8, 0, 0) : rgb(0, 0.5, 0),
     }
   );
 
   page.drawText(
-    `Total pagado por clientes: CRC ${totalPagado.toLocaleString("es-CR")}`,
+    `Porcentaje de Cumplimiento: ${porcentajePagado}%`,
     {
-      x: marginX,
-      y: cursorY - 40,
-      size: 12,
+      x: marginX + 350,
+      y: cursorY,
+      size: 11,
       font: helveticaBold,
+      color: Number(porcentajePagado) >= 80 ? rgb(0, 0.5, 0) : rgb(0.8, 0.4, 0),
     }
   );
 

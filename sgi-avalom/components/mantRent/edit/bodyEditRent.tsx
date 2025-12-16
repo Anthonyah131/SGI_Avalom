@@ -10,11 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbResponsive } from "@/components/breadcrumbResponsive";
-import { ModeToggle } from "@/components/modeToggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DateRangeCalculator } from "./DateRangeCalculator";
 import MonthsBetween from "./MonthsBetween";
 import DepositForm from "./depositForm";
+import ContractCard from "./contractCard";
 import useRentalStore from "@/lib/zustand/useRentalStore";
 
 const BodyEditRent: React.FC = () => {
@@ -179,13 +179,18 @@ const BodyEditRent: React.FC = () => {
                 Modificar alquiler
               </CardTitle>
             </CardHeader>
-            <div className="flex flex-wrap justify-center gap-2 p-4">
-              <ModeToggle />
-            </div>
           </Card>
 
-          <RentalForm action="edit" onSuccess={() => {}} />
+          {/* Grid de 2 columnas para pantallas grandes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Columna Izquierda: Alquiler y Clientes en un mismo card */}
+            <RentalForm action="edit" onSuccess={() => {}} />
 
+            {/* Columna Derecha: Contrato */}
+            <ContractCard />
+          </div>
+
+          {/* Depósito abajo, ocupando todo el ancho */}
           <DepositForm onSuccess={() => {}} />
 
           <Card className="w-full">
