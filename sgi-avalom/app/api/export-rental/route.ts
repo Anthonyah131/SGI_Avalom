@@ -222,8 +222,8 @@ export async function GET(req: NextRequest) {
   // Información del depósito si existe
   if (alquiler.ava_deposito && alquiler.ava_deposito.length > 0) {
     const deposito = alquiler.ava_deposito[0];
-    const depositoTotal = Number(deposito.depo_montototal);
-    const depositoPagado = Number(deposito.depo_montopagado ?? 0);
+    const depositoTotal = Number(deposito.depo_total);
+    const depositoActual = Number(deposito.depo_montoactual);
     
     page.drawText("DEPÓSITO", {
       x: marginX + 550,
@@ -245,9 +245,8 @@ export async function GET(req: NextRequest) {
 
     const depositoInfo = [
       `Total: CRC ${depositoTotal.toLocaleString("es-CR")}`,
-      `Pagado: CRC ${depositoPagado.toLocaleString("es-CR")}`,
-      `Pendiente: CRC ${(depositoTotal - depositoPagado).toLocaleString("es-CR")}`,
-      `Estado: ${deposito.depo_estado === "P" ? "Pagado" : deposito.depo_estado === "I" ? "Incompleto" : deposito.depo_estado}`,
+      `Actual: CRC ${depositoActual.toLocaleString("es-CR")}`,
+      `Usado: CRC ${(depositoTotal - depositoActual).toLocaleString("es-CR")}`,
       `Pagos: ${deposito.ava_pago?.length ?? 0}`,
     ];
 
