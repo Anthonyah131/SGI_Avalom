@@ -70,7 +70,7 @@ export const serviceFormSchema = z.object({
     .min(1, "El nombre es requerido")
     .max(30, "El nombre no puede exceder 30 caracteres"),
   ser_servicio: z.string().max(40, "El tipo de servicio no puede exceder 40 caracteres").optional(),
-  ser_proveedor: z.string().max(80, "El proveedor no puede exceder 80 caracteres").optional(),
+  ser_negocio: z.string().max(80, "El negocio no puede exceder 80 caracteres").optional(),
   ser_mediopago: z.string().max(30, "El medio de pago no puede exceder 30 caracteres").optional(),
 });
 

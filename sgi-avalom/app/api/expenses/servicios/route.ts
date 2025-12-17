@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   return authenticate(async (req: NextRequest, res: NextResponse) => {
     try {
       const body = await request.json();
-      const { ser_codigo, ser_nombre, ser_servicio, ser_proveedor, ser_mediopago } = body;
+      const { ser_codigo, ser_nombre, ser_servicio, ser_negocio, ser_mediopago } = body;
 
       // Validar campos requeridos
       if (!ser_codigo || !ser_nombre) {
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           ser_codigo: ser_codigo,
           ser_nombre: ser_nombre,
           ser_servicio: ser_servicio || null,
-          ser_negocio: ser_proveedor || null,
+          ser_negocio: ser_negocio || null,
           ser_mediopago: ser_mediopago || null,
         },
       });

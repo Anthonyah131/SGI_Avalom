@@ -54,7 +54,7 @@ export function ExportServices({ services, disabled }: ExportServicesProps) {
     }, {} as Record<string, number>);
 
     Object.entries(serviceTypes).forEach(([type, count]) => {
-      summaryData.push([type + ":", count]);
+      summaryData.push([type + ":", count as number]);
     });
 
     const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
@@ -81,8 +81,8 @@ export function ExportServices({ services, disabled }: ExportServicesProps) {
     // Hoja 3: Servicios por Tipo
     const typeData = Object.entries(serviceTypes).map(([type, count]) => ({
       "Tipo de Servicio": type,
-      "Cantidad": count,
-      "Porcentaje": `${((count / services.length) * 100).toFixed(2)}%`,
+      "Cantidad": count as number,
+      "Porcentaje": `${(((count as number) / services.length) * 100).toFixed(2)}%`,
     }));
 
     const wsTypes = XLSX.utils.json_to_sheet(typeData);

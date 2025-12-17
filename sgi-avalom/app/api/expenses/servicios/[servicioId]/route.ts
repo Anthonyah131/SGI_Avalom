@@ -55,7 +55,7 @@ export async function PUT(
     try {
       const params = await context.params;
       const body = await request.json();
-      const { ser_codigo, ser_nombre, ser_servicio, ser_proveedor, ser_mediopago } = body;
+      const { ser_codigo, ser_nombre, ser_servicio, ser_negocio, ser_mediopago } = body;
 
       // Verificar si el servicio existe
       const existingService = await prisma.ava_servicio.findFirst({
@@ -99,7 +99,7 @@ export async function PUT(
           ser_codigo: ser_codigo,
           ser_nombre: ser_nombre,
           ser_servicio: ser_servicio || null,
-          ser_negocio: ser_proveedor || null,
+          ser_negocio: ser_negocio || null,
           ser_mediopago: ser_mediopago || null,
         },
       });

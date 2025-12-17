@@ -37,7 +37,7 @@ export function ServiceFormDialog({ open, onOpenChange, service, onSubmit, exist
       ser_codigo: "",
       ser_nombre: "",
       ser_servicio: "",
-      ser_proveedor: "",
+      ser_negocio: "",
       ser_mediopago: "",
     },
   });
@@ -48,7 +48,7 @@ export function ServiceFormDialog({ open, onOpenChange, service, onSubmit, exist
         ser_codigo: service.ser_codigo,
         ser_nombre: service.ser_nombre,
         ser_servicio: service.ser_servicio || "",
-        ser_proveedor: service.ser_proveedor || "",
+        ser_negocio: service.ser_negocio || "",
         ser_mediopago: service.ser_mediopago || "",
       });
     } else {
@@ -56,7 +56,7 @@ export function ServiceFormDialog({ open, onOpenChange, service, onSubmit, exist
         ser_codigo: "",
         ser_nombre: "",
         ser_servicio: "",
-        ser_proveedor: "",
+        ser_negocio: "",
         ser_mediopago: "",
       });
     }
@@ -154,7 +154,7 @@ export function ServiceFormDialog({ open, onOpenChange, service, onSubmit, exist
 
             <FormField
               control={form.control}
-              name="ser_proveedor"
+              name="ser_negocio"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Proveedor/Negocio</FormLabel>

@@ -45,7 +45,7 @@ export function ServicesTable({ services, onEdit, onDelete }: ServicesTableProps
                 </TableCell>
                 <TableCell className="font-medium">{service.ser_nombre}</TableCell>
                 <TableCell>{service.ser_servicio || "-"}</TableCell>
-                <TableCell className="text-muted-foreground">{service.ser_proveedor || "-"}</TableCell>
+                <TableCell className="text-muted-foreground">{service.ser_negocio || "-"}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{service.ser_mediopago || "-"}</TableCell>
                 <TableCell>
                   <DropdownMenu>
