@@ -71,10 +71,90 @@ export default function GenerateContractModal() {
       .finally(() => setLoadingUsers(false));
   }, [open]);
 
+  const validateForm = (): boolean => {
+    // Validar campos de texto obligatorios
+    if (!data.arrendante || data.arrendante.trim() === "") {
+      toast.error("El campo 'Arrendante' es obligatorio");
+      return false;
+    }
+
+    if (!data.cedulaArrendante || data.cedulaArrendante.trim() === "") {
+      toast.error("El campo 'Cédula Arrendante' es obligatorio");
+      return false;
+    }
+
+    if (!data.arrendatario || data.arrendatario.trim() === "") {
+      toast.error("El campo 'Arrendatario' es obligatorio");
+      return false;
+    }
+
+    if (!data.cedulaArrendatario || data.cedulaArrendatario.trim() === "") {
+      toast.error("El campo 'Cédula Arrendatario' es obligatorio");
+      return false;
+    }
+
+    if (!data.estadoCivil || data.estadoCivil.trim() === "") {
+      toast.error("El campo 'Estado Civil' es obligatorio");
+      return false;
+    }
+
+    if (!data.direccion || data.direccion.trim() === "") {
+      toast.error("El campo 'Dirección' es obligatorio");
+      return false;
+    }
+
+    if (!data.aptoNumero || data.aptoNumero.trim() === "") {
+      toast.error("El campo 'Número de Apartamento' es obligatorio");
+      return false;
+    }
+
+    if (!data.contratoDesde || data.contratoDesde.trim() === "") {
+      toast.error("El campo 'Fecha Desde' es obligatorio");
+      return false;
+    }
+
+    if (!data.contratoHasta || data.contratoHasta.trim() === "") {
+      toast.error("El campo 'Fecha Hasta' es obligatorio");
+      return false;
+    }
+
+    // Validar campos numéricos obligatorios
+    if (!data.montoTotal || data.montoTotal <= 0) {
+      toast.error("El campo 'Monto Total Anual' es obligatorio y debe ser mayor a 0");
+      return false;
+    }
+
+    if (!data.diaPago || data.diaPago < 1 || data.diaPago > 31) {
+      toast.error("El campo 'Día de Pago Mensual' es obligatorio y debe estar entre 1 y 31");
+      return false;
+    }
+
+    if (!data.duracionAnios || data.duracionAnios <= 0) {
+      toast.error("El campo 'Duración' es obligatorio y debe ser mayor a 0");
+      return false;
+    }
+
+    if (!data.diaPrimerPago || data.diaPrimerPago < 1 || data.diaPrimerPago > 31) {
+      toast.error("El campo 'Día del Primer Pago' es obligatorio y debe estar entre 1 y 31");
+      return false;
+    }
+
+    if (!data.numeroMiembros || data.numeroMiembros < 1) {
+      toast.error("El campo 'Número de Miembros del Núcleo Familiar' es obligatorio y debe ser mayor a 0");
+      return false;
+    }
+
+    if (!data.depositoGarantia || data.depositoGarantia <= 0) {
+      toast.error("El campo 'Depósito de Garantía' es obligatorio y debe ser mayor a 0");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
-    // Validar campos obligatorios
-    if (!data.diaPrimerPago || !data.numeroMiembros || !data.depositoGarantia) {
-      toast.error("Por favor complete todos los campos obligatorios");
+    // Validar todos los campos obligatorios
+    if (!validateForm()) {
       return;
     }
     

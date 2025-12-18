@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import cookie from "js-cookie";
 
 export interface ContractData {
@@ -58,88 +58,87 @@ const initialFormData: ContractData = {
 export const useContractGenerator = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ContractData>(initialFormData);
-  const { toast } = useToast();
 
   const handleChange = (field: keyof ContractData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = (): boolean => {
-    const requiredFields = [
-      "arrendante",
-      "cedulaArrendante",
-      "arrendatario",
-      "cedulaArrendatario",
-      "estadoCivil",
-      "direccion",
-      "aptoNumero",
-      "contratoDesde",
-      "contratoHasta",
-    ];
-
-    for (const field of requiredFields) {
-      if (!formData[field as keyof ContractData]) {
-        toast({
-          title: "Error",
-          description: "Todos los campos básicos son requeridos",
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
-
-    if (formData.montoTotal <= 0) {
-      toast({
-        title: "Error",
-        description: "El monto mensual debe ser mayor a 0",
-        variant: "destructive",
-      });
+    // Validar campos de texto obligatorios
+    if (!formData.arrendante || formData.arrendante.trim() === "") {
+      toast.error("El campo 'Arrendante' es obligatorio");
       return false;
     }
 
-    if (formData.diaPago < 1 || formData.diaPago > 31) {
-      toast({
-        title: "Error",
-        description: "El día de pago debe estar entre 1 y 31",
-        variant: "destructive",
-      });
+    if (!formData.cedulaArrendante || formData.cedulaArrendante.trim() === "") {
+      toast.error("El campo 'Cédula Arrendante' es obligatorio");
       return false;
     }
 
-    if (formData.duracionAnios <= 0) {
-      toast({
-        title: "Error",
-        description: "La duración debe ser mayor a 0 años",
-        variant: "destructive",
-      });
+    if (!formData.arrendatario || formData.arrendatario.trim() === "") {
+      toast.error("El campo 'Arrendatario' es obligatorio");
+      return false;
+    }
+
+    if (!formData.cedulaArrendatario || formData.cedulaArrendatario.trim() === "") {
+      toast.error("El campo 'Cédula Arrendatario' es obligatorio");
+      return false;
+    }
+
+    if (!formData.estadoCivil || formData.estadoCivil.trim() === "") {
+      toast.error("El campo 'Estado Civil' es obligatorio");
+      return false;
+    }
+
+    if (!formData.direccion || formData.direccion.trim() === "") {
+      toast.error("El campo 'Dirección' es obligatorio");
+      return false;
+    }
+
+    if (!formData.aptoNumero || formData.aptoNumero.trim() === "") {
+      toast.error("El campo 'Número de Apartamento' es obligatorio");
+      return false;
+    }
+
+    if (!formData.contratoDesde || formData.contratoDesde.trim() === "") {
+      toast.error("El campo 'Fecha Desde' es obligatorio");
+      return false;
+    }
+
+    if (!formData.contratoHasta || formData.contratoHasta.trim() === "") {
+      toast.error("El campo 'Fecha Hasta' es obligatorio");
+      return false;
+    }
+
+    // Validar campos numéricos obligatorios
+    if (!formData.montoTotal || formData.montoTotal <= 0) {
+      toast.error("El campo 'Monto Total Anual' es obligatorio y debe ser mayor a 0");
+      return false;
+    }
+
+    if (!formData.diaPago || formData.diaPago < 1 || formData.diaPago > 31) {
+      toast.error("El campo 'Día de Pago Mensual' es obligatorio y debe estar entre 1 y 31");
+      return false;
+    }
+
+    if (!formData.duracionAnios || formData.duracionAnios <= 0) {
+      toast.error("El campo 'Duración' es obligatorio y debe ser mayor a 0");
       return false;
     }
 
     // Validar nuevos campos obligatorios
     if (!formData.diaPrimerPago || formData.diaPrimerPago < 1 || formData.diaPrimerPago > 31) {
-      toast({
-        title: "Error",
-        description: "El día del primer pago es obligatorio y debe estar entre 1 y 31",
-        variant: "destructive",
-      });
+      toast.error("El campo 'Día del Primer Pago' es obligatorio y debe estar entre 1 y 31");
       return false;
     }
 
     if (!formData.numeroMiembros || formData.numeroMiembros < 1) {
-      toast({
-        title: "Error",
-        description: "El número de miembros del núcleo familiar es obligatorio y debe ser mayor a 0",
-        variant: "destructive",
-      });
+      toast.error("El campo 'Número de Miembros del Núcleo Familiar' es obligatorio y debe ser mayor a 0");
       return false;
     }
 
     if (!formData.depositoGarantia || formData.depositoGarantia <= 0) {
-      toast({
-        title: "Error",
-        description: "El depósito de garantía es obligatorio y debe ser mayor a 0",
-        variant: "destructive",
-      });
+      toast.error("El campo 'Depósito de Garantía' es obligatorio y debe ser mayor a 0");
       return false;
     }
 
@@ -153,11 +152,7 @@ export const useContractGenerator = () => {
     try {
       const token = cookie.get("token");
       if (!token) {
-        toast({
-          title: "Error",
-          description: "No hay token de autenticación",
-          variant: "destructive",
-        });
+        toast.error("No hay token de autenticación");
         return false;
       }
 
@@ -170,7 +165,10 @@ export const useContractGenerator = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error("Error al generar contrato");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Error al generar contrato");
+      }
 
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
@@ -182,21 +180,14 @@ export const useContractGenerator = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(downloadUrl);
 
-      toast({
-        title: "Éxito",
-        description: "Contrato generado exitosamente",
-      });
+      toast.success("Contrato generado exitosamente");
 
       // Reset form
       setFormData(initialFormData);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        title: "Error",
-        description: "Error al generar el contrato",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Error al generar el contrato");
       return false;
     } finally {
       setLoading(false);
